@@ -1,3 +1,6 @@
+using beautyCenterSystem.data.Repositories;
+using BeautyCenterSystem.Data;
+
 namespace beautyCenterSystem
 {
     public partial class Form1 : Form
@@ -6,5 +9,9 @@ namespace beautyCenterSystem
         {
             InitializeComponent();
         }
+
+      
+
+      
     }
 }
