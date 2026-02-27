@@ -114,8 +114,7 @@
             // txtUsername
             // 
             txtUsername.AnimateReadOnly = false;
-            txtUsername.AutoCompleteMode = AutoCompleteMode.None;
-            txtUsername.AutoCompleteSource = AutoCompleteSource.None;
+           
             txtUsername.BackgroundImageLayout = ImageLayout.None;
             txtUsername.CharacterCasing = CharacterCasing.Normal;
             txtUsername.Depth = 0;
@@ -164,8 +163,7 @@
             // txtPassword
             // 
             txtPassword.AnimateReadOnly = false;
-            txtPassword.AutoCompleteMode = AutoCompleteMode.None;
-            txtPassword.AutoCompleteSource = AutoCompleteSource.None;
+           
             txtPassword.BackgroundImageLayout = ImageLayout.None;
             txtPassword.CharacterCasing = CharacterCasing.Normal;
             txtPassword.Depth = 0;

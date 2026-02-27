@@ -83,6 +83,7 @@ namespace beautyCenterSystem
 
         private void btnCustomers_Click(object sender, EventArgs e)
         {
+            ShowScreen(new UC_Customers());
             HighlightButton(sender);
         }
 
@@ -93,12 +94,15 @@ namespace beautyCenterSystem
 
         private void btnRooms_Click(object sender, EventArgs e)
         {
+            ShowScreen(new UC_rooms());
+
             HighlightButton(sender);
         }
 
         private void btnMaterials_Click(object sender, EventArgs e)
         {
             HighlightButton(sender);
+           
         }
 
         private void btnInvoices_Click(object sender, EventArgs e)
