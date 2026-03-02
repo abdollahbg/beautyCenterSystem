@@ -1,4 +1,5 @@
-﻿using FontAwesome.Sharp;
+﻿using beautyCenterSystem.data.Repositories;
+using FontAwesome.Sharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -78,7 +79,9 @@ namespace beautyCenterSystem
 
         private void btnAppointments_Click(object sender, EventArgs e)
         {
+            ShowScreen(new UC_Appointments());
             HighlightButton(sender);
+           
         }
 
         private void btnCustomers_Click(object sender, EventArgs e)
@@ -89,6 +92,7 @@ namespace beautyCenterSystem
 
         private void btnServices_Click(object sender, EventArgs e)
         {
+            ShowScreen(new UC_Services());
             HighlightButton(sender);
         }
 

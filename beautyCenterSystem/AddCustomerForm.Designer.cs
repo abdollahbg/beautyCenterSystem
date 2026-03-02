@@ -193,8 +193,7 @@
             // 
             // AddCustomerForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(434, 511);
             Controls.Add(BtnNotes);
             Controls.Add(label3);

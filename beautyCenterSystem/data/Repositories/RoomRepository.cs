@@ -15,7 +15,7 @@ namespace beautyCenterSystem.Data.Repositories
         public async Task<IEnumerable<Room>> GetAllAsync()
         {
             using var db = _dbFactory.CreateConnection();
-            string sql = "SELECT RoomID, RoomName FROM Rooms ORDER BY RoomName";
+            string sql = "SELECT * FROM Rooms WHERE IsActive = 1 ORDER BY RoomName";
             return await db.QueryAsync<Room>(sql);
         }
 
@@ -35,14 +35,17 @@ namespace beautyCenterSystem.Data.Repositories
             return rows > 0;
         }
 
-        
+
         public async Task<bool> DeleteAsync(int roomId)
         {
             using var db = _dbFactory.CreateConnection();
-            string sql = "DELETE FROM Rooms WHERE RoomID = @Id";
+            // إيقاف الغرفة بدلاً من مسحها نهائياً
+            string sql = "UPDATE Rooms SET IsActive = 0 WHERE RoomID = @Id";
             int rows = await db.ExecuteAsync(sql, new { Id = roomId });
             return rows > 0;
         }
+
+       
 
 
         public async Task<Room> GetByIdAsync(int roomId)
@@ -50,6 +53,14 @@ namespace beautyCenterSystem.Data.Repositories
             using var db = _dbFactory.CreateConnection();
             string sql = "SELECT * FROM Rooms WHERE RoomID = @Id";
             return await db.QueryFirstOrDefaultAsync<Room>(sql, new { Id = roomId });
+        }
+        public async Task<bool> HasActiveServicesAsync(int roomId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            // نبحث عن الخدمات التي لم يتم إيقافها (IsActive = 1) وتابعة لهذه الغرفة
+            string sql = "SELECT COUNT(1) FROM Services WHERE RoomID = @Id AND IsActive = 1";
+            int count = await db.ExecuteScalarAsync<int>(sql, new { Id = roomId });
+            return count > 0;
         }
     }
 }

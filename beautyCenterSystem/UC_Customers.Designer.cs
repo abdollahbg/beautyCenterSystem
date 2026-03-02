@@ -35,11 +35,11 @@
             iconPictureBox1 = new FontAwesome.Sharp.IconPictureBox();
             label1 = new Label();
             tableLayoutPanel1 = new TableLayoutPanel();
+            txtboxSearch = new MaterialSkin.Controls.MaterialTextBox2();
             panel1 = new Panel();
             dgvCustomers = new DataGridView();
             contextMenuStrip1 = new ContextMenuStrip(components);
             btnDeleteCustomer = new ToolStripMenuItem();
-            txtboxSearch = new MaterialSkin.Controls.MaterialTextBox2();
             panel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox1).BeginInit();
             tableLayoutPanel1.SuspendLayout();
@@ -81,7 +81,7 @@
             btnAddCustomer.Text = "إضافة عميل";
             btnAddCustomer.TextImageRelation = TextImageRelation.TextBeforeImage;
             btnAddCustomer.UseVisualStyleBackColor = true;
-            btnAddCustomer.Click += btnAddCustomer_Click_2;
+            btnAddCustomer.Click += btnAddCustomer_Click;
             // 
             // iconPictureBox1
             // 
@@ -130,6 +130,38 @@
             tableLayoutPanel1.TabIndex = 3;
             tableLayoutPanel1.Paint += tableLayoutPanel1_Paint_2;
             // 
+            // txtboxSearch
+            // 
+            txtboxSearch.AnimateReadOnly = false;
+            txtboxSearch.AutoCompleteMode = AutoCompleteMode.None;
+            txtboxSearch.AutoCompleteSource = AutoCompleteSource.None;
+            txtboxSearch.BackgroundImageLayout = ImageLayout.None;
+            txtboxSearch.CharacterCasing = CharacterCasing.Normal;
+            txtboxSearch.Depth = 0;
+            txtboxSearch.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
+            txtboxSearch.HideSelection = true;
+            txtboxSearch.Hint = "البحث";
+            txtboxSearch.LeadingIcon = null;
+            txtboxSearch.Location = new Point(253, 3);
+            txtboxSearch.MaxLength = 32767;
+            txtboxSearch.MouseState = MaterialSkin.MouseState.OUT;
+            txtboxSearch.Name = "txtboxSearch";
+            txtboxSearch.PasswordChar = '\0';
+            txtboxSearch.PrefixSuffixText = null;
+            txtboxSearch.ReadOnly = false;
+            txtboxSearch.RightToLeft = RightToLeft.Yes;
+            txtboxSearch.SelectedText = "";
+            txtboxSearch.SelectionLength = 0;
+            txtboxSearch.SelectionStart = 0;
+            txtboxSearch.ShortcutsEnabled = true;
+            txtboxSearch.Size = new Size(444, 48);
+            txtboxSearch.TabIndex = 5;
+            txtboxSearch.TabStop = false;
+            txtboxSearch.TextAlign = HorizontalAlignment.Right;
+            txtboxSearch.TrailingIcon = null;
+            txtboxSearch.UseSystemPasswordChar = false;
+            txtboxSearch.TextChanged += txtboxSearch_TextChanged;
+            // 
             // panel1
             // 
             panel1.Controls.Add(dgvCustomers);
@@ -167,38 +199,6 @@
             btnDeleteCustomer.Size = new Size(135, 22);
             btnDeleteCustomer.Text = "حذف العميل";
             btnDeleteCustomer.Click += btnDeleteCustomer_Click;
-            // 
-            // txtboxSearch
-            // 
-            txtboxSearch.AnimateReadOnly = false;
-            txtboxSearch.AutoCompleteMode = AutoCompleteMode.None;
-            txtboxSearch.AutoCompleteSource = AutoCompleteSource.None;
-            txtboxSearch.BackgroundImageLayout = ImageLayout.None;
-            txtboxSearch.CharacterCasing = CharacterCasing.Normal;
-            txtboxSearch.Depth = 0;
-            txtboxSearch.Font = new Font("Roboto", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            txtboxSearch.HideSelection = true;
-            txtboxSearch.Hint = "البحث";
-            txtboxSearch.LeadingIcon = null;
-            txtboxSearch.Location = new Point(253, 3);
-            txtboxSearch.MaxLength = 32767;
-            txtboxSearch.MouseState = MaterialSkin.MouseState.OUT;
-            txtboxSearch.Name = "txtboxSearch";
-            txtboxSearch.PasswordChar = '\0';
-            txtboxSearch.PrefixSuffixText = null;
-            txtboxSearch.ReadOnly = false;
-            txtboxSearch.RightToLeft = RightToLeft.Yes;
-            txtboxSearch.SelectedText = "";
-            txtboxSearch.SelectionLength = 0;
-            txtboxSearch.SelectionStart = 0;
-            txtboxSearch.ShortcutsEnabled = true;
-            txtboxSearch.Size = new Size(444, 48);
-            txtboxSearch.TabIndex = 5;
-            txtboxSearch.TabStop = false;
-            txtboxSearch.TextAlign = HorizontalAlignment.Right;
-            txtboxSearch.TrailingIcon = null;
-            txtboxSearch.UseSystemPasswordChar = false;
-            txtboxSearch.TextChanged += txtboxSearch_TextChanged;
             // 
             // UC_Customers
             // 

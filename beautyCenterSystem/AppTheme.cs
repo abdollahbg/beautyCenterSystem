@@ -129,6 +129,17 @@ namespace beautyCenterSystem
                     dgv.RowTemplate.Height = 35;
                 }
 
+                // --- تنسيق القوائم (ListView) ---
+                if (c is ListView lv)
+                {
+                    lv.BackColor = White;
+                    lv.ForeColor = Charcoal;
+                    lv.BorderStyle = BorderStyle.None;
+                    lv.FullRowSelect = true;
+                    lv.GridLines = false;
+                    lv.Font = GetFont(10, FontStyle.Regular);
+                }
+
                 if (c.HasChildren) ApplyToAllChildren(c);
             }
         }

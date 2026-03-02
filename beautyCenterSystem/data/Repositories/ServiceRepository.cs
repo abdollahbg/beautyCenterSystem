@@ -12,15 +12,15 @@ namespace beautyCenterSystem.Data.Repositories
     {
         public ServiceRepository(DbConnectionFactory dbFactory) : base(dbFactory) { }
 
-        
-        public async Task<IEnumerable<dynamic>> GetAllWithRoomNamesAsync()
+
+        public async Task<IEnumerable<Service>> GetAllWithRoomNamesAsync()
         {
             using var db = _dbFactory.CreateConnection();
-            string sql = @"SELECT S.*, R.RoomName 
-                           FROM Services S 
-                           LEFT JOIN Rooms R ON S.RoomID = R.RoomID 
-                           ORDER BY S.ServiceName";
-            return await db.QueryAsync(sql);
+            string sql = @"SELECT S.*, R.RoomName FROM Services S 
+                   LEFT JOIN Rooms R ON S.RoomID = R.RoomID 
+                   WHERE S.IsActive = 1
+                   ORDER BY S.ServiceName";
+            return await db.QueryAsync<Service>(sql);
         }
 
         public async Task<bool> AddAsync(Service service)
@@ -50,7 +50,7 @@ namespace beautyCenterSystem.Data.Repositories
         public async Task<bool> DeleteAsync(int serviceId)
         {
             using var db = _dbFactory.CreateConnection();
-            string sql = "DELETE FROM Services WHERE ServiceID = @Id";
+            string sql = "UPDATE Services SET IsActive = 0 WHERE ServiceID = @Id";
             int rows = await db.ExecuteAsync(sql, new { Id = serviceId });
             return rows > 0;
         }

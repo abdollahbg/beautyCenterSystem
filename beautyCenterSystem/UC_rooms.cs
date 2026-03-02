@@ -84,16 +84,51 @@ namespace beautyCenterSystem
 
         private async void btnDeleteRoom_Click(object sender, EventArgs e)
         {
+            // 1. التأكد من اختيار غرفة من الجدول
             if (dgvRooms.CurrentRow == null) return;
+
             var room = dgvRooms.CurrentRow.DataBoundItem as Room;
+            if (room == null) return;
 
-            var result = MessageBox.Show($"هل أنت متأكد من حذف {room.RoomName}؟\nتنبيه: قد يؤثر هذا على الخدمات المرتبطة بها.",
-                                       "تأكيد", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-
-            if (result == DialogResult.Yes)
+            try
             {
-                await _roomRepo.DeleteAsync(room.RoomID);
-                await LoadRooms();
+                // 2. فحص الأمان: هل توجد خدمات نشطة مرتبطة؟
+                bool hasServices = await _roomRepo.HasActiveServicesAsync(room.RoomID);
+
+                if (hasServices)
+                {
+                    MessageBox.Show(
+                        $"لا يمكن إيقاف غرفة ({room.RoomName}) حالياً!\n\n" +
+                        "يوجد خدمات نشطة مرتبطة بهذه الغرفة. يرجى حذف تلك الخدمات أو تغيير غرفتها أولاً من قسم الخدمات.",
+                        "إجراء غير مسموح",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Stop);
+                    return;
+                }
+
+                // 3. إذا كانت الغرفة فارغة من الخدمات النشطة، نسأل للتأكيد
+                var confirm = MessageBox.Show(
+                    $"هل أنت متأكد من إيقاف غرفة ({room.RoomName})؟\n" +
+                    "لن تظهر هذه الغرفة عند إضافة خدمات جديدة، ولكن ستبقى مسجلة في التقارير القديمة.",
+                    "تأكيد الإيقاف",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (confirm == DialogResult.Yes)
+                {
+                    // تنفيذ الـ Soft Delete (تغيير IsActive إلى 0)
+                    bool success = await _roomRepo.DeleteAsync(room.RoomID);
+
+                    if (success)
+                    {
+                        await LoadRooms(); // تحديث الجدول
+                        MessageBox.Show("تم إيقاف الغرفة بنجاح.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"حدث خطأ: {ex.Message}");
             }
         }
 

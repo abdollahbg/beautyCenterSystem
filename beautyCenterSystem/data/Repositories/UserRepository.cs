@@ -19,23 +19,24 @@ namespace beautyCenterSystem.data.Repositories
             using var db = _dbFactory.CreateConnection();
 
             string sql = @"SELECT U.*, R.RoleName 
-                           FROM Users U 
-                           INNER JOIN Roles R ON U.RoleID = R.RoleID 
-                           WHERE U.Username = @Username AND U.IsActive = 1";
+                   FROM Users U 
+                   INNER JOIN Roles R ON U.RoleID = R.RoleID 
+                   WHERE U.Username = @Username AND U.IsActive = 1";
 
             var user = await db.QueryFirstOrDefaultAsync<User>(sql, new { Username = username });
 
             if (user != null)
             {
-                bool isValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+                // 💡 تحسين: تشغيل التحقق في Task منفصل لعدم حجز الـ Thread الرئيسي
+                bool isValid = await Task.Run(() => BCrypt.Net.BCrypt.Verify(password, user.PasswordHash));
 
                 if (isValid)
                 {
-                    return user; 
+                    return user;
                 }
             }
 
-            return null; 
+            return null;
         }
         public async Task<bool> CreateUserAsync(string username, string password, int roleId)
         {
