@@ -203,6 +203,7 @@
             btnCompleteAndPay.Text = "انهاء ودفع";
             btnCompleteAndPay.TextImageRelation = TextImageRelation.TextBeforeImage;
             btnCompleteAndPay.UseVisualStyleBackColor = true;
+            btnCompleteAndPay.Click += btnCompleteAndPay_Click;
             // 
             // btnStartService
             // 

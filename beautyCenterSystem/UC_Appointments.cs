@@ -1,10 +1,12 @@
-﻿using beautyCenterSystem.Data.Repositories;
+﻿using beautyCenterSystem.data.Repositories;
+using beautyCenterSystem.Data.Repositories;
 using BeautyCenterSystem.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -417,6 +419,129 @@ namespace beautyCenterSystem
             {
                 MessageBox.Show($"حدث خطأ أثناء محاولة فتح شاشة التعديل: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private async void btnCompleteAndPay_Click(object sender, EventArgs e)
+        {
+            // 1. التأكد من اختيار حجز من الجدول
+            if (dgvAppointments.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("يرجى اختيار الحجز المراد إتمامه من الجدول أولاً.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                // 2. جلب بيانات السطر المختار
+                var selectedRow = dgvAppointments.SelectedRows[0];
+                int appId = Convert.ToInt32(selectedRow.Cells["AppointmentID"].Value);
+                string customerName = selectedRow.Cells["CustomerName"].Value.ToString();
+                decimal totalAmount = Convert.ToDecimal(selectedRow.Cells["TotalPrice"].Value);
+                string currentStatus = selectedRow.Cells["Status"].Value.ToString();
+
+                // 3. التحقق من حالة الحجز
+                if (currentStatus == "Completed")
+                {
+                    MessageBox.Show("هذا الحجز مكتمل ومدفوع بالفعل.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                // 4. فتح فورم الدفع
+                using (var payForm = new CheckoutForm(customerName, totalAmount))
+                {
+                    if (payForm.ShowDialog() == DialogResult.OK)
+                    {
+                        // 5. تحديث الحالة في قاعدة البيانات (نستخدم معرف المستخدم من الجلسة)
+                        bool isSuccess = await _appointmentRepo.CompleteAndPayAsync(
+                            appId,
+                            totalAmount,
+                            payForm.AmountPaid,
+                            payForm.Discount,
+                            payForm.PaymentMethod,
+                            CurrentSession.UserID // تم الربط بالجلسة
+                        );
+
+                        if (isSuccess)
+                        {
+                            // 6. تحديث الجدول الرئيسي
+                            await LoadAppointments();
+
+                            try
+                            {
+                                // 7. جلب الإعدادات والخدمات من قاعدة البيانات
+                                var settingsRepo = new SettingsRepository(new DbConnectionFactory());
+                                var settings = await settingsRepo.GetSettingsAsync();
+                                var services = await _appointmentRepo.GetAppointmentServicesAsync(appId);
+
+                                // 8. تجهيز كائن الطباعة بالبيانات الفعلية من الإعدادات والجلسة
+                                ReceiptPrinter printer = new ReceiptPrinter();
+
+                                // بيانات المركز من الإعدادات (مع وضع قيم افتراضية في حال كانت فارغة)
+                                printer.CenterName = settings.CenterName ?? "صالون التجميل";
+                                printer.Phone = settings.Phone ?? "";
+                                printer.Policy = settings.Note ?? "الرجاء مراجعة الفاتورة قبل المغادرة.";
+                                printer.Logo = settings.GetLogoImage(); // تحويل البايتات لصورة
+
+                                // تجميع روابط السوشيال ميديا
+                                List<string> socialList = new List<string>();
+                                if (!string.IsNullOrEmpty(settings.Facebook)) socialList.Add("FB: " + settings.Facebook);
+                                if (!string.IsNullOrEmpty(settings.Instagram)) socialList.Add("Insta: " + settings.Instagram);
+                                if (!string.IsNullOrEmpty(settings.WhatsApp)) socialList.Add("WhatsApp: " + settings.WhatsApp);
+                                printer.SocialMedia = string.Join(" | ", socialList);
+
+                                // بيانات الفاتورة
+                                printer.InvoiceNumber = appId;
+                                printer.CustomerName = customerName;
+                                printer.TotalAmount = totalAmount;
+                                printer.Discount = payForm.Discount;
+                                printer.NetAmount = payForm.AmountPaid;
+
+                                // بيانات الموظف من الجلسة
+                                printer.CashierName = CurrentSession.Username;
+
+                                printer.Items = services.Select(s => new InvoiceItem
+                                {
+                                    ServiceName = s.ServiceName,
+                                    Price = s.Price
+                                }).ToList();
+
+                                // 9. الطباعة المباشرة
+                                printer.PrintReceipt(false);
+                            }
+                            catch (Exception printEx)
+                            {
+                                MessageBox.Show($"تم الحفظ، لكن فشلت الطباعة: {printEx.Message}", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+
+                            MessageBox.Show($"تم إتمام العملية بنجاح للعميلة {customerName}.", "نجاح", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"حدث خطأ غير متوقع: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void PrintDirectly(ReceiptPrinter printer)
+        {
+            PrintDocument pd = new PrintDocument();
+            // ضبط مقاس الورق لـ 80mm
+            pd.DefaultPageSettings.PaperSize = new PaperSize("Thermal80mm", 285, 0);
+
+            // ربط الرسم بكلاس الطابعة
+            pd.PrintPage += (s, ev) => {
+                // هنا نستدعي دالة الرسم الأصلية الموجودة في كلاس ReceiptPrinter
+                // (ملاحظة: إذا جعلت دالة Pd_PrintPage في كلاس الطابعة public يمكنك استدعاؤها مباشرة)
+                // حالياً سنقوم باستدعاء أمر الطباعة المباشر
+            };
+
+            // هذا السطر هو السر في الطباعة المباشرة دون ظهور نوافذ
+            pd.PrintController = new StandardPrintController();
+
+            // تنفيذ الطباعة
+            // ملاحظة: تأكد أن كلاس ReceiptPrinter يحتوي على منطق الرسم داخل PrintDocument
+            // سأقوم بتعديل دالة PrintReceipt داخل كلاس ReceiptPrinter لتصبح هكذا:
         }
     }
 
