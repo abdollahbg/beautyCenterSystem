@@ -105,12 +105,15 @@ namespace beautyCenterSystem
 
         private void btnMaterials_Click(object sender, EventArgs e)
         {
+            ShowScreen(new UC_Materials());
             HighlightButton(sender);
            
         }
 
         private void btnInvoices_Click(object sender, EventArgs e)
         {
+            ShowScreen(new UC_FinancialMain());
+
             HighlightButton(sender);
         }
 

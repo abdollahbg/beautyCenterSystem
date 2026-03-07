@@ -185,6 +185,7 @@
             dgvCustomers.CellContentClick += dgvCustomers_CellContentClick_1;
             dgvCustomers.CellEndEdit += dgvCustomers_CellEndEdit;
             dgvCustomers.CellMouseDown += dgvCustomers_CellMouseDown;
+            dgvCustomers.MouseDown += dgvCustomers_MouseDown;
             // 
             // contextMenuStrip1
             // 

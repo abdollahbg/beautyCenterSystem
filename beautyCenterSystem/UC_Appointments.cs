@@ -458,7 +458,8 @@ namespace beautyCenterSystem
                             payForm.AmountPaid,
                             payForm.Discount,
                             payForm.PaymentMethod,
-                            CurrentSession.UserID // تم الربط بالجلسة
+                            CurrentSession.UserID ,// تم الربط بالجلسة
+                            1
                         );
 
                         if (isSuccess)

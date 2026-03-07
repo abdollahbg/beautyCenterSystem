@@ -2,7 +2,7 @@ using beautyCenterSystem.data.Repositories;
 using BeautyCenterSystem.Data;
 using MaterialSkin.Controls; 
 using FontAwesome.Sharp;
-using beautyCenterSystem.D;
+
 namespace beautyCenterSystem;
     using beautyCenterSystem.data.Repositories;
     using BeautyCenterSystem.Data;

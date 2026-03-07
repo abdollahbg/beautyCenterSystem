@@ -31,13 +31,13 @@
             PnlHeader = new Panel();
             label1 = new Label();
             txtName = new MaterialSkin.Controls.MaterialTextBox2();
-            txtPhone = new MaterialSkin.Controls.MaterialTextBox2();
-            txtNotes = new MaterialSkin.Controls.MaterialMultiLineTextBox2();
             btnSave = new Button();
             BtnCancel = new Button();
             label2 = new Label();
             label3 = new Label();
+            txtNotes = new MaterialSkin.Controls.MaterialMultiLineTextBox2();
             BtnNotes = new Label();
+            txtPhone = new MaterialSkin.Controls.MaterialTextBox2();
             PnlHeader.SuspendLayout();
             SuspendLayout();
             // 
@@ -90,60 +90,6 @@
             txtName.TrailingIcon = null;
             txtName.UseSystemPasswordChar = false;
             // 
-            // txtPhone
-            // 
-            txtPhone.AnimateReadOnly = false;
-            txtPhone.AutoCompleteMode = AutoCompleteMode.None;
-            txtPhone.AutoCompleteSource = AutoCompleteSource.None;
-            txtPhone.BackgroundImageLayout = ImageLayout.None;
-            txtPhone.CharacterCasing = CharacterCasing.Normal;
-            txtPhone.Depth = 0;
-            txtPhone.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            txtPhone.HideSelection = true;
-            txtPhone.LeadingIcon = null;
-            txtPhone.Location = new Point(92, 202);
-            txtPhone.MaxLength = 32767;
-            txtPhone.MouseState = MaterialSkin.MouseState.OUT;
-            txtPhone.Name = "txtPhone";
-            txtPhone.PasswordChar = '\0';
-            txtPhone.PrefixSuffixText = null;
-            txtPhone.ReadOnly = false;
-            txtPhone.RightToLeft = RightToLeft.Yes;
-            txtPhone.SelectedText = "";
-            txtPhone.SelectionLength = 0;
-            txtPhone.SelectionStart = 0;
-            txtPhone.ShortcutsEnabled = true;
-            txtPhone.Size = new Size(250, 48);
-            txtPhone.TabIndex = 2;
-            txtPhone.TabStop = false;
-            txtPhone.TextAlign = HorizontalAlignment.Right;
-            txtPhone.TrailingIcon = null;
-            txtPhone.UseSystemPasswordChar = false;
-            // 
-            // txtNotes
-            // 
-            txtNotes.AnimateReadOnly = false;
-            txtNotes.BackgroundImageLayout = ImageLayout.None;
-            txtNotes.CharacterCasing = CharacterCasing.Normal;
-            txtNotes.Depth = 0;
-            txtNotes.HideSelection = true;
-            txtNotes.Location = new Point(92, 274);
-            txtNotes.MaxLength = 32767;
-            txtNotes.MouseState = MaterialSkin.MouseState.OUT;
-            txtNotes.Name = "txtNotes";
-            txtNotes.PasswordChar = '\0';
-            txtNotes.ReadOnly = false;
-            txtNotes.ScrollBars = ScrollBars.None;
-            txtNotes.SelectedText = "";
-            txtNotes.SelectionLength = 0;
-            txtNotes.SelectionStart = 0;
-            txtNotes.ShortcutsEnabled = true;
-            txtNotes.Size = new Size(250, 100);
-            txtNotes.TabIndex = 3;
-            txtNotes.TabStop = false;
-            txtNotes.TextAlign = HorizontalAlignment.Left;
-            txtNotes.UseSystemPasswordChar = false;
-            // 
             // btnSave
             // 
             btnSave.Location = new Point(246, 411);
@@ -182,6 +128,30 @@
             label3.TabIndex = 7;
             label3.Text = "رقم الهاتف";
             // 
+            // txtNotes
+            // 
+            txtNotes.AnimateReadOnly = false;
+            txtNotes.BackgroundImageLayout = ImageLayout.None;
+            txtNotes.CharacterCasing = CharacterCasing.Normal;
+            txtNotes.Depth = 0;
+            txtNotes.HideSelection = true;
+            txtNotes.Location = new Point(92, 274);
+            txtNotes.MaxLength = 32767;
+            txtNotes.MouseState = MaterialSkin.MouseState.OUT;
+            txtNotes.Name = "txtNotes";
+            txtNotes.PasswordChar = '\0';
+            txtNotes.ReadOnly = false;
+            txtNotes.ScrollBars = ScrollBars.None;
+            txtNotes.SelectedText = "";
+            txtNotes.SelectionLength = 0;
+            txtNotes.SelectionStart = 0;
+            txtNotes.ShortcutsEnabled = true;
+            txtNotes.Size = new Size(250, 100);
+            txtNotes.TabIndex = 3;
+            txtNotes.TabStop = false;
+            txtNotes.TextAlign = HorizontalAlignment.Left;
+            txtNotes.UseSystemPasswordChar = false;
+            // 
             // BtnNotes
             // 
             BtnNotes.AutoSize = true;
@@ -190,6 +160,36 @@
             BtnNotes.Size = new Size(52, 15);
             BtnNotes.TabIndex = 8;
             BtnNotes.Text = "ملاحظات";
+            // 
+            // txtPhone
+            // 
+            txtPhone.AnimateReadOnly = false;
+            txtPhone.AutoCompleteMode = AutoCompleteMode.None;
+            txtPhone.AutoCompleteSource = AutoCompleteSource.None;
+            txtPhone.BackgroundImageLayout = ImageLayout.None;
+            txtPhone.CharacterCasing = CharacterCasing.Normal;
+            txtPhone.Depth = 0;
+            txtPhone.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
+            txtPhone.HideSelection = true;
+            txtPhone.LeadingIcon = null;
+            txtPhone.Location = new Point(92, 202);
+            txtPhone.MaxLength = 32767;
+            txtPhone.MouseState = MaterialSkin.MouseState.OUT;
+            txtPhone.Name = "txtPhone";
+            txtPhone.PasswordChar = '\0';
+            txtPhone.PrefixSuffixText = null;
+            txtPhone.ReadOnly = false;
+            txtPhone.RightToLeft = RightToLeft.Yes;
+            txtPhone.SelectedText = "";
+            txtPhone.SelectionLength = 0;
+            txtPhone.SelectionStart = 0;
+            txtPhone.ShortcutsEnabled = true;
+            txtPhone.Size = new Size(250, 48);
+            txtPhone.TabIndex = 2;
+            txtPhone.TabStop = false;
+            txtPhone.TextAlign = HorizontalAlignment.Right;
+            txtPhone.TrailingIcon = null;
+            txtPhone.UseSystemPasswordChar = false;
             // 
             // AddCustomerForm
             // 
@@ -222,12 +222,12 @@
         private Panel PnlHeader;
         private Label label1;
         private MaterialSkin.Controls.MaterialTextBox2 txtName;
-        private MaterialSkin.Controls.MaterialTextBox2 txtPhone;
-        private MaterialSkin.Controls.MaterialMultiLineTextBox2 txtNotes;
         private Button btnSave;
         private Button BtnCancel;
         private Label label2;
         private Label label3;
+        private MaterialSkin.Controls.MaterialMultiLineTextBox2 txtNotes;
         private Label BtnNotes;
+        private MaterialSkin.Controls.MaterialTextBox2 txtPhone;
     }
 }

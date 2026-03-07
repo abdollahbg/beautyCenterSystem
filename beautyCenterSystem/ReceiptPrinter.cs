@@ -88,7 +88,7 @@ namespace beautyCenterSystem // تأكد من أن الـ namespace يطابق �
             // رسم الشعار الخاص بالمركز إن وجد
             if (Logo != null)
             {
-                int logoWidth = 80; // حجم أصغر قليلاً ليتناسب مع الورق الحراري
+                int logoWidth = 80; 
                 int logoHeight = 80;
                 int logoX = (width - logoWidth) / 2;
                 g.DrawImage(Logo, logoX, y, logoWidth, logoHeight);

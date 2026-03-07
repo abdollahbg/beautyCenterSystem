@@ -255,5 +255,10 @@ namespace beautyCenterSystem
         {
 
         }
+
+        private void dgvCustomers_MouseDown(object sender, MouseEventArgs e)
+        {
+
+        }
     }
 }

@@ -171,7 +171,7 @@ namespace beautyCenterSystem.Data.Repositories
             }
         }
 
-        public async Task<bool> CompleteAndPayAsync(int appId, decimal amountSystem, decimal amountPaid, decimal discount, string method, int userId)
+        public async Task<bool> CompleteAndPayAsync(int appId, decimal amountSystem, decimal amountPaid, decimal discount, string method, int userId, int safeId)
         {
             using var db = _dbFactory.CreateConnection();
             db.Open();
@@ -183,9 +183,9 @@ namespace beautyCenterSystem.Data.Repositories
                 string updateAppSql = "UPDATE Appointments SET Status = 'Completed' WHERE AppointmentID = @Id";
                 await db.ExecuteAsync(updateAppSql, new { Id = appId }, transaction);
 
-                // 2. تسجيل الدفعة مع ربطها بالموظف الحالي
-                string insertPaymentSql = @"INSERT INTO Payments (AppointmentID, AmountSystem, AmountPaid, Discount, PaymentMethod, IssuedBy, PaymentDate) 
-                                    VALUES (@AppId, @SysAmt, @PaidAmt, @Disc, @Method, @UserId, GETDATE())";
+                // 2. تسجيل الدفعة مع ربطها بالخزنة (SafeID)
+                string insertPaymentSql = @"INSERT INTO Payments (AppointmentID, AmountSystem, AmountPaid, Discount, PaymentMethod, IssuedBy, SafeID, PaymentDate) 
+                                    VALUES (@AppId, @SysAmt, @PaidAmt, @Disc, @Method, @UserId, @SafeId, GETDATE())";
 
                 await db.ExecuteAsync(insertPaymentSql, new
                 {
@@ -194,8 +194,13 @@ namespace beautyCenterSystem.Data.Repositories
                     PaidAmt = amountPaid,
                     Disc = discount,
                     Method = method,
-                    UserId = userId
+                    UserId = userId,
+                    SafeId = safeId // القيمة الجديدة
                 }, transaction);
+
+                // 3. تحديث رصيد الخزنة فوراً (زيادة المبلغ المدفوع)
+                string updateSafeSql = "UPDATE Safes SET Balance = Balance + @Amount WHERE SafeID = @SafeId";
+                await db.ExecuteAsync(updateSafeSql, new { Amount = amountPaid, SafeId = safeId }, transaction);
 
                 transaction.Commit();
                 return true;
@@ -205,47 +210,45 @@ namespace beautyCenterSystem.Data.Repositories
                 transaction.Rollback();
                 throw;
             }
-
         }
-
         // 1. إضافة حجز جديد وإرجاع الرقم التعريفي (ID) بدلاً من true/false
         public async Task<int> CreateAndGetIdAsync(Appointment appointment)
-        {
-            using var db = _dbFactory.CreateConnection();
-            await ((SqlConnection)db).OpenAsync();
-            using var transaction = db.BeginTransaction();
+{
+    using var db = _dbFactory.CreateConnection();
+    await ((SqlConnection)db).OpenAsync(); 
+    using var transaction = db.BeginTransaction();
 
-            try
-            {
-                // الاستعلام يضيف الحجز ثم يطلب آخر ID تم توليده
-                string sqlApp = @"INSERT INTO Appointments (CustomerID, AppointmentDate, TotalPrice, Status, CreatedBy) 
+    try
+    {
+        // الاستعلام يضيف الحجز ثم يطلب آخر ID تم توليده
+        string sqlApp = @"INSERT INTO Appointments (CustomerID, AppointmentDate, TotalPrice, Status, CreatedBy) 
                           VALUES (@CustomerID, @AppointmentDate, @TotalPrice, @Status, @CreatedBy);
                           SELECT CAST(SCOPE_IDENTITY() as int);";
 
-                // QuerySingleAsync ستجلب الـ ID مباشرة
-                int appId = await db.QuerySingleAsync<int>(sqlApp, appointment, transaction);
+        // QuerySingleAsync ستجلب الـ ID مباشرة
+        int appId = await db.QuerySingleAsync<int>(sqlApp, appointment, transaction);
 
-                string sqlDetails = "INSERT INTO AppointmentDetails (AppointmentID, ServiceID) VALUES (@AppId, @SId)";
+        string sqlDetails = "INSERT INTO AppointmentDetails (AppointmentID, ServiceID) VALUES (@AppId, @SId)";
 
-                if (appointment.SelectedServices != null)
-                {
-                    foreach (var service in appointment.SelectedServices)
-                    {
-                        await db.ExecuteAsync(sqlDetails, new { AppId = appId, SId = service.ServiceID }, transaction);
-                    }
-                }
-
-                transaction.Commit();
-
-                // نرجع الرقم الجديد لاستخدامه في الطباعة
-                return appId;
-            }
-            catch (Exception)
+        if (appointment.SelectedServices != null)
+        {
+            foreach (var service in appointment.SelectedServices)
             {
-                transaction.Rollback();
-                throw;
+                await db.ExecuteAsync(sqlDetails, new { AppId = appId, SId = service.ServiceID }, transaction);
             }
         }
+
+        transaction.Commit();
+        
+        // نرجع الرقم الجديد لاستخدامه في الطباعة
+        return appId; 
+    }
+    catch (Exception)
+    {
+        transaction.Rollback();
+        throw;
+    }
+}
 
 
     }
