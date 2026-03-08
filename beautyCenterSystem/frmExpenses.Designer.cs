@@ -32,6 +32,7 @@
             dtp_To = new DateTimePicker();
             dtp_From = new DateTimePicker();
             panel1 = new Panel();
+            txtboxSearch = new MaterialSkin.Controls.MaterialTextBox2();
             label8 = new Label();
             label7 = new Label();
             label6 = new Label();
@@ -39,6 +40,7 @@
             splitContainer1 = new SplitContainer();
             btnSave = new Button();
             tableLayoutPanel1 = new TableLayoutPanel();
+            txtAmount = new MaterialSkin.Controls.MaterialMultiLineTextBox2();
             label5 = new Label();
             label4 = new Label();
             label3 = new Label();
@@ -46,6 +48,8 @@
             label2 = new Label();
             cmbSafes = new MaterialSearchableCombo();
             label1 = new Label();
+            txtCategory = new MaterialSkin.Controls.MaterialMultiLineTextBox2();
+            txtDescription = new MaterialSkin.Controls.MaterialMultiLineTextBox2();
             ((System.ComponentModel.ISupportInitialize)dgvExpenses).BeginInit();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox1).BeginInit();
@@ -84,6 +88,7 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(txtboxSearch);
             panel1.Controls.Add(label8);
             panel1.Controls.Add(label7);
             panel1.Controls.Add(label6);
@@ -95,6 +100,38 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(984, 76);
             panel1.TabIndex = 30;
+            // 
+            // txtboxSearch
+            // 
+            txtboxSearch.AnimateReadOnly = false;
+            txtboxSearch.AutoCompleteMode = AutoCompleteMode.None;
+            txtboxSearch.AutoCompleteSource = AutoCompleteSource.None;
+            txtboxSearch.BackgroundImageLayout = ImageLayout.None;
+            txtboxSearch.CharacterCasing = CharacterCasing.Normal;
+            txtboxSearch.Depth = 0;
+            txtboxSearch.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
+            txtboxSearch.HideSelection = true;
+            txtboxSearch.Hint = "البحث";
+            txtboxSearch.LeadingIcon = null;
+            txtboxSearch.Location = new Point(366, 12);
+            txtboxSearch.MaxLength = 32767;
+            txtboxSearch.MouseState = MaterialSkin.MouseState.OUT;
+            txtboxSearch.Name = "txtboxSearch";
+            txtboxSearch.PasswordChar = '\0';
+            txtboxSearch.PrefixSuffixText = null;
+            txtboxSearch.ReadOnly = false;
+            txtboxSearch.RightToLeft = RightToLeft.Yes;
+            txtboxSearch.SelectedText = "";
+            txtboxSearch.SelectionLength = 0;
+            txtboxSearch.SelectionStart = 0;
+            txtboxSearch.ShortcutsEnabled = true;
+            txtboxSearch.Size = new Size(444, 48);
+            txtboxSearch.TabIndex = 35;
+            txtboxSearch.TabStop = false;
+            txtboxSearch.TextAlign = HorizontalAlignment.Right;
+            txtboxSearch.TrailingIcon = null;
+            txtboxSearch.UseSystemPasswordChar = false;
+            txtboxSearch.TextChanged += txtboxSearch_TextChanged;
             // 
             // label8
             // 
@@ -174,6 +211,7 @@
             tableLayoutPanel1.ColumnCount = 2;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.Controls.Add(txtAmount, 0, 1);
             tableLayoutPanel1.Controls.Add(label5, 1, 4);
             tableLayoutPanel1.Controls.Add(label4, 1, 3);
             tableLayoutPanel1.Controls.Add(label3, 1, 2);
@@ -181,6 +219,8 @@
             tableLayoutPanel1.Controls.Add(label2, 1, 1);
             tableLayoutPanel1.Controls.Add(cmbSafes, 0, 3);
             tableLayoutPanel1.Controls.Add(label1, 1, 0);
+            tableLayoutPanel1.Controls.Add(txtCategory, 0, 0);
+            tableLayoutPanel1.Controls.Add(txtDescription, 0, 2);
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 6;
@@ -193,6 +233,31 @@
             tableLayoutPanel1.Size = new Size(318, 585);
             tableLayoutPanel1.TabIndex = 0;
             tableLayoutPanel1.Paint += tableLayoutPanel1_Paint;
+            // 
+            // txtAmount
+            // 
+            txtAmount.AnimateReadOnly = false;
+            txtAmount.BackgroundImageLayout = ImageLayout.None;
+            txtAmount.CharacterCasing = CharacterCasing.Normal;
+            txtAmount.Depth = 0;
+            txtAmount.HideSelection = true;
+            txtAmount.Location = new Point(3, 53);
+            txtAmount.MaxLength = 32767;
+            txtAmount.MouseState = MaterialSkin.MouseState.OUT;
+            txtAmount.Name = "txtAmount";
+            txtAmount.PasswordChar = '\0';
+            txtAmount.ReadOnly = false;
+            txtAmount.ScrollBars = ScrollBars.None;
+            txtAmount.SelectedText = "";
+            txtAmount.SelectionLength = 0;
+            txtAmount.SelectionStart = 0;
+            txtAmount.ShortcutsEnabled = true;
+            txtAmount.Size = new Size(250, 44);
+            txtAmount.TabIndex = 17;
+            txtAmount.TabStop = false;
+            txtAmount.TextAlign = HorizontalAlignment.Left;
+            txtAmount.UseSystemPasswordChar = false;
+            txtAmount.KeyPress += txtAmount_KeyPress;
             // 
             // label5
             // 
@@ -266,6 +331,54 @@
             label1.Text = "التصنيف";
             label1.TextAlign = ContentAlignment.MiddleRight;
             // 
+            // txtCategory
+            // 
+            txtCategory.AnimateReadOnly = false;
+            txtCategory.BackgroundImageLayout = ImageLayout.None;
+            txtCategory.CharacterCasing = CharacterCasing.Normal;
+            txtCategory.Depth = 0;
+            txtCategory.HideSelection = true;
+            txtCategory.Location = new Point(3, 3);
+            txtCategory.MaxLength = 32767;
+            txtCategory.MouseState = MaterialSkin.MouseState.OUT;
+            txtCategory.Name = "txtCategory";
+            txtCategory.PasswordChar = '\0';
+            txtCategory.ReadOnly = false;
+            txtCategory.ScrollBars = ScrollBars.None;
+            txtCategory.SelectedText = "";
+            txtCategory.SelectionLength = 0;
+            txtCategory.SelectionStart = 0;
+            txtCategory.ShortcutsEnabled = true;
+            txtCategory.Size = new Size(250, 44);
+            txtCategory.TabIndex = 16;
+            txtCategory.TabStop = false;
+            txtCategory.TextAlign = HorizontalAlignment.Left;
+            txtCategory.UseSystemPasswordChar = false;
+            // 
+            // txtDescription
+            // 
+            txtDescription.AnimateReadOnly = false;
+            txtDescription.BackgroundImageLayout = ImageLayout.None;
+            txtDescription.CharacterCasing = CharacterCasing.Normal;
+            txtDescription.Depth = 0;
+            txtDescription.HideSelection = true;
+            txtDescription.Location = new Point(3, 103);
+            txtDescription.MaxLength = 32767;
+            txtDescription.MouseState = MaterialSkin.MouseState.OUT;
+            txtDescription.Name = "txtDescription";
+            txtDescription.PasswordChar = '\0';
+            txtDescription.ReadOnly = false;
+            txtDescription.ScrollBars = ScrollBars.None;
+            txtDescription.SelectedText = "";
+            txtDescription.SelectionLength = 0;
+            txtDescription.SelectionStart = 0;
+            txtDescription.ShortcutsEnabled = true;
+            txtDescription.Size = new Size(250, 64);
+            txtDescription.TabIndex = 18;
+            txtDescription.TabStop = false;
+            txtDescription.TextAlign = HorizontalAlignment.Left;
+            txtDescription.UseSystemPasswordChar = false;
+            // 
             // frmExpenses
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -306,12 +419,13 @@
         private Label label2;
         private Label label1;
         private Label label6;
-        private MaterialSkin.Controls.MaterialTextBox2 txtAmount;
-        private MaterialSkin.Controls.MaterialTextBox2 txtCategory;
-        private MaterialSkin.Controls.MaterialMultiLineTextBox2 txtDescription;
-        private MaterialSkin.Controls.MaterialTextBox2 txtboxSearch;
+       
         private Label label7;
         private Label label8;
         private MaterialSearchableCombo cmbSafes;
+        private MaterialSkin.Controls.MaterialTextBox2 txtboxSearch;
+        private MaterialSkin.Controls.MaterialMultiLineTextBox2 txtAmount;
+        private MaterialSkin.Controls.MaterialMultiLineTextBox2 txtCategory;
+        private MaterialSkin.Controls.MaterialMultiLineTextBox2 txtDescription;
     }
 }

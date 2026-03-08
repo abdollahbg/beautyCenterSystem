@@ -202,5 +202,88 @@ namespace BeautyCenterSystem.Data.Repositories
         
     return await db.QueryAsync(sql);
         }
+        // 1. جلب قائمة المواد لملء الكومبو بوكس عند الشراء
+        public async Task<IEnumerable<dynamic>> GetAllMaterialsAsync()
+        {
+            using var db = _dbFactory.CreateConnection();
+            return await db.QueryAsync("SELECT MaterialID, MaterialName FROM Materials WHERE IsAvailable = 1");
+        }
+
+        // 2. جلب سجل المشتريات مع أسماء المواد والخزنات (لعرضها في الجدول)
+        public async Task<IEnumerable<dynamic>> GetPurchasesHistoryAsync()
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"
+        SELECT 
+            P.PurchaseID, 
+            M.MaterialName, 
+            P.Quantity, 
+            P.UnitPrice, 
+            P.TotalAmount, 
+            P.PurchaseDate, 
+            P.SupplierName, 
+            S.SafeName AS PaidFromSafe,
+            U.Username AS IssuedBy
+        FROM Purchases P
+        JOIN Materials M ON P.MaterialID = M.MaterialID
+        JOIN Safes S ON P.PaidFromSafeID = S.SafeID
+        JOIN Users U ON P.IssuedBy = U.UserID
+        ORDER BY P.PurchaseDate DESC";
+
+            return await db.QueryAsync(sql);
+        }
+        // 1. حذف عملية شراء ورد المبلغ للخزنة
+        public async Task<bool> DeletePurchaseAsync(int purchaseId, decimal totalAmount, int safeId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            db.Open();
+            using var transaction = db.BeginTransaction();
+            try
+            {
+                // حذف السجل
+                await db.ExecuteAsync("DELETE FROM Purchases WHERE PurchaseID = @Id", new { Id = purchaseId }, transaction);
+
+                // رد المبلغ للخزنة
+                await db.ExecuteAsync("UPDATE Safes SET Balance = Balance + @Amt WHERE SafeID = @SId",
+                    new { Amt = totalAmount, SId = safeId }, transaction);
+
+                transaction.Commit();
+                return true;
+            }
+            catch { transaction.Rollback(); throw; }
+        }
+
+        // 2. تعديل عملية شراء (مع معالجة فرق السعر في الخزنة)
+        public async Task<bool> UpdatePurchaseAsync(Purchase p, decimal oldTotal)
+        {
+            using var db = _dbFactory.CreateConnection();
+            db.Open();
+            using var transaction = db.BeginTransaction();
+            try
+            {
+                // 1. تحديث بيانات المشتريات
+                string sql = @"UPDATE Purchases SET MaterialID=@MaterialID, Quantity=@Quantity, 
+                       UnitPrice=@UnitPrice, SupplierName=@SupplierName WHERE PurchaseID=@PurchaseID";
+
+                await db.ExecuteAsync(sql, p, transaction);
+
+                // 2. معالجة فرق السعر في الخزنة
+                decimal newTotal = p.Quantity * p.UnitPrice;
+                decimal diff = newTotal - oldTotal;
+
+                // إذا كان الفرق موجباً سيخصم من الخزنة، وإذا سالباً (تخفيض سعر) سيعود للخزنة
+                await db.ExecuteAsync("UPDATE Safes SET Balance = Balance - @Diff WHERE SafeID = @SId",
+                    new { Diff = diff, SId = p.PaidFromSafeID }, transaction);
+
+                transaction.Commit();
+                return true; // الإرجاع في حال النجاح
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                // إما أن تعيد false أو تقوم بعمل throw ليتم معالجته في الواجهة
+                throw new Exception($"فشل تحديث المشتريات: {ex.Message}");
+            }
+        }
     }
 }
