@@ -171,19 +171,32 @@ namespace beautyCenterSystem.Data.Repositories
             }
         }
 
-        public async Task<bool> CompleteAndPayAsync(int appId, decimal amountSystem, decimal amountPaid, decimal discount, string method, int userId, int safeId)
+        public async Task<bool> CompleteAndPayAsync(int appId, decimal amountSystem, decimal amountPaid, decimal discount, string method, int userId)
         {
             using var db = _dbFactory.CreateConnection();
-            db.Open();
+            // فتح الاتصال صراحةً قبل بدء الترانزاكشن
+            if (db.State != ConnectionState.Open) db.Open();
+
             using var transaction = db.BeginTransaction();
 
             try
             {
-                // 1. تحديث حالة الحجز
+                // 1. جلب الخزنة المربوطة آلياً بناءً على طريقة الدفع (Cash/Card)
+                // ملاحظة: نمرر الترانزاكشن لضمان القراءة المتوافقة
+                string getSafeSql = "SELECT SafeID FROM PaymentMapping WHERE MethodName = @Method";
+                int safeId = await db.QueryFirstOrDefaultAsync<int>(getSafeSql, new { Method = method }, transaction);
+
+                // حماية النظام: إذا لم يجد ربطاً في جدول PaymentMapping
+                if (safeId == 0)
+                {
+                    throw new Exception($"لم يتم تحديد خزنة افتراضية لطريقة الدفع: {method}. يرجى ضبط الإعدادات أولاً.");
+                }
+
+                // 2. تحديث حالة الحجز إلى 'Completed'
                 string updateAppSql = "UPDATE Appointments SET Status = 'Completed' WHERE AppointmentID = @Id";
                 await db.ExecuteAsync(updateAppSql, new { Id = appId }, transaction);
 
-                // 2. تسجيل الدفعة مع ربطها بالخزنة (SafeID)
+                // 3. تسجيل الدفعة في جدول Payments
                 string insertPaymentSql = @"INSERT INTO Payments (AppointmentID, AmountSystem, AmountPaid, Discount, PaymentMethod, IssuedBy, SafeID, PaymentDate) 
                                     VALUES (@AppId, @SysAmt, @PaidAmt, @Disc, @Method, @UserId, @SafeId, GETDATE())";
 
@@ -195,20 +208,23 @@ namespace beautyCenterSystem.Data.Repositories
                     Disc = discount,
                     Method = method,
                     UserId = userId,
-                    SafeId = safeId // القيمة الجديدة
+                    SafeId = safeId
                 }, transaction);
 
-                // 3. تحديث رصيد الخزنة فوراً (زيادة المبلغ المدفوع)
+                // 4. تحديث رصيد الخزنة الصحيحة (زيادة المبلغ)
                 string updateSafeSql = "UPDATE Safes SET Balance = Balance + @Amount WHERE SafeID = @SafeId";
                 await db.ExecuteAsync(updateSafeSql, new { Amount = amountPaid, SafeId = safeId }, transaction);
 
+                // اعتماد كافة العمليات
                 transaction.Commit();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                // تراجع عن كل العمليات في حال حدوث أي خطأ (SQL أو Logic)
                 transaction.Rollback();
-                throw;
+                // إعادة رمي الخطأ ليتم التقاطه في الواجهة وعرضه للمستخدم
+                throw new Exception($"فشل إتمام العملية مالياً: {ex.Message}");
             }
         }
         // 1. إضافة حجز جديد وإرجاع الرقم التعريفي (ID) بدلاً من true/false

@@ -139,5 +139,68 @@ namespace BeautyCenterSystem.Data.Repositories
                 throw new Exception($"حدث خطأ أثناء تحديث بيانات المصروف: {ex.Message}");
             }
         }
+        // --- إضافة خزنة جديدة ---
+        public async Task<bool> AddNewSafeAsync(string safeName, decimal initialBalance)
+        {
+            using var db = _dbFactory.CreateConnection();
+            // نستخدم IsActive = 1 كقيمة افتراضية حسب تصميمك
+            string sql = @"INSERT INTO Safes (SafeName, Balance, IsActive) 
+                   VALUES (@Name, @Balance, 1)";
+
+            int rows = await db.ExecuteAsync(sql, new { Name = safeName, Balance = initialBalance });
+            return rows > 0;
+        }
+        // أضف هذه الدوال داخل كلاس FinancialRepository
+
+        // جلب الخزنة المربوطة بطريقة دفع معينة (مثلاً Cash أو Card)
+        public async Task<int> GetSafeIdByPaymentMethodAsync(string method)
+        {
+            using var db = _dbFactory.CreateConnection();
+            // إذا لم يجد ربطاً، سيرجع 0 (لذا يجب معالجة هذه الحالة)
+            string sql = "SELECT SafeID FROM PaymentMapping WHERE MethodName = @Method";
+            return await db.QueryFirstOrDefaultAsync<int>(sql, new { Method = method });
+        }
+
+        // تحديث أو إضافة ربط جديد (يُستخدم من واجهة الإعدادات - Tab 3)
+        public async Task<bool> UpdatePaymentMappingAsync(string method, int safeId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"IF EXISTS (SELECT 1 FROM PaymentMapping WHERE MethodName = @Method)
+                   UPDATE PaymentMapping SET SafeID = @SId WHERE MethodName = @Method
+                   ELSE
+                   INSERT INTO PaymentMapping (MethodName, SafeID) VALUES (@Method, @SId)";
+
+            int rows = await db.ExecuteAsync(sql, new { Method = method, SId = safeId });
+            return rows > 0;
+        }
+
+        // جلب كل الإعدادات الحالية لعرضها في الواجهة
+        public async Task<IEnumerable<dynamic>> GetAllPaymentMappingsAsync()
+        {
+            using var db = _dbFactory.CreateConnection();
+            return await db.QueryAsync("SELECT * FROM PaymentMapping");
+        }
+        // --- جلب سجل التحويلات ---
+        public async Task<IEnumerable<dynamic>> GetTransferHistoryAsync()
+        {
+            using var db = _dbFactory.CreateConnection();
+            // نستخدم JOIN لنجلب أسماء الخزنات واسم الموظف بدلاً من الأرقام (IDs)
+            string sql = @"
+        SELECT 
+            t.TransferID, 
+            f.SafeName AS FromSafe, 
+            s.SafeName AS ToSafe, 
+            t.Amount, 
+            t.TransferDate, 
+            u.Username AS TransferredBy, 
+            t.Notes
+        FROM SafeTransfers t
+        JOIN Safes f ON t.FromSafeID = f.SafeID
+        JOIN Safes s ON t.ToSafeID = s.SafeID
+        JOIN Users u ON t.CreatedBy = u.UserID
+        ORDER BY t.TransferDate DESC";
+        
+    return await db.QueryAsync(sql);
+        }
     }
 }

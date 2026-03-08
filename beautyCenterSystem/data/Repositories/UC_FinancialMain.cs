@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BeautyCenterSystem.Data.Repositories;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -71,6 +72,17 @@ namespace beautyCenterSystem.data.Repositories
                 btnPurchases.BackColor = Color.White;
                 btnPurchases.TextAlign = ContentAlignment.MiddleCenter;
             });
+
+        }
+
+        private void btnManageSafes_Click_1(object sender, EventArgs e)
+        {
+            using (frmSafes frm = new frmSafes())
+            {
+                
+                frm.ShowDialog();
+            }
+
 
         }
     }

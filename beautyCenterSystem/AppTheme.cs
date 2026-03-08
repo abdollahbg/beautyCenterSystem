@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using MaterialSkin;
 using MaterialSkin.Controls;
-using FontAwesome.Sharp; // مكتبة الأيقونات
+using FontAwesome.Sharp;
 
 namespace beautyCenterSystem
 {
@@ -55,20 +55,36 @@ namespace beautyCenterSystem
         {
             foreach (Control c in parent.Controls)
             {
-                // 1. استثناء التيكست بوكس من خط كايرو (للمشاكل البرمجية)
+                // 1. استثناء التيكست بوكس من خط كايرو
                 bool isTextBox = c is MaterialTextBox || c is MaterialTextBox2 || c is TextBox;
                 if (!isTextBox)
                 {
                     c.Font = GetFont(c.Font.Size);
                 }
 
-                // --- تنسيق الأزرار العادية و IconButton ---
+                // --- [تعديل جديد] تنسيق الـ TabControl لجعل التبويبات كبيرة وواضحة ---
+                if (c is TabControl tabCtrl)
+                {
+                    tabCtrl.Alignment = TabAlignment.Top; // وضع التبويبات في الأعلى لتمتد عرضياً
+                    tabCtrl.SizeMode = TabSizeMode.Fixed; // تمكين التحكم في الحجم
+                    tabCtrl.ItemSize = new Size(200, 50); // عرض 200 وارتفاع 50 لجعلها واضحة جداً
+                    tabCtrl.Font = GetFont(12, FontStyle.Bold); // خط كبير وعريض للتبويبات
+
+                    foreach (TabPage page in tabCtrl.TabPages)
+                    {
+                        page.BackColor = BackgroundLight;
+                        page.Text = "  " + page.Text.Trim() + "  "; // إضافة مسافات جمالية للنص
+                        ApplyToAllChildren(page); // تطبيق الثيم على محتويات كل صفحة
+                    }
+                }
+
+                // --- تنسيق الأزرار و IconButton ---
                 if (c is IconButton iconBtn)
                 {
                     iconBtn.IconFont = IconFont.Auto;
                     iconBtn.FlatStyle = FlatStyle.Flat;
                     iconBtn.FlatAppearance.BorderSize = 0;
-                    iconBtn.BackColor = Color.White; // ليعطي شكل Sidebar أنيق
+                    iconBtn.BackColor = Color.White;
                     iconBtn.ForeColor = Charcoal;
                     iconBtn.IconColor = Charcoal;
                     iconBtn.TextAlign = ContentAlignment.MiddleRight;
@@ -87,7 +103,7 @@ namespace beautyCenterSystem
                     btn.Cursor = Cursors.Hand;
                 }
 
-                // --- تنسيق الـ Panels (لو أردت تمييز الـ Sidebar) ---
+                // --- تنسيق الـ Panels ---
                 if (c is Panel pnl)
                 {
                     if (pnl.Name.ToLower().Contains("sidebar"))
@@ -100,11 +116,11 @@ namespace beautyCenterSystem
                 if (c is Label lbl)
                 {
                     lbl.ForeColor = Charcoal;
-                    if (lbl.Tag?.ToString() == "Header") // لو وضعت كلمة Header في خاصية Tag
+                    if (lbl.Tag?.ToString() == "Header")
                         lbl.Font = GetFont(lbl.Font.Size, FontStyle.Bold);
                 }
 
-                // --- تنسيق الجداول (DataGridView) لتكون مودرن ---
+                // --- تنسيق الجداول (DataGridView) ---
                 if (c is DataGridView dgv)
                 {
                     dgv.BackgroundColor = White;
@@ -115,29 +131,16 @@ namespace beautyCenterSystem
                     dgv.RowHeadersVisible = false;
                     dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-                    // الهيدر
                     dgv.ColumnHeadersDefaultCellStyle.BackColor = Primary;
                     dgv.ColumnHeadersDefaultCellStyle.ForeColor = White;
                     dgv.ColumnHeadersDefaultCellStyle.Font = GetFont(10, FontStyle.Bold);
                     dgv.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                     dgv.ColumnHeadersHeight = 40;
 
-                    // الصفوف
                     dgv.DefaultCellStyle.SelectionBackColor = RoseGold;
                     dgv.DefaultCellStyle.SelectionForeColor = Charcoal;
                     dgv.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                     dgv.RowTemplate.Height = 35;
-                }
-
-                // --- تنسيق القوائم (ListView) ---
-                if (c is ListView lv)
-                {
-                    lv.BackColor = White;
-                    lv.ForeColor = Charcoal;
-                    lv.BorderStyle = BorderStyle.None;
-                    lv.FullRowSelect = true;
-                    lv.GridLines = false;
-                    lv.Font = GetFont(10, FontStyle.Regular);
                 }
 
                 if (c.HasChildren) ApplyToAllChildren(c);

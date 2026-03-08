@@ -43,15 +43,21 @@ namespace beautyCenterSystem.data.Repositories
             cmbPaymentMethod.SelectedIndex = 0;
         }
 
+        // تعديل طريقة جلب قيمة الدفع في زر التأكيد
         private void btnConfirm_Click(object sender, EventArgs e)
         {
-            // القيمة الصافية هي التي تهمنا برمجياً للدفعة
             decimal.TryParse(txtNet.Text, out decimal netValue);
             decimal.TryParse(txtDiscount.Text, out decimal discountValue);
 
-            this.AmountPaid = netValue; // هذا ما سيذهب لعمود AmountPaid في القاعدة
+            this.AmountPaid = netValue;
             this.Discount = discountValue;
-            this.PaymentMethod = cmbPaymentMethod.SelectedItem.ToString();
+
+            // --- التعديل هنا ---
+            // بدلاً من أخذ النص الكامل، نتحقق من الخيار المختار
+            if (cmbPaymentMethod.SelectedIndex == 0)
+                this.PaymentMethod = "Cash";
+            else
+                this.PaymentMethod = "Card";
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -62,6 +68,7 @@ namespace beautyCenterSystem.data.Repositories
         private void CheckoutForm_Load(object sender, EventArgs e)
         {
             AppTheme.Apply(this);
+            CalculateNet();
             btnCancel.BackColor = Color.DarkGray;
 
             // جعل التركيز يبدأ من "المبلغ المدفوع" لتسهيل العمل

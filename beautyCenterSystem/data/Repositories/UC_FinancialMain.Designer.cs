@@ -122,6 +122,7 @@
             btnManageSafes.Text = "إدارة الخزينة";
             btnManageSafes.TextImageRelation = TextImageRelation.TextAboveImage;
             btnManageSafes.UseVisualStyleBackColor = true;
+            btnManageSafes.Click += btnManageSafes_Click_1;
             // 
             // UC_FinancialMain
             // 
