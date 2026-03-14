@@ -41,23 +41,30 @@ namespace beautyCenterSystem
                 activeBtn.IconColor = AppTheme.Primary;  // لون الأيقونة أحمر ياقوتي
             }
         }
-        private void ShowScreen(UserControl screen)
+        private async Task<bool> ShowScreen(UserControl screen)
         {
+            // 1. التحقق: هل الصفحة المعروضة حالياً هي صفحة الإعدادات؟
+            if (pnlContainer.Controls.Count > 0 && pnlContainer.Controls[0] is UC_Settings oldSettings)
+            {
+                // استدعاء دالة التحقق التي أنشأناها سابقاً
+                bool canNavigate = await oldSettings.PromptUnsavedChanges();
 
+                // إذا اختار المستخدم "إلغاء" (Cancel)، نخرج من الدالة ونعيد false
+                if (!canNavigate) return false;
+            }
+
+            // 2. إذا وصلنا هنا، يعني إما الصفحة الحالية ليست إعدادات أو أن المستخدم وافق على الانتقال
             if (pnlContainer.Controls.Count > 0)
             {
                 pnlContainer.Controls[0].Dispose();
                 pnlContainer.Controls.Clear();
             }
 
-
             screen.Dock = DockStyle.Fill;
-
-
             pnlContainer.Controls.Add(screen);
-
-
             AppTheme.Apply(screen);
+
+            return true; // تم الانتقال بنجاح
         }
         private void MainDashBoard_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -119,6 +126,7 @@ namespace beautyCenterSystem
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
+            ShowScreen(new UC_Settings());
             HighlightButton(sender);
         }
     }
