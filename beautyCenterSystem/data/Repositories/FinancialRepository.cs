@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BeautyCenterSystem.Data;
 using beautyCenterSystem;
+using beautyCenterSystem.data.Repositories;
 
 namespace BeautyCenterSystem.Data.Repositories
 {
@@ -150,7 +151,6 @@ namespace BeautyCenterSystem.Data.Repositories
             int rows = await db.ExecuteAsync(sql, new { Name = safeName, Balance = initialBalance });
             return rows > 0;
         }
-        // أضف هذه الدوال داخل كلاس FinancialRepository
 
         // جلب الخزنة المربوطة بطريقة دفع معينة (مثلاً Cash أو Card)
         public async Task<int> GetSafeIdByPaymentMethodAsync(string method)
@@ -199,8 +199,8 @@ namespace BeautyCenterSystem.Data.Repositories
         JOIN Safes s ON t.ToSafeID = s.SafeID
         JOIN Users u ON t.CreatedBy = u.UserID
         ORDER BY t.TransferDate DESC";
-        
-    return await db.QueryAsync(sql);
+
+            return await db.QueryAsync(sql);
         }
         // 1. جلب قائمة المواد لملء الكومبو بوكس عند الشراء
         public async Task<IEnumerable<dynamic>> GetAllMaterialsAsync()
@@ -284,6 +284,196 @@ namespace BeautyCenterSystem.Data.Repositories
                 // إما أن تعيد false أو تقوم بعمل throw ليتم معالجته في الواجهة
                 throw new Exception($"فشل تحديث المشتريات: {ex.Message}");
             }
+        }
+        // 1. إضافة فاتورة مشتريات كاملة مع تفاصيلها
+        public async Task<bool> AddPurchaseInvoiceAsync(PurchaseInvoice invoice)
+        {
+            using var db = _dbFactory.CreateConnection();
+            db.Open();
+            using var transaction = db.BeginTransaction();
+            try
+            {
+                // أولاً: إدخال رأس الفاتورة والحصول على الـ ID الجديد
+                string sqlInvoice = @"INSERT INTO PurchaseInvoices (SupplierName, TotalAmount, PurchaseDate, PaidFromSafeID, IssuedBy, Notes) 
+                              VALUES (@SupplierName, @TotalAmount, @PurchaseDate, @PaidFromSafeID, @IssuedBy, @Notes);
+                              SELECT CAST(SCOPE_IDENTITY() as int);";
+
+                int invoiceId = await db.QuerySingleAsync<int>(sqlInvoice, invoice, transaction);
+
+                // ثانياً: إدخال تفاصيل الفاتورة (المواد)
+                string sqlDetails = @"INSERT INTO PurchaseDetails (InvoiceID, MaterialID, Quantity, UnitPrice) 
+                              VALUES (@InvoiceID, @MaterialID, @Quantity, @UnitPrice)";
+
+                foreach (var detail in invoice.Details)
+                {
+                    detail.InvoiceID = invoiceId;
+                    await db.ExecuteAsync(sqlDetails, detail, transaction);
+                }
+
+                // ثالثاً: خصم المبلغ الإجمالي من الخزنة المحددة
+                await db.ExecuteAsync("UPDATE Safes SET Balance = Balance - @Amt WHERE SafeID = @SId",
+                    new { Amt = invoice.TotalAmount, SId = invoice.PaidFromSafeID }, transaction);
+
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                throw new Exception($"خطأ في حفظ فاتورة المشتريات: {ex.Message}");
+            }
+        }
+
+        // 2. جلب قائمة الفواتير (لجدول الفواتير العلوي)
+        public async Task<IEnumerable<dynamic>> GetPurchaseInvoicesAsync(DateTime from, DateTime to)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"SELECT I.*, S.SafeName, U.Username as IssuedByName 
+                   FROM PurchaseInvoices I
+                   JOIN Safes S ON I.PaidFromSafeID = S.SafeID
+                   JOIN Users U ON I.IssuedBy = U.UserID
+                   WHERE I.PurchaseDate BETWEEN @From AND @To
+                   ORDER BY I.PurchaseDate DESC";
+
+            return await db.QueryAsync(sql, new { From = from.Date, To = to.Date.AddDays(1).AddSeconds(-1) });
+        }
+
+        // 3. جلب تفاصيل فاتورة محددة (للجدول السفلي عند الضغط على فاتورة)
+        public async Task<IEnumerable<dynamic>> GetInvoiceDetailsAsync(int invoiceId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"SELECT D.*, M.MaterialName 
+                   FROM PurchaseDetails D
+                   JOIN Materials M ON D.MaterialID = M.MaterialID
+                   WHERE D.InvoiceID = @Id";
+
+            return await db.QueryAsync(sql, new { Id = invoiceId });
+        }
+        public async Task<bool> DeletePurchaseInvoiceAsync(int invoiceId, decimal amount, int safeId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            db.Open();
+            using var transaction = db.BeginTransaction();
+            try
+            {
+                // 1. حذف الفاتورة (سيحذف التفاصيل تلقائياً بفضل Cascade)
+                await db.ExecuteAsync("DELETE FROM PurchaseInvoices WHERE InvoiceID = @Id", new { Id = invoiceId }, transaction);
+
+                // 2. رد المبلغ المخصوم للخزنة
+                await db.ExecuteAsync("UPDATE Safes SET Balance = Balance + @Amt WHERE SafeID = @SId",
+                    new { Amt = amount, SId = safeId }, transaction);
+
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                throw new Exception($"فشل حذف الفاتورة: {ex.Message}");
+            }
+        }
+
+        // --- الدوال الإضافية الجديدة لإدارة التفاصيل الفردية ---
+
+        public async Task<bool> AddPurchaseDetailAsync(PurchaseDetail detail, int safeId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            db.Open();
+            using var transaction = db.BeginTransaction();
+            try
+            {
+                // 1. إدخال السطر الجديد
+                string sqlDetail = @"INSERT INTO PurchaseDetails (InvoiceID, MaterialID, Quantity, UnitPrice) 
+                                     VALUES (@InvoiceID, @MaterialID, @Quantity, @UnitPrice)";
+                await db.ExecuteAsync(sqlDetail, detail, transaction);
+
+                decimal rowTotal = detail.Quantity * detail.UnitPrice;
+
+                // 2. تحديث إجمالي الفاتورة الرئيسية
+                await db.ExecuteAsync("UPDATE PurchaseInvoices SET TotalAmount = TotalAmount + @Amt WHERE InvoiceID = @Id",
+                    new { Amt = rowTotal, Id = detail.InvoiceID }, transaction);
+
+                // 3. خصم المبلغ من الخزنة
+                await db.ExecuteAsync("UPDATE Safes SET Balance = Balance - @Amt WHERE SafeID = @SId",
+                    new { Amt = rowTotal, SId = safeId }, transaction);
+
+                transaction.Commit();
+                return true;
+            }
+            catch { transaction.Rollback(); throw; }
+        }
+
+        public async Task<bool> DeletePurchaseDetailAsync(int detailId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            db.Open();
+            using var transaction = db.BeginTransaction();
+            try
+            {
+                // جلب بيانات السطر والخزنة قبل الحذف لرد المال
+                string sqlGet = @"SELECT d.Quantity, d.UnitPrice, d.InvoiceID, i.PaidFromSafeID 
+                                  FROM PurchaseDetails d 
+                                  JOIN PurchaseInvoices i ON d.InvoiceID = i.InvoiceID 
+                                  WHERE d.DetailID = @Id";
+                var info = await db.QueryFirstOrDefaultAsync(sqlGet, new { Id = detailId }, transaction);
+
+                if (info != null)
+                {
+                    decimal amountToRefund = (decimal)info.Quantity * (decimal)info.UnitPrice;
+
+                    // رد المال للخزنة
+                    await db.ExecuteAsync("UPDATE Safes SET Balance = Balance + @Amt WHERE SafeID = @SId",
+                        new { Amt = amountToRefund, SId = info.PaidFromSafeID }, transaction);
+
+                    // خصم القيمة من إجمالي الفاتورة
+                    await db.ExecuteAsync("UPDATE PurchaseInvoices SET TotalAmount = TotalAmount - @Amt WHERE InvoiceID = @InvId",
+                        new { Amt = amountToRefund, InvId = info.InvoiceID }, transaction);
+
+                    // حذف السجل
+                    await db.ExecuteAsync("DELETE FROM PurchaseDetails WHERE DetailID = @Id", new { Id = detailId }, transaction);
+                }
+
+                transaction.Commit();
+                return true;
+            }
+            catch { transaction.Rollback(); throw; }
+        }
+        // 1. جلب الفواتير بناءً على تاريخ محدد فقط
+        public async Task<IEnumerable<PurchaseInvoice>> GetPurchaseInvoicesByDateAsync(DateTime date)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"SELECT I.*, S.SafeName, U.Username as IssuedByName 
+                   FROM PurchaseInvoices I
+                   JOIN Safes S ON I.PaidFromSafeID = S.SafeID
+                   JOIN Users U ON I.IssuedBy = U.UserID
+                   WHERE CAST(I.PurchaseDate AS DATE) = @SelectedDate
+                   ORDER BY I.PurchaseDate DESC";
+
+            return await db.QueryAsync<PurchaseInvoice>(sql, new { SelectedDate = date.Date });
+        }
+
+        // 2. إنشاء رأس الفاتورة فقط (بدون تفاصيل) وإرجاع الرقم التعريفي ID
+        public async Task<int> CreatePurchaseHeaderAsync(PurchaseInvoice invoice)
+        {
+            using var db = _dbFactory.CreateConnection();
+            // ننشئ الفاتورة بإجمالي 0 في البداية، وسيزداد مع إضافة التفاصيل
+            string sql = @"INSERT INTO PurchaseInvoices (SupplierName, TotalAmount, PurchaseDate, PaidFromSafeID, IssuedBy, Notes) 
+                   VALUES (@SupplierName, 0, @PurchaseDate, @PaidFromSafeID, @IssuedBy, @Notes);
+                   SELECT CAST(SCOPE_IDENTITY() as int);";
+
+            return await db.QuerySingleAsync<int>(sql, invoice);
+        }
+
+        // 3. جلب تفاصيل فاتورة محددة (كـ List من موديل PurchaseDetail)
+        public async Task<IEnumerable<PurchaseDetail>> GetPurchaseDetailsAsync(int invoiceId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"SELECT D.*, M.MaterialName 
+                   FROM PurchaseDetails D
+                   JOIN Materials M ON D.MaterialID = M.MaterialID
+                   WHERE D.InvoiceID = @Id";
+
+            return await db.QueryAsync<PurchaseDetail>(sql, new { Id = invoiceId });
         }
     }
 }

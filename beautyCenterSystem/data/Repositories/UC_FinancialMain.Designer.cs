@@ -52,6 +52,7 @@
             btnFinReports.Text = "التقارير المالية";
             btnFinReports.TextImageRelation = TextImageRelation.TextAboveImage;
             btnFinReports.UseVisualStyleBackColor = true;
+            btnFinReports.Click += btnFinReports_Click;
             // 
             // btnPurchases
             // 
@@ -69,6 +70,7 @@
             btnPurchases.Text = "المشتريات";
             btnPurchases.TextImageRelation = TextImageRelation.TextAboveImage;
             btnPurchases.UseVisualStyleBackColor = true;
+            btnPurchases.Click += btnPurchases_Click;
             // 
             // btnExpenses
             // 

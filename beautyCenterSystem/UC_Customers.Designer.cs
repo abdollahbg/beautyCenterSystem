@@ -138,9 +138,10 @@
             txtboxSearch.BackgroundImageLayout = ImageLayout.None;
             txtboxSearch.CharacterCasing = CharacterCasing.Normal;
             txtboxSearch.Depth = 0;
+            txtboxSearch.Dock = DockStyle.Fill;
             txtboxSearch.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
             txtboxSearch.HideSelection = true;
-            txtboxSearch.Hint = "البحث";
+            txtboxSearch.Hint = "بحث";
             txtboxSearch.LeadingIcon = null;
             txtboxSearch.Location = new Point(253, 3);
             txtboxSearch.MaxLength = 32767;
@@ -155,9 +156,9 @@
             txtboxSearch.SelectionStart = 0;
             txtboxSearch.ShortcutsEnabled = true;
             txtboxSearch.Size = new Size(444, 48);
-            txtboxSearch.TabIndex = 5;
+            txtboxSearch.TabIndex = 7;
             txtboxSearch.TabStop = false;
-            txtboxSearch.TextAlign = HorizontalAlignment.Right;
+            txtboxSearch.TextAlign = HorizontalAlignment.Left;
             txtboxSearch.TrailingIcon = null;
             txtboxSearch.UseSystemPasswordChar = false;
             txtboxSearch.TextChanged += txtboxSearch_TextChanged;

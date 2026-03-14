@@ -79,11 +79,29 @@ namespace beautyCenterSystem.data.Repositories
         {
             using (frmSafes frm = new frmSafes())
             {
-                
+
                 frm.ShowDialog();
             }
 
 
+        }
+
+        private void btnPurchases_Click(object sender, EventArgs e)
+        {
+            using (frmPurchases frm = new frmPurchases())
+            {
+
+                frm.ShowDialog();
+            }
+        }
+
+        private void btnFinReports_Click(object sender, EventArgs e)
+        {
+            using (FrmFinancialReports frm = new FrmFinancialReports())
+            {
+
+                frm.ShowDialog();
+            }
         }
     }
 }
