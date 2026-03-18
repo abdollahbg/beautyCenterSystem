@@ -7,6 +7,7 @@ using MaterialSkin.Controls;
 using beautyCenterSystem.Data.Repositories;
 using BeautyCenterSystem.Data;
 using System.Collections.Generic;
+using beautyCenterSystem.data.Repositories;
 
 namespace beautyCenterSystem
 {
@@ -24,7 +25,7 @@ namespace beautyCenterSystem
             _appointmentRepo = new AppointmentRepository(factory);
 
             InitializeComponent();
-           
+
 
             this.VisibleChanged += UC_Home_VisibleChanged;
 
@@ -43,10 +44,10 @@ namespace beautyCenterSystem
         }
 
         private async void UC_Home_Load(object sender, EventArgs e)
-        { 
-                  AppTheme.Apply(this);
+        {
+            AppTheme.Apply(this);
             await RefreshDashboard();
-          
+
         }
 
         public async Task RefreshDashboard()
@@ -65,7 +66,8 @@ namespace beautyCenterSystem
                 var roomsData = await roomsTask;
                 var outOfStock = await materialsTask;
 
-                this.Invoke((Action)(() => {
+                this.Invoke((Action)(() =>
+                {
                     // 1. تحديث الإحصائيات
                     lblCompletedVal.Text = kpis.completed.ToString();
                     lblTopServiceVal.Text = kpis.topService;
@@ -203,6 +205,21 @@ namespace beautyCenterSystem
                     dgvOutofStock.Columns["MaterialName"].HeaderText = "المادة الناقصة";
                     dgvOutofStock.Columns["MaterialName"].FillWeight = 100;
                 }
+            }
+        }
+
+        private async void btnDailyClose_Click(object sender, EventArgs e)
+        {
+            // 1. إنشاء نسخة من فورم الإغلاق
+            // تأكد من عمل using beautyCenterSystem.data.Repositories; في أعلى الملف
+            using (FrmDailyClosure frm = new FrmDailyClosure())
+            {
+                // 2. إظهار الفورم كنافذة منبثقة (Modal)
+                var result = frm.ShowDialog();
+
+                // 3. (اختياري) إذا أردت تحديث أرقام الشاشة الرئيسية بعد الإغلاق
+                // نفترض أن لديك دالة RefreshDashboard() التي برمجناها سابقاً
+                await RefreshDashboard();
             }
         }
     }

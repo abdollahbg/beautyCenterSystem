@@ -99,6 +99,7 @@
             btnDailyClose.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             btnDailyClose.UseAccentColor = true;
             btnDailyClose.UseVisualStyleBackColor = true;
+            btnDailyClose.Click += btnDailyClose_Click;
             // 
             // lblDashboardTitle
             // 
