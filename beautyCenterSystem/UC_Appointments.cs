@@ -451,77 +451,76 @@ namespace beautyCenterSystem
                 {
                     if (payForm.ShowDialog() == DialogResult.OK)
                     {
-                        // 5. تحديث الحالة في قاعدة البيانات (نستخدم معرف المستخدم من الجلسة)
+                        // 5. تحديث الحالة في قاعدة البيانات
                         bool isSuccess = await _appointmentRepo.CompleteAndPayAsync(
                             appId,
                             totalAmount,
                             payForm.AmountPaid,
                             payForm.Discount,
                             payForm.PaymentMethod,
-                            CurrentSession.UserID // تم الربط بالجلسة
-                            
+                            CurrentSession.UserID
                         );
 
                         if (isSuccess)
                         {
-                            // 6. تحديث الجدول الرئيسي
+                            // 6. تحديث الجدول الرئيسي في الواجهة
                             await LoadAppointments();
 
                             try
                             {
-                                // 7. جلب الإعدادات والخدمات من قاعدة البيانات
+                                // 7. جلب الإعدادات والخدمات من قاعدة البيانات للطباعة
                                 var settingsRepo = new SettingsRepository(new DbConnectionFactory());
                                 var settings = await settingsRepo.GetSettingsAsync();
                                 var services = await _appointmentRepo.GetAppointmentServicesAsync(appId);
 
-                                // 8. تجهيز كائن الطباعة بالبيانات الفعلية من الإعدادات والجلسة
+                                // 8. تجهيز كائن الطابعة
                                 ReceiptPrinter printer = new ReceiptPrinter();
 
-                                // بيانات المركز من الإعدادات (مع وضع قيم افتراضية في حال كانت فارغة)
+                                // بيانات المركز الأساسية
                                 printer.CenterName = settings.CenterName ?? "صالون التجميل";
                                 printer.Phone = settings.Phone ?? "";
                                 printer.Policy = settings.Note ?? "الرجاء مراجعة الفاتورة قبل المغادرة.";
-                                printer.Logo = settings.GetLogoImage(); // تحويل البايتات لصورة
+                                printer.Logo = settings.GetLogoImage();
 
-                                // تجميع روابط السوشيال ميديا
-                                List<string> socialList = new List<string>();
-                                if (!string.IsNullOrEmpty(settings.Facebook)) socialList.Add("FB: " + settings.Facebook);
-                                if (!string.IsNullOrEmpty(settings.Instagram)) socialList.Add("Insta: " + settings.Instagram);
-                                if (!string.IsNullOrEmpty(settings.WhatsApp)) socialList.Add("WhatsApp: " + settings.WhatsApp);
-                                printer.SocialMedia = string.Join(" | ", socialList);
+                                // --- التعديل الجديد: تمرير بيانات التواصل الاجتماعي بشكل منفصل ---
+                                printer.FacebookHandle = settings.Facebook;
+                                printer.InstagramHandle = settings.Instagram;
+                                printer.WhatsAppHandle = settings.WhatsApp;
 
-                                // بيانات الفاتورة
+                                // بيانات الفاتورة المالية
                                 printer.InvoiceNumber = appId;
                                 printer.CustomerName = customerName;
                                 printer.TotalAmount = totalAmount;
                                 printer.Discount = payForm.Discount;
                                 printer.NetAmount = payForm.AmountPaid;
 
-                                // بيانات الموظف من الجلسة
+                                // بيانات الموظف من الجلسة الحالية
                                 printer.CashierName = CurrentSession.Username;
 
+                                // تحويل قائمة الخدمات إلى النوع المطلوب في الطابعة
                                 printer.Items = services.Select(s => new InvoiceItem
                                 {
                                     ServiceName = s.ServiceName,
                                     Price = s.Price
                                 }).ToList();
 
-                                // 9. الطباعة المباشرة
+                                // 9. تنفيذ الطباعة المباشرة (false تعني بدون معاينة)
                                 printer.PrintReceipt(false);
                             }
                             catch (Exception printEx)
                             {
-                                MessageBox.Show($"تم الحفظ، لكن فشلت الطباعة: {printEx.Message}", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                // في حال فشل الطابعة، لا نعطل نجاح عملية الحفظ في القاعدة
+                                MessageBox.Show($"تم حفظ البيانات بنجاح، لكن تعذر إخراج الفاتورة: {printEx.Message}", "تنبيه الطباعة", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             }
 
-                            MessageBox.Show($"تم إتمام العملية بنجاح للعميلة {customerName}.", "نجاح", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show($"تم إتمام العملية بنجاح للعميلة {customerName}.", "نجاح العملية", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"حدث خطأ غير متوقع: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"حدث خطأ غير متوقع: {ex.Message}", "خطأ نظام", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         private void PrintDirectly(ReceiptPrinter printer)

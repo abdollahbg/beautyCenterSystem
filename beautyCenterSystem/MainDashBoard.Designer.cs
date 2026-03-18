@@ -285,6 +285,7 @@
             Controls.Add(pnlSidebar);
             Name = "MainDashBoard";
             Text = "MainDashBoard";
+            FormClosing += MainDashBoard_FormClosing;
             FormClosed += MainDashBoard_FormClosed;
             Load += MainDashBoard_Load;
             pnlSidebar.ResumeLayout(false);

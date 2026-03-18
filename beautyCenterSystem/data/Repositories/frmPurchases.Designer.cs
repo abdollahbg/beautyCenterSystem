@@ -301,6 +301,7 @@
             // dgvPurchaseDetails
             // 
             dgvPurchaseDetails.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvPurchaseDetails.ContextMenuStrip = contextMenuStrip1;
             dgvPurchaseDetails.Dock = DockStyle.Fill;
             dgvPurchaseDetails.Location = new Point(0, 0);
             dgvPurchaseDetails.Name = "dgvPurchaseDetails";

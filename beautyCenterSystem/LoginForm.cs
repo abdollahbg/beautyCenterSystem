@@ -1,86 +1,92 @@
+using System;
+using System.Windows.Forms;
 using beautyCenterSystem.data.Repositories;
 using BeautyCenterSystem.Data;
-using MaterialSkin.Controls; 
-using FontAwesome.Sharp;
 
-namespace beautyCenterSystem;
-    using beautyCenterSystem.data.Repositories;
-    using BeautyCenterSystem.Data;
-
+namespace beautyCenterSystem
+{
     public partial class LoginForm : Form
     {
-    private readonly beautyCenterSystem.data.Repositories.UserRepository _userRepository;
-    public LoginForm()
+        private readonly UserRepository _userRepository;
+
+        public LoginForm()
         {
             InitializeComponent();
-        var dbFactory = new BeautyCenterSystem.Data.DbConnectionFactory();
-        _userRepository = new beautyCenterSystem.data.Repositories.UserRepository(dbFactory);
-        AppTheme.Apply(this);
-        
-        
+            //  ÂÌ∆… «·« ’«· »ﬁ«⁄œ… «·»Ì«‰«  Ê«·—Ì»Ê
+            var dbFactory = new DbConnectionFactory();
+            _userRepository = new UserRepository(dbFactory);
 
-
+            //  ÿ»Ìﬁ «·ÀÌ„ «·⁄«„ ··„—ﬂ“
+            AppTheme.Apply(this);
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private  async void LoginButton_Click(object sender, EventArgs e)
+        private async void LoginButton_Click(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
-            if(string.IsNullOrEmpty(username)||string.IsNullOrEmpty(password))
+            // 1. «· Õﬁﬁ „‰ ≈œŒ«· «·»Ì«‰« 
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 MessageBox.Show("⁄–—«° Ì—ÃÏ ≈œŒ«· «”„ «·„” Œœ„ Êﬂ·„… «·„—Ê— √Ê·«.",
-                        " ‰»ÌÂ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                " ‰»ÌÂ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-      
+
             try
-              {
-            this.Cursor = Cursors.WaitCursor;
-            LoginButton.Enabled = false;
-            var user = await _userRepository.LoginAsync(username, password);
-
-            if(user != null )
             {
-                  CurrentSession.UserID = user.UserID;
-                CurrentSession.Username = user.Username;
-                  CurrentSession.RoleName = user.RoleName;
-                this.Hide();
-                new MainDashBoard().Show();
+                //  €ÌÌ— ‘ﬂ· «·„«Ê” ·ÌÊÕÌ »«·«‰ Ÿ«—
+                this.Cursor = Cursors.WaitCursor;
+                LoginButton.Enabled = false;
 
+                // 2. „Õ«Ê·…  ”ÃÌ· «·œŒÊ· ⁄»— «·—Ì»Ê (Dapper + BCrypt)
+                var user = await _userRepository.LoginAsync(username, password);
+
+                if (user != null)
+                {
+                    // --- «·ŒÿÊ… «·Õ«”„… ·—»ÿ «·’·«ÕÌ«  ---
+
+                    // √:  Œ“Ì‰ »Ì«‰«  «·Ã·”… (··⁄—÷ ›Ì «·Ê«ÃÂ« )
+                    CurrentSession.UserID = user.UserID;
+                    CurrentSession.Username = user.Username;
+                    CurrentSession.RoleName = user.RoleName;
+                    CurrentSession.UserPermissions = user.Permissions;
+
+                    // »:  ›⁄Ì· ‰Ÿ«„ «·’·«ÕÌ«  («·–Ì  ⁄ „œ ⁄·ÌÂ «·√“—«— ›Ì MainDashBoard)
+                    // »œÊ‰ Â–« «·”ÿ—° ”Ì⁄ »— «·‹ PermissionManager √‰ﬂ „” Œœ„ „ÃÂÊ· Ê Œ ›Ì «·√“—«—
+                    PermissionManager.Initialize(user);
+
+                    // 3. «·«‰ ﬁ«· ··‘«‘… «·—∆Ì”Ì…
+                    this.Hide();
+                    MainDashBoard main = new MainDashBoard();
+                    main.Show();
+                }
+                else
+                {
+                    // ›‘· «·œŒÊ·
+                    MessageBox.Show("«”„ «·„” Œœ„ √Ê ﬂ·„… «·„—Ê— €Ì— ’ÕÌÕ….",
+                                    "›‘· «·œŒÊ·", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    txtPassword.Clear();
+                    txtPassword.Focus();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("«”„ «·„” Œœ„ √Ê ﬂ·„… «·„—Ê— €Ì— ’ÕÌÕ…° .",
-                                "›‘· «·œŒÊ·", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                txtPassword.Clear();
-                txtPassword.Focus();
+                // «· ⁄«„· „⁄ √Œÿ«¡ «·”Ì—›— √Ê ﬁ«⁄œ… «·»Ì«‰« 
+                MessageBox.Show($"ÕœÀ Œÿ√ √À‰«¡ «·« ’«· »ﬁ«⁄œ… «·»Ì«‰« : \n{ex.Message}",
+                                "Œÿ√  ﬁ‰Ì", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+            }
+            finally
+            {
+                // ≈⁄«œ… «·“— Ê«·„«Ê” ·Õ«· Â„« «·ÿ»Ì⁄Ì…
+                this.Cursor = Cursors.Default;
+                LoginButton.Enabled = true;
             }
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"ÕœÀ Œÿ√ √À‰«¡ «·« ’«· »ﬁ«⁄œ… «·»Ì«‰« : \n{ex.Message}",
-                            "Œÿ√  ﬁ‰Ì", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-        }
-        finally
-        {
-            // ≈⁄«œ… «·„«Ê” Ê«·“— ·Õ«· Â„« «·ÿ»Ì⁄Ì…
-            this.Cursor = Cursors.Default;
-            LoginButton.Enabled = true;
-        }
 
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // √Ì ≈⁄œ«œ«  ≈÷«›Ì… ⁄‰œ › Õ «·‘«‘…
+        }
     }
-        
-
-
-
-        }
-    
-
-
-
+}

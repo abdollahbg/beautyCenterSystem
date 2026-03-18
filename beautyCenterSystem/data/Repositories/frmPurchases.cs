@@ -60,16 +60,17 @@ namespace beautyCenterSystem.data.Repositories
             catch (Exception ex) { MessageBox.Show("خطأ في تحميل البيانات الأساسية: " + ex.Message); }
         }
 
+        // الدالة المعدلة التي تضمن تزامن جدول التفاصيل مع الفاتورة المحددة
         private async Task LoadPurchases()
         {
             try
             {
                 Cursor = Cursors.WaitCursor;
 
-                // 1. إيقاف حدث تغيير التحديد مؤقتاً لمنع قفز المؤشر
+                // 1. إيقاف حدث تغيير التحديد مؤقتاً
                 dgvPurchases.SelectionChanged -= dgvPurchases_SelectionChanged;
 
-                // 2. حفظ حالة الفاتورة الحالية وموقع التمرير (السكرول)
+                // 2. حفظ حالة الفاتورة الحالية وموقع التمرير
                 int savedId = _currentInvoiceId;
                 int lastScrollIndex = dgvPurchases.Rows.Count > 0 ? dgvPurchases.FirstDisplayedScrollingRowIndex : -1;
 
@@ -77,7 +78,7 @@ namespace beautyCenterSystem.data.Repositories
                 var invoices = await _financialRepo.GetPurchaseInvoicesByDateAsync(selectedDate);
                 _allDayPurchases = invoices.ToList();
 
-                // 3. تحديث البيانات وتنسيق الجدول
+                // 3. تحديث البيانات
                 dgvPurchases.DataSource = null;
                 dgvPurchases.DataSource = _allDayPurchases;
                 FormatPurchasesGrid();
@@ -85,14 +86,12 @@ namespace beautyCenterSystem.data.Repositories
                 // 4. استعادة التحديد بشكل آمن
                 if (dgvPurchases.Rows.Count > 0)
                 {
-                    // البحث عن أول عمود مرئي لتجنب خطأ "Invisible Cell"
                     var firstVisibleCol = dgvPurchases.Columns.Cast<DataGridViewColumn>().FirstOrDefault(c => c.Visible);
 
                     if (firstVisibleCol != null)
                     {
                         bool rowFound = false;
 
-                        // محاولة العثور على الفاتورة التي كنا نقف عليها
                         if (savedId > 0)
                         {
                             foreach (DataGridViewRow row in dgvPurchases.Rows)
@@ -101,13 +100,13 @@ namespace beautyCenterSystem.data.Repositories
                                 {
                                     dgvPurchases.CurrentCell = row.Cells[firstVisibleCol.Index];
                                     row.Selected = true;
+                                    _currentInvoiceId = savedId; // تثبيت المعرف
                                     rowFound = true;
                                     break;
                                 }
                             }
                         }
 
-                        // إذا لم نجدها (مثل حالة حذف الفاتورة)، نحدد أول سطر
                         if (!rowFound)
                         {
                             dgvPurchases.CurrentCell = dgvPurchases.Rows[0].Cells[firstVisibleCol.Index];
@@ -115,7 +114,6 @@ namespace beautyCenterSystem.data.Repositories
                             _currentInvoiceId = Convert.ToInt32(dgvPurchases.Rows[0].Cells["InvoiceID"].Value);
                         }
 
-                        // استعادة مكان السكرول حتى لا يهتز الجدول
                         if (lastScrollIndex >= 0 && lastScrollIndex < dgvPurchases.Rows.Count)
                         {
                             dgvPurchases.FirstDisplayedScrollingRowIndex = lastScrollIndex;
@@ -124,14 +122,25 @@ namespace beautyCenterSystem.data.Repositories
                 }
                 else
                 {
-                    dgvPurchaseDetails.DataSource = null;
                     _currentInvoiceId = 0;
                 }
+
+                // 5. الحــــــــل: تحديث جدول التفاصيل يدوياً هنا
+                // لأن الحدث معطل، الجدول السفلي لن يعرف أننا اخترنا فاتورة معينة إلا بهذا السطر
+                if (_currentInvoiceId > 0)
+                {
+                    await LoadPurchaseDetails(_currentInvoiceId);
+                }
+                else
+                {
+                    dgvPurchaseDetails.DataSource = null;
+                }
+
             }
             catch (Exception ex) { MessageBox.Show($"خطأ في تحميل الفواتير: {ex.Message}"); }
             finally
             {
-                // 5. إعادة تفعيل الحدث بعد استقرار كل شيء
+                // 6. إعادة تفعيل الحدث
                 dgvPurchases.SelectionChanged += dgvPurchases_SelectionChanged;
                 Cursor = Cursors.Default;
             }
@@ -176,11 +185,9 @@ namespace beautyCenterSystem.data.Repositories
                 if (_currentInvoiceId > 0)
                 {
                     await LoadPurchases();
-                    dgvPurchaseDetails.DataSource = null;
                     txtSupplierName.Clear();
                     txtNotes.Clear();
                     cmbMaterials.Focus();
-                    MessageBox.Show($"تم فتح الفاتورة رقم {_currentInvoiceId}. يمكنك الآن إضافة المواد.");
                 }
             }
             catch (Exception ex) { MessageBox.Show($"خطأ: {ex.Message}"); }
@@ -213,7 +220,12 @@ namespace beautyCenterSystem.data.Repositories
                 return;
             }
 
-            int savedInvoiceId = _currentInvoiceId;
+            // --- إضافة هذا الجزء لضمان صحة رقم الخزنة قبل الخصم ---
+            if (dgvPurchases.CurrentRow != null)
+            {
+                _currentSafeId = Convert.ToInt32(dgvPurchases.CurrentRow.Cells["PaidFromSafeID"].Value);
+            }
+            // ---------------------------------------------------
 
             if (cmbMaterials.SelectedValue == null || numQty.Value <= 0 || numPrice.Value <= 0)
             {
@@ -229,13 +241,12 @@ namespace beautyCenterSystem.data.Repositories
                 UnitPrice = numPrice.Value
             };
 
+            // نرسل _currentSafeId المتأكدين منه الآن
             bool success = await _financialRepo.AddPurchaseDetailAsync(detail, _currentSafeId);
 
             if (success)
             {
-                await LoadPurchaseDetails(savedInvoiceId);
                 await LoadPurchases();
-
                 numQty.Value = 1;
                 numPrice.Value = 1;
                 cmbMaterials.Focus();
@@ -247,7 +258,7 @@ namespace beautyCenterSystem.data.Repositories
             if (dgvPurchaseDetails.CurrentRow == null) return;
 
             int detailId = Convert.ToInt32(dgvPurchaseDetails.CurrentRow.Cells["DetailID"].Value);
-            string materialName = dgvPurchaseDetails.CurrentRow.Cells["MaterialID"].FormattedValue.ToString();
+            string materialName = dgvPurchaseDetails.CurrentRow.Cells["MaterialName"].Value?.ToString();
 
             var confirm = MessageBox.Show($"هل أنت متأكد من حذف '{materialName}'؟\nسيتم استرداد المبلغ للخزنة تلقائياً.",
                                          "تأكيد الحذف", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -257,12 +268,9 @@ namespace beautyCenterSystem.data.Repositories
                 try
                 {
                     bool isDeleted = await _financialRepo.DeletePurchaseDetailAsync(detailId);
-
                     if (isDeleted)
                     {
-                        await LoadPurchaseDetails(_currentInvoiceId);
-                        await LoadPurchases();
-                        MessageBox.Show("تم الحذف وتحديث الحسابات.");
+                        await LoadPurchases(); // سيقوم بتحديث الجدولين معاً
                     }
                 }
                 catch (Exception ex) { MessageBox.Show($"خطأ أثناء الحذف: {ex.Message}"); }
@@ -291,11 +299,8 @@ namespace beautyCenterSystem.data.Repositories
 
             if (dgvPurchases.Columns.Contains("PurchaseDate")) { dgvPurchases.Columns["PurchaseDate"].Visible = true; dgvPurchases.Columns["PurchaseDate"].HeaderText = "التاريخ"; }
             if (dgvPurchases.Columns.Contains("SupplierName")) { dgvPurchases.Columns["SupplierName"].Visible = true; dgvPurchases.Columns["SupplierName"].HeaderText = "المورد"; }
-
             if (dgvPurchases.Columns.Contains("SafeName")) { dgvPurchases.Columns["SafeName"].Visible = true; dgvPurchases.Columns["SafeName"].HeaderText = "الخزنة"; }
-
             if (dgvPurchases.Columns.Contains("TotalAmount")) { dgvPurchases.Columns["TotalAmount"].Visible = true; dgvPurchases.Columns["TotalAmount"].HeaderText = "الإجمالي"; dgvPurchases.Columns["TotalAmount"].DefaultCellStyle.Format = "N2"; }
-
             if (dgvPurchases.Columns.Contains("Notes")) { dgvPurchases.Columns["Notes"].Visible = true; dgvPurchases.Columns["Notes"].HeaderText = "ملاحظات"; dgvPurchases.Columns["Notes"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill; }
 
             dgvPurchases.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -305,16 +310,11 @@ namespace beautyCenterSystem.data.Repositories
         {
             foreach (DataGridViewColumn col in dgvPurchaseDetails.Columns) col.Visible = false;
 
-            string[] visibleCols = { "MaterialID", "Quantity", "UnitPrice", "TotalAmount" };
+            string[] visibleCols = { "MaterialName", "Quantity", "UnitPrice", "TotalAmount" };
             foreach (var name in visibleCols)
             {
                 if (dgvPurchaseDetails.Columns.Contains(name))
-                {
                     dgvPurchaseDetails.Columns[name].Visible = true;
-                    if (name == "Quantity") dgvPurchaseDetails.Columns[name].HeaderText = "الكمية";
-                    if (name == "UnitPrice") dgvPurchaseDetails.Columns[name].HeaderText = "السعر";
-                    if (name == "TotalAmount") dgvPurchaseDetails.Columns[name].HeaderText = "الإجمالي";
-                }
             }
         }
 
@@ -322,28 +322,23 @@ namespace beautyCenterSystem.data.Repositories
         {
             try
             {
-                var materials = await _financialRepo.GetAllMaterialsAsync();
                 dgvPurchaseDetails.AutoGenerateColumns = false;
                 dgvPurchaseDetails.Columns.Clear();
 
                 dgvPurchaseDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "DetailID", Name = "DetailID", Visible = false });
+                dgvPurchaseDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "MaterialID", Name = "MaterialID", Visible = false });
 
-                var combo = new DataGridViewComboBoxColumn
+                dgvPurchaseDetails.Columns.Add(new DataGridViewTextBoxColumn
                 {
-                    Name = "MaterialID",
-                    DataPropertyName = "MaterialID",
+                    Name = "MaterialName",
+                    DataPropertyName = "MaterialName",
                     HeaderText = "اسم المادة",
-                    DataSource = materials.ToList(),
-                    DisplayMember = "MaterialName",
-                    ValueMember = "MaterialID",
-                    DisplayStyle = DataGridViewComboBoxDisplayStyle.Nothing,
-                    FlatStyle = FlatStyle.Flat,
-                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-                };
-                dgvPurchaseDetails.Columns.Add(combo);
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                    ReadOnly = true
+                });
 
-                dgvPurchaseDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Quantity", Name = "Quantity", HeaderText = "الكمية" });
-                dgvPurchaseDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "UnitPrice", Name = "UnitPrice", HeaderText = "السعر", DefaultCellStyle = { Format = "N2" } });
+                dgvPurchaseDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Quantity", Name = "Quantity", HeaderText = "الكمية", ReadOnly = true });
+                dgvPurchaseDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "UnitPrice", Name = "UnitPrice", HeaderText = "السعر", DefaultCellStyle = { Format = "N2" }, ReadOnly = true });
 
                 dgvPurchaseDetails.Columns.Add(new DataGridViewTextBoxColumn
                 {
@@ -356,42 +351,43 @@ namespace beautyCenterSystem.data.Repositories
             }
             catch (Exception ex) { MessageBox.Show("خطأ في إعداد أعمدة الجدول: " + ex.Message); }
         }
-        // 1. حدث تغيير التاريخ: يجلب بيانات جديدة من قاعدة البيانات لهذا اليوم
+
         private async void dtpFilterDate_ValueChanged(object sender, EventArgs e)
         {
             await LoadPurchases();
         }
 
-        // 2. حدث تغيير نص البحث: يفلتر القائمة الموجودة في الذاكرة حالياً دون الرجوع للقاعدة
         private void txtSearchSupplier_TextChanged(object sender, EventArgs e)
         {
             ApplyPurchasesFilter();
         }
 
-        // 3. دالة الفلترة (أضفها أسفل الأحداث أعلاه)
         private void ApplyPurchasesFilter()
         {
             try
             {
                 string searchText = txtSearchSupplier.Text.Trim().ToLower();
 
-                // فلترة القائمة الأصلية المحملة مسبقاً في _allDayPurchases
                 var filteredList = _allDayPurchases
                     .Where(p => string.IsNullOrEmpty(searchText) ||
                                 (p.SupplierName != null && p.SupplierName.ToLower().Contains(searchText)))
                     .ToList();
 
-                // تحديث الجدول بالنتائج المفلترة فقط
-                dgvPurchases.SelectionChanged -= dgvPurchases_SelectionChanged; // منع تعليق البرنامج أثناء التحديث
+                dgvPurchases.SelectionChanged -= dgvPurchases_SelectionChanged;
                 dgvPurchases.DataSource = null;
                 dgvPurchases.DataSource = filteredList;
                 FormatPurchasesGrid();
+
+                // بعد الفلترة، يفضل تحديث تفاصيل أول فاتورة تظهر في الفلترة
+                if (dgvPurchases.Rows.Count > 0)
+                {
+                    _currentInvoiceId = Convert.ToInt32(dgvPurchases.Rows[0].Cells["InvoiceID"].Value);
+                    LoadPurchaseDetails(_currentInvoiceId);
+                }
+
                 dgvPurchases.SelectionChanged += dgvPurchases_SelectionChanged;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("خطأ أثناء الفلترة: " + ex.Message);
-            }
+            catch (Exception ex) { MessageBox.Show("خطأ أثناء الفلترة: " + ex.Message); }
         }
     }
 }
