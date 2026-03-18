@@ -586,6 +586,7 @@
             btnSaveSettings.TabIndex = 4;
             btnSaveSettings.Text = "حفظ الاعدادات";
             btnSaveSettings.UseVisualStyleBackColor = true;
+            btnSaveSettings.Click += btnSaveSettings_Click;
             // 
             // label13
             // 
@@ -606,6 +607,7 @@
             btnDelete.TabIndex = 2;
             btnDelete.Text = "حذف الصورة الحالية";
             btnDelete.UseVisualStyleBackColor = true;
+            btnDelete.Click += btnDelete_Click;
             // 
             // btnBrowse
             // 
@@ -616,6 +618,7 @@
             btnBrowse.TabIndex = 1;
             btnBrowse.Text = "إضافة صورة";
             btnBrowse.UseVisualStyleBackColor = true;
+            btnBrowse.Click += btnBrowse_Click;
             // 
             // tbUsersPermissions
             // 

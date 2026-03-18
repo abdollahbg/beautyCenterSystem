@@ -16,9 +16,45 @@ namespace beautyCenterSystem.data.Repositories
         public UC_FinancialMain()
         {
             InitializeComponent();
+            ApplyFinancialPermissions();
 
         }
 
+        private void ApplyFinancialPermissions()
+        {
+            // 1. إدارة الخزينة -> btnManageSafes
+            btnManageSafes.Enabled = PermissionManager.Can("AccessSafeManagement");
+            StyleIfDisabled(btnManageSafes);
+
+            // 2. المصروفات -> btnExpenses
+            btnExpenses.Enabled = PermissionManager.Can("AccessExpenses");
+            StyleIfDisabled(btnExpenses);
+
+            // 3. المشتريات -> btnPurchases
+            btnPurchases.Enabled = PermissionManager.Can("AccessPurchases");
+            StyleIfDisabled(btnPurchases);
+
+            // 4. التقارير المالية -> btnFinReports
+            btnFinReports.Enabled = PermissionManager.Can("AccessFinancialReports");
+            StyleIfDisabled(btnFinReports);
+        }
+
+        // دالة لجعل الزر المعطل يبدو احترافياً وغير قابل للتفاعل بصرياً
+        private void StyleIfDisabled(Button btn)
+        {
+            if (!btn.Enabled)
+            {
+                btn.BackColor = Color.FromArgb(235, 235, 235); // رمادي فاتح جداً
+                btn.ForeColor = Color.Silver;                 // نص باهت
+                btn.Cursor = Cursors.No;                      // تغيير المؤشر لعلامة "ممنوع"
+
+                // إذا كنت تستخدم FontAwesomeSharp
+                if (btn is FontAwesome.Sharp.IconButton iconBtn)
+                {
+                    iconBtn.IconColor = Color.Silver;
+                }
+            }
+        }
         private void btnManageSafes_Click(object sender, EventArgs e)
         {
 

@@ -68,5 +68,12 @@ namespace beautyCenterSystem.Data.Repositories
                 return rows > 0;
             }
         }
+        public async Task<IEnumerable<Material>> GetOutOfStockMaterialsAsync()
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                return await conn.QueryAsync<Material>("SELECT * FROM Materials WHERE IsAvailable = 0");
+            }
+        }
     }
 }

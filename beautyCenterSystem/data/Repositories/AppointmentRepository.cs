@@ -65,13 +65,15 @@ namespace beautyCenterSystem.Data.Repositories
         public async Task<IEnumerable<Appointment>> GetByDateAsync(DateTime date)
         {
             using var db = _dbFactory.CreateConnection();
+            // استخدم LEFT JOIN لضمان جلب الحجز حتى لو حدث خطأ في ربط العميلة
             string sql = @"SELECT A.*, C.CustomerName 
-                           FROM Appointments A 
-                           JOIN Customers C ON A.CustomerID = C.CustomerID 
-                           WHERE CAST(A.AppointmentDate AS DATE) = CAST(@TargetDate AS DATE)
-                           ORDER BY A.AppointmentDate ASC";
+                   FROM Appointments A 
+                   LEFT JOIN Customers C ON A.CustomerID = C.CustomerID 
+                   WHERE CAST(A.AppointmentDate AS DATE) = CAST(@TargetDate AS DATE)
+                   ORDER BY A.AppointmentDate ASC";
 
-            return await db.QueryAsync<Appointment>(sql, new { TargetDate = date });
+            var result = await db.QueryAsync<Appointment>(sql, new { TargetDate = date });
+            return result ?? Enumerable.Empty<Appointment>(); // ضمان عدم إرجاع Null أبداً
         }
 
         // 3. تغيير حالة الحجز (مثلاً من Pending إلى Completed أو Cancelled)
@@ -265,6 +267,75 @@ namespace beautyCenterSystem.Data.Repositories
         throw;
     }
 }
+        public async Task<(int completed, string topService, int avgTime)> GetTodayDashboardKPIsAsync()
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                string sql = @"
+            -- 1. المكتملة اليوم
+            SELECT COUNT(*) FROM Appointments WHERE Status = 'Completed' AND CAST(AppointmentDate AS DATE) = CAST(GETDATE() AS DATE);
+
+            -- 2. الخدمة الأكثر طلباً اليوم
+            SELECT TOP 1 S.ServiceName
+            FROM AppointmentDetails AD
+            JOIN Services S ON AD.ServiceID = S.ServiceID
+            JOIN Appointments A ON AD.AppointmentID = A.AppointmentID
+            WHERE CAST(A.AppointmentDate AS DATE) = CAST(GETDATE() AS DATE)
+            GROUP BY S.ServiceName ORDER BY COUNT(*) DESC;
+
+            -- 3. متوسط وقت الخدمات المكتملة اليوم
+            SELECT ISNULL(AVG(S.DurationMinutes), 0)
+            FROM AppointmentDetails AD
+            JOIN Services S ON AD.ServiceID = S.ServiceID
+            JOIN Appointments A ON AD.AppointmentID = A.AppointmentID
+            WHERE A.Status = 'Completed' AND CAST(A.AppointmentDate AS DATE) = CAST(GETDATE() AS DATE);";
+
+                using (var multi = await conn.QueryMultipleAsync(sql))
+                {
+                    var completed = await multi.ReadFirstAsync<int>();
+                    var topService = await multi.ReadFirstOrDefaultAsync<string>() ?? "لا يوجد";
+                    var avgTime = await multi.ReadFirstAsync<int>();
+                    return (completed, topService, avgTime);
+                }
+            }
+        }
+        public async Task<IEnumerable<dynamic>> GetRoomsStatusAsync()
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                string sql = @"
+            SELECT 
+                R.RoomID, 
+                R.RoomName,
+                ActiveApp.AppointmentStatus,
+                ActiveApp.CustomerName,
+                ActiveApp.ServiceName,
+                ActiveApp.StartTime,
+                ActiveApp.DurationMinutes
+            FROM Rooms R
+            OUTER APPLY (
+                SELECT TOP 1 
+                    A.Status as AppointmentStatus, 
+                    C.CustomerName, 
+                    S.ServiceName, 
+                    A.AppointmentDate as StartTime, 
+                    S.DurationMinutes
+                FROM AppointmentDetails AD
+                JOIN Appointments A ON AD.AppointmentID = A.AppointmentID
+                JOIN Services S ON AD.ServiceID = S.ServiceID
+                JOIN Customers C ON A.CustomerID = C.CustomerID
+                WHERE S.RoomID = R.RoomID 
+                AND A.Status NOT IN ('Pending', 'Cancelled') -- نتجاهل المعلق والملغي فقط
+                AND CAST(A.AppointmentDate AS DATE) = CAST(GETDATE() AS DATE)
+                ORDER BY A.AppointmentDate DESC 
+            ) AS ActiveApp
+            WHERE R.IsActive = 1";
+
+                return await conn.QueryAsync(sql);
+            }
+        }
+
+
 
 
     }

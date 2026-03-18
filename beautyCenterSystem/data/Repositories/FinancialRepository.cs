@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BeautyCenterSystem.Data;
 using beautyCenterSystem;
 using beautyCenterSystem.data.Repositories;
+using beautyCenterSystem.viewsmodels;
 
 namespace BeautyCenterSystem.Data.Repositories
 {
@@ -475,5 +476,66 @@ namespace BeautyCenterSystem.Data.Repositories
 
             return await db.QueryAsync<PurchaseDetail>(sql, new { Id = invoiceId });
         }
+        public async Task<DailySummaryDTO> GetDailyFinancialSummaryAsync()
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                // استعلام شامل يجلب مبيعات الكاش والشبكة، والمصروفات، والمشتريات لليوم الحالي
+                string sql = @"
+            -- 1. المبيعات (كاش وشبكة)
+            SELECT 
+                ISNULL(SUM(CASE WHEN PaymentMethod = 'Cash' THEN AmountPaid ELSE 0 END), 0) as TotalCashIn,
+                ISNULL(SUM(CASE WHEN PaymentMethod = 'Card' THEN AmountPaid ELSE 0 END), 0) as TotalCardIn
+            FROM Payments 
+            WHERE CAST(PaymentDate AS DATE) = CAST(GETDATE() AS DATE);
+
+            -- 2. المصروفات
+            SELECT ISNULL(SUM(Amount), 0) FROM Expenses 
+            WHERE CAST(ExpenseDate AS DATE) = CAST(GETDATE() AS DATE);
+
+            -- 3. المشتريات
+            SELECT ISNULL(SUM(TotalAmount), 0) FROM PurchaseInvoices 
+            WHERE CAST(PurchaseDate AS DATE) = CAST(GETDATE() AS DATE);";
+
+                using (var multi = await conn.QueryMultipleAsync(sql))
+                {
+                    var sales = await multi.ReadFirstAsync<dynamic>();
+                    var expenses = await multi.ReadFirstAsync<decimal>();
+                    var purchases = await multi.ReadFirstAsync<decimal>();
+
+                    return new DailySummaryDTO
+                    {
+                        TotalCashIn = sales.TotalCashIn,
+                        TotalCardIn = sales.TotalCardIn,
+                        TotalExpenses = expenses,
+                        TotalPurchases = purchases
+                    };
+                }
+            }
+        }
+        public async Task<bool> SaveDailyClosureAsync(decimal cashSystem, decimal cardSystem, decimal expenses, decimal purchases, decimal actualCash, int userId, string notes)
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                string sql = @"INSERT INTO DailyClosures 
+                     (TotalCashSystem, TotalCardSystem, TotalExpenses, TotalPurchases, ActualCashHand, Difference, ClosedBy, Notes, ClosureDate)
+                     VALUES 
+                     (@cashSystem, @cardSystem, @expenses, @purchases, @actualCash, (@actualCash - @cashSystem + @expenses + @purchases), @userId, @notes, GETDATE())";
+
+                var result = await conn.ExecuteAsync(sql, new
+                {
+                    cashSystem,
+                    cardSystem,
+                    expenses,
+                    purchases,
+                    actualCash,
+                    userId,
+                    notes
+                });
+
+                return result > 0;
+            }
+        }
     }
+
 }

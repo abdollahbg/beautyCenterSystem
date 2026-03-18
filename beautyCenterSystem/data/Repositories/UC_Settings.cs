@@ -41,8 +41,7 @@ namespace beautyCenterSystem.data.Repositories
 
         private void ApplyPermission()
         {
-            // ملاحظة: افترضت أن أسماء التابات لديك هي tabPage1 و tabPage2 و tabPage3
-            // بناءً على كود Designer الذي أرسلته سابقاً
+           
 
             // 1. التحقق من صلاحية "هوية المركز"
             if (!PermissionManager.Can("AccessCenterIdentity"))

@@ -48,16 +48,11 @@ namespace beautyCenterSystem
             btnInvoices.Visible = PermissionManager.Can("AccessFinancials") ||
                                   PermissionManager.Can("AccessFinancialReports");
 
-            // 3. زر المصروفات والمشتريات (إذا كانت أزرار منفصلة لديك)
-            // btnExpenses.Visible = PermissionManager.Can("AccessExpenses");
-            // btnPurchases.Visible = PermissionManager.Can("AccessPurchases");
-
+        
             // 4. زر المواد والمخزون
             btnMaterials.Visible = PermissionManager.Can("AccessPurchases");
 
-            // 5. إدارة الخزينة
-            // btnSafes.Visible = PermissionManager.Can("AccessSafeManagement");
-
+           
             // ملحوظة: أزرار العميلات والمواعيد والخدمات تترك مرئية للموظفين (Staff) عادةً
             btnCustomers.Visible = true;
             btnAppointments.Visible = true;
@@ -116,9 +111,10 @@ namespace beautyCenterSystem
 
         #region Button Click Events
 
-        private void btnHome_Click(object sender, EventArgs e)
+        private async void btnHome_Click(object sender, EventArgs e)
         {
-            HighlightButton(sender);
+            if (await ShowScreen(new UC_Home()))
+                HighlightButton(sender);
         }
 
         private async void btnAppointments_Click(object sender, EventArgs e)
