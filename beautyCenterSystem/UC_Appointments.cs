@@ -330,7 +330,12 @@ namespace beautyCenterSystem
 
         private async void btnCompleteAndPay_Click(object sender, EventArgs e)
         {
-            if (dgvAppointments.SelectedRows.Count == 0) return;
+            // 1. التأكد من اختيار حجز
+            if (dgvAppointments.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("يرجى اختيار الحجز المراد إتمامه من الجدول أولاً.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             try
             {
@@ -340,35 +345,114 @@ namespace beautyCenterSystem
                 decimal totalAmount = Convert.ToDecimal(selectedRow.Cells["TotalPrice"].Value);
                 string currentStatus = selectedRow.Cells["Status"].Value.ToString();
 
-                if (currentStatus == "Completed") return;
+                if (currentStatus == "Completed")
+                {
+                    MessageBox.Show("هذا الحجز مكتمل ومدفوع بالفعل.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
 
+                // 2. فتح فورم الدفع
                 using (var payForm = new CheckoutForm(customerName, totalAmount))
                 {
                     if (payForm.ShowDialog() == DialogResult.OK)
                     {
-                        bool isSuccess = await _appointmentRepo.CompleteAndPayAsync(appId, totalAmount, payForm.AmountPaid, payForm.Discount, payForm.PaymentMethod, CurrentSession.UserID);
+                        // 3. تحديث البيانات في قاعدة البيانات
+                        bool isSuccess = await _appointmentRepo.CompleteAndPayAsync(
+                            appId, totalAmount, payForm.AmountPaid, payForm.Discount,
+                            payForm.PaymentMethod, CurrentSession.UserID);
 
                         if (isSuccess)
                         {
-                            await LoadAppointments();
-                            // منطق الطباعة (مختصر للحفاظ على حجم الكود)
-                            try { /* ... استدعاء ReceiptPrinter كما في كودك ... */ } catch { }
+                            await LoadAppointments(); // تحديث الجدول
+
+                            // 4. عملية الطباعة
+                            try
+                            {
+                                var settingsRepo = new SettingsRepository(new DbConnectionFactory());
+                                var settings = await settingsRepo.GetSettingsAsync();
+                                var services = await _appointmentRepo.GetAppointmentServicesAsync(appId);
+
+                                ReceiptPrinter printer = new ReceiptPrinter
+                                {
+                                    // بيانات المركز من الإعدادات
+                                    CenterName = settings.CenterName ?? "صالون التجميل الراقي",
+                                    Phone = settings.Phone ?? "",
+                                    Policy = settings.Note ?? "الرجاء مراجعة الفاتورة قبل المغادرة.",
+                                    Logo = settings.GetLogoImage(),
+                                    FacebookHandle = settings.Facebook,
+                                    InstagramHandle = settings.Instagram,
+                                    WhatsAppHandle = settings.WhatsApp,
+
+                                    // بيانات الفاتورة
+                                    InvoiceNumber = appId,
+                                    CustomerName = customerName,
+                                    TotalAmount = totalAmount,
+                                    Discount = payForm.Discount,
+                                    NetAmount = payForm.AmountPaid,
+                                    CashierName = CurrentSession.Username,
+
+                                    // تحويل الخدمات إلى InvoiceItem
+                                    Items = services.Select(s => new InvoiceItem
+                                    {
+                                        ServiceName = s.ServiceName,
+                                        Price = s.Price
+                                    }).ToList()
+                                };
+
+                                // طباعة مباشرة بدون معاينة
+                                printer.PrintReceipt(showPreview: false);
+                            }
+                            catch (Exception printEx)
+                            {
+                                MessageBox.Show($"فشلت الطباعة: {printEx.Message}", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+
+                            MessageBox.Show($"تم إتمام العملية بنجاح للعميلة {customerName}.", "نجاح", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            catch (Exception ex) { MessageBox.Show($"خطأ: {ex.Message}"); }
         }
 
         private async void btnPrintInvoice_Click(object sender, EventArgs e)
         {
-            if (dgvAppointments.SelectedRows.Count == 0) return;
+            if (dgvAppointments.CurrentRow == null) return;
+
             try
             {
-                // ... منطق الطباعة الخاص بك ...
-                MessageBox.Show("تم إرسال الفاتورة إلى الطابعة.", "طباعة", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                int appId = Convert.ToInt32(dgvAppointments.CurrentRow.Cells["AppointmentID"].Value);
+
+                // جلب البيانات اللازمة
+                var settingsRepo = new SettingsRepository(new DbConnectionFactory());
+                var settings = await settingsRepo.GetSettingsAsync();
+                var services = await _appointmentRepo.GetAppointmentServicesAsync(appId);
+
+                var row = dgvAppointments.CurrentRow;
+
+                ReceiptPrinter printer = new ReceiptPrinter
+                {
+                    CenterName = settings.CenterName,
+                    Phone = settings.Phone,
+                    Logo = settings.GetLogoImage(),
+                    Policy = settings.Note + "\n \n طباعه فقط",
+
+                    FacebookHandle = settings.Facebook,
+                    InstagramHandle = settings.Instagram,
+                    WhatsAppHandle = settings.WhatsApp,
+
+                    InvoiceNumber = appId,
+                    CustomerName = row.Cells["CustomerName"].Value.ToString(),
+                    TotalAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value),
+                    NetAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value), // افترضنا هنا الصافي هو الإجمالي لإعادة الطباعة
+                    CashierName = CurrentSession.Username,
+                    Items = services.Select(s => new InvoiceItem { ServiceName = s.ServiceName, Price = s.Price }).ToList()
+                };
+
+                // هنا نستخدم المعاينة قبل الطباعة
+                printer.PrintReceipt(showPreview: false);
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            catch (Exception ex) { MessageBox.Show("خطأ في الطباعة: " + ex.Message); }
         }
     }
 }

@@ -85,6 +85,7 @@
             btnLogout.TextAlign = ContentAlignment.MiddleRight;
             btnLogout.TextImageRelation = TextImageRelation.ImageBeforeText;
             btnLogout.UseVisualStyleBackColor = false;
+            btnLogout.Click += btnLogout_Click;
             // 
             // btnSettings
             // 

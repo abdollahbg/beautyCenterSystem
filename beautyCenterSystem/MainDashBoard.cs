@@ -48,11 +48,11 @@ namespace beautyCenterSystem
             btnInvoices.Visible = PermissionManager.Can("AccessFinancials") ||
                                   PermissionManager.Can("AccessFinancialReports");
 
-        
+
             // 4. زر المواد والمخزون
             btnMaterials.Visible = PermissionManager.Can("AccessPurchases");
 
-           
+
             // ملحوظة: أزرار العميلات والمواعيد والخدمات تترك مرئية للموظفين (Staff) عادةً
             btnCustomers.Visible = true;
             btnAppointments.Visible = true;
@@ -190,7 +190,8 @@ namespace beautyCenterSystem
 
                     try
                     {
-                        await Task.Run(async () => {
+                        await Task.Run(async () =>
+                        {
                             await _backupRepo.CreateBackupAsync(settings.AutoBackupPath);
                             await Task.Delay(1000); // تأخير بسيط لضمان اكتمال العملية
                         });
@@ -254,5 +255,30 @@ namespace beautyCenterSystem
         }
 
         #endregion
+
+        private void btnLogout_Click(object sender, EventArgs e)
+        {
+            // 1. تأكيد رغبة المستخدم في تسجيل الخروج
+            var result = MessageBox.Show("هل أنت متأكد من رغبتك في تسجيل الخروج؟", "تأكيد",
+                                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                // 2. تصفير بيانات الجلسة الحالية باستخدام الدالة التي برمجتها أنت
+                CurrentSession.Logout();
+
+                // 3. فتح شاشة تسجيل الدخول من جديد
+                LoginForm login = new LoginForm();
+                login.Show();
+
+                // 4. إغلاق الشاشة الرئيسية الحالية (MainForm)
+                // ملاحظة: إذا كانت هذه هي الشاشة الرئيسية، استخدم this.Hide() 
+                // لضمان عدم إغلاق التطبيق بالكامل إذا كان الـ Main هو الـ Entry point
+                this.Hide();
+
+                // أو إذا أردت إغلاقها تماماً وكان لديك Logic آخر في Program.cs استخدم:
+                // this.Close();
+            }
+        }
     }
 }
