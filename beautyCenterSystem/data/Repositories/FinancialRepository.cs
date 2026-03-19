@@ -480,22 +480,26 @@ namespace BeautyCenterSystem.Data.Repositories
         {
             using (var conn = _dbFactory.CreateConnection())
             {
-                // استعلام شامل يجلب مبيعات الكاش والشبكة، والمصروفات، والمشتريات لليوم الحالي
                 string sql = @"
-            -- 1. المبيعات (كاش وشبكة)
-            SELECT 
-                ISNULL(SUM(CASE WHEN PaymentMethod = 'Cash' THEN AmountPaid ELSE 0 END), 0) as TotalCashIn,
-                ISNULL(SUM(CASE WHEN PaymentMethod = 'Card' THEN AmountPaid ELSE 0 END), 0) as TotalCardIn
-            FROM Payments 
-            WHERE CAST(PaymentDate AS DATE) = CAST(GETDATE() AS DATE);
+        -- 0. تحديد خزنة الكاش ديناميكياً من جدول الربط
+        DECLARE @CashSafeId INT = (SELECT TOP 1 SafeID FROM PaymentMapping WHERE MethodName = 'Cash');
 
-            -- 2. المصروفات
-            SELECT ISNULL(SUM(Amount), 0) FROM Expenses 
-            WHERE CAST(ExpenseDate AS DATE) = CAST(GETDATE() AS DATE);
+        -- 1. المبيعات (نأخذ الكاش الذي دخل الخزنة المحددة، والشبكة بشكل عام)
+        SELECT 
+            ISNULL(SUM(CASE WHEN SafeID = @CashSafeId THEN AmountPaid ELSE 0 END), 0) as TotalCashIn,
+            ISNULL(SUM(CASE WHEN PaymentMethod = 'Card' THEN AmountPaid ELSE 0 END), 0) as TotalCardIn
+        FROM Payments 
+        WHERE CAST(PaymentDate AS DATE) = CAST(GETDATE() AS DATE);
 
-            -- 3. المشتريات
-            SELECT ISNULL(SUM(TotalAmount), 0) FROM PurchaseInvoices 
-            WHERE CAST(PurchaseDate AS DATE) = CAST(GETDATE() AS DATE);";
+        -- 2. المصروفات (التي خرجت من خزنة الكاش حصراً)
+        SELECT ISNULL(SUM(Amount), 0) FROM Expenses 
+        WHERE CAST(ExpenseDate AS DATE) = CAST(GETDATE() AS DATE)
+          AND PaidFromSafeID = @CashSafeId;
+
+        -- 3. المشتريات (التي خُصمت من خزنة الكاش حصراً)
+        SELECT ISNULL(SUM(TotalAmount), 0) FROM PurchaseInvoices 
+        WHERE CAST(PurchaseDate AS DATE) = CAST(GETDATE() AS DATE)
+          AND PaidFromSafeID = @CashSafeId;";
 
                 using (var multi = await conn.QueryMultipleAsync(sql))
                 {
@@ -505,10 +509,11 @@ namespace BeautyCenterSystem.Data.Repositories
 
                     return new DailySummaryDTO
                     {
-                        TotalCashIn = sales.TotalCashIn,
-                        TotalCardIn = sales.TotalCardIn,
+                        TotalCashIn = (decimal)sales.TotalCashIn,
+                        TotalCardIn = (decimal)sales.TotalCardIn,
                         TotalExpenses = expenses,
                         TotalPurchases = purchases
+                        // ملاحظة: ExpectedCash سيتم حسابها تلقائياً داخل الـ DTO
                     };
                 }
             }
@@ -517,10 +522,14 @@ namespace BeautyCenterSystem.Data.Repositories
         {
             using (var conn = _dbFactory.CreateConnection())
             {
+                // المعادلة: (النقد الفعلي) - (النقد المتوقع دفترياً)
+                // النقد المتوقع دفترياً = (إجمالي الكاش الداخل - المصروفات - المشتريات)
                 string sql = @"INSERT INTO DailyClosures 
                      (TotalCashSystem, TotalCardSystem, TotalExpenses, TotalPurchases, ActualCashHand, Difference, ClosedBy, Notes, ClosureDate)
                      VALUES 
-                     (@cashSystem, @cardSystem, @expenses, @purchases, @actualCash, (@actualCash - @cashSystem + @expenses + @purchases), @userId, @notes, GETDATE())";
+                     (@cashSystem, @cardSystem, @expenses, @purchases, @actualCash, 
+                      (@actualCash - (@cashSystem - (@expenses + @purchases))), 
+                      @userId, @notes, GETDATE())";
 
                 var result = await conn.ExecuteAsync(sql, new
                 {

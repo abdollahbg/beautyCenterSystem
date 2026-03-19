@@ -1,5 +1,7 @@
-﻿using BeautyCenterSystem.Data;
+﻿using beautyCenterSystem.helpers;
+using BeautyCenterSystem.Data;
 using BeautyCenterSystem.Data.Repositories;
+using BeautyCenterSystem.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -388,6 +390,61 @@ namespace beautyCenterSystem.data.Repositories
                 dgvPurchases.SelectionChanged += dgvPurchases_SelectionChanged;
             }
             catch (Exception ex) { MessageBox.Show("خطأ أثناء الفلترة: " + ex.Message); }
+        }
+
+        private async void btnPrintInvoice_Click(object sender, EventArgs e)
+        {
+            if (_currentInvoiceId <= 0)
+            {
+                MessageBox.Show("يرجى تحديد فاتورة من الجدول أولاً لطباعتها.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                Cursor = Cursors.WaitCursor;
+
+                // 1. جلب بيانات الفاتورة المحددة
+                var currentInvoice = _allDayPurchases.FirstOrDefault(i => i.InvoiceID == _currentInvoiceId);
+                if (currentInvoice == null) return;
+
+                // 2. جلب تفاصيل المواد داخل هذه الفاتورة
+                var details = await _financialRepo.GetPurchaseDetailsAsync(_currentInvoiceId);
+                if (!details.Any())
+                {
+                    MessageBox.Show("هذه الفاتورة فارغة ولا تحتوي على مواد لطباعتها.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 3. جلب بيانات المركز الحقيقية من قاعدة البيانات باستخدام SettingsRepository
+                var settingsRepo = new SettingsRepository(new DbConnectionFactory());
+                CenterSettings center = await settingsRepo.GetSettingsAsync();
+
+                // 4. تجهيز مسار حفظ ملف الـ PDF
+                string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "فواتير المشتريات");
+                if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+                string filePath = Path.Combine(folderPath, $"فاتورة_مشتريات_{_currentInvoiceId}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+
+                // 5. استدعاء مولد الفاتورة وتمرير كل البيانات الحقيقية له
+                var generator = new PurchaseInvoiceGenerator();
+                generator.Generate(filePath, center, currentInvoice, details);
+
+                // 6. فتح الفاتورة تلقائياً للمستخدم لطباعتها أو حفظها
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"حدث خطأ أثناء إعداد الطباعة: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
+            }
         }
     }
 }

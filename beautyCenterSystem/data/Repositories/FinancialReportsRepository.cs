@@ -103,5 +103,17 @@ namespace BeautyCenterSystem.Data.Repositories
             using var db = _dbFactory.CreateConnection();
             return await db.QueryAsync("SELECT SafeName, Balance FROM vw_Financial_SafesSummary");
         }
+        // 8. جلب تقارير الإغلاق اليومي
+        public async Task<IEnumerable<dynamic>> GetDailyClosuresReportsAsync(DateTime from, DateTime to)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"
+                SELECT D.*, U.Username AS ClosedByName 
+                FROM DailyClosures D
+                LEFT JOIN Users U ON D.ClosedBy = U.UserID
+                WHERE D.ClosureDate BETWEEN @From AND @To
+                ORDER BY D.ClosureDate DESC";
+            return await db.QueryAsync(sql, new { From = from, To = to });
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing; // ضروري جداً للألوان
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -11,6 +12,7 @@ using BeautyCenterSystem.Data;
 using BeautyCenterSystem.Data.Repositories;
 using CartesianChart = LiveCharts.WinForms.CartesianChart;
 using System.Configuration;
+using beautyCenterSystem.helpers;
 
 namespace beautyCenterSystem.data.Repositories
 {
@@ -31,18 +33,13 @@ namespace beautyCenterSystem.data.Repositories
 
             // تطبيق الثيم العام
             AppTheme.Apply(this);
-            // --- تخصيص ألوان المؤشرات المالية فقط ---
 
-            // 1. إجمالي الإيرادات (أخضر احترافي)
+            // -----------
+
+            // --- تخصيص ألوان المؤشرات المالية ---
             lblTotalRevenue.ForeColor = Color.FromArgb(39, 174, 96);
-
-            // 2. إجمالي المصروفات (أحمر هادئ)
             lblTotalExpenses.ForeColor = Color.FromArgb(192, 57, 43);
-
-            // 3. إجمالي المشتريات (لون ذهبي/برتقالي لتمييزها عن المصاريف العامة)
             lblTotalPurchases.ForeColor = Color.FromArgb(211, 84, 0);
-
-            // 4. صافي الربح (لون افتراضي رمادي غامق - سيتغير لاحقاً عند جلب البيانات)
             lblNetProfit.ForeColor = Color.FromArgb(44, 62, 80);
 
             InitializeCustomCharts();
@@ -100,30 +97,37 @@ namespace beautyCenterSystem.data.Repositories
 
                 decimal netProfit = dashboard.TotalRevenue - dashboard.TotalExpenses - dashboard.TotalPurchases;
                 lblNetProfit.Text = netProfit.ToString("N0");
-
-                lblNetProfit.ForeColor = netProfit >= 0 ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+                lblNetProfit.ForeColor = netProfit >= 0 ? Color.Green : Color.Red;
 
                 // ب. تحديث رسم وجدول الغرف
                 var roomData = (await _reportsRepo.GetRevenueByRoomAsync(from, to)).ToList();
                 UpdateRoomsChart(roomData);
-                BindRoomsGrid(roomData); // استدعاء دالة الربط اليدوي
+                BindRoomsGrid(roomData);
 
                 // ج. تحديث رسم وجدول الخدمات
                 var serviceData = (await _reportsRepo.GetTopServicesAsync(from, to)).ToList();
                 UpdateServicesChart(serviceData);
-                BindServicesGrid(serviceData); // استدعاء دالة الربط اليدوي
+                BindServicesGrid(serviceData);
 
-                // أ. تفاصيل المصروفات
+                // د. تفاصيل المصروفات
                 var expensesData = await _reportsRepo.GetExpenseReportsAsync(from, to);
                 BindExpensesGrid(expensesData.ToList());
 
-                // ب. تفاصيل المشتريات
+                // هـ. تفاصيل المشتريات
                 var purchasesData = await _reportsRepo.GetPurchaseReportsAsync(from, to);
                 BindPurchasesGrid(purchasesData.ToList());
 
-                // ج. أرصدة الخزائن
+                // و. أرصدة الخزائن
                 var safesData = await _reportsRepo.GetCurrentSafesStatusAsync();
                 BindSafesGrid(safesData.ToList());
+
+                // ز. تفاصيل مبيعات الخدمات (الإضافة الجديدة)
+                var salesData = await _reportsRepo.GetRevenueReportsAsync(from, to);
+                BindSalesGrid(salesData.ToList());
+
+                // ح. تقارير الإغلاق اليومي (الإضافة الجديدة)
+                var closingData = await _reportsRepo.GetDailyClosuresReportsAsync(from, to);
+                BindDailyClosingGrid(closingData.ToList());
             }
             catch (Exception ex)
             {
@@ -159,58 +163,92 @@ namespace beautyCenterSystem.data.Repositories
             });
         }
 
-        // --- دالة ربط جدول الغرف لمنع التكرار والتعريب ---
+        // --- دوال ربط الجداول (Grids) ---
+
         private void BindRoomsGrid(object data)
         {
             dgvRoomsSummary.DataSource = null;
             dgvRoomsSummary.Columns.Clear();
-            dgvRoomsSummary.AutoGenerateColumns = false; // منع التكرار الإنجليزي
-
-            dgvRoomsSummary.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "RoomName", // يجب أن يطابق اسم الخاصية في الـ Repository
-                HeaderText = "اسم الغرفة",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
-
-            dgvRoomsSummary.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "TotalRevenue",
-                HeaderText = "إجمالي الإيرادات",
-                DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" }
-            });
-
+            dgvRoomsSummary.AutoGenerateColumns = false;
+            dgvRoomsSummary.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "RoomName", HeaderText = "اسم الغرفة", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            dgvRoomsSummary.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "TotalRevenue", HeaderText = "إجمالي الإيرادات", DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
             dgvRoomsSummary.DataSource = data;
         }
 
-        // --- دالة ربط جدول الخدمات لمنع التكرار والتعريب ---
         private void BindServicesGrid(object data)
         {
             dgvServicesSummary.DataSource = null;
             dgvServicesSummary.Columns.Clear();
-            dgvServicesSummary.AutoGenerateColumns = false; // منع التكرار الإنجليزي
-
-            dgvServicesSummary.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "ServiceName",
-                HeaderText = "اسم الخدمة",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
-
-            dgvServicesSummary.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "TotalRevenue",
-                HeaderText = "إجمالي الإيرادات",
-                DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" }
-            });
-
-            dgvServicesSummary.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "TimesRequested", // تأكد من مطابقة الاسم البرمجي (TimesRequested)
-                HeaderText = "عدد الطلبات"
-            });
-
+            dgvServicesSummary.AutoGenerateColumns = false;
+            dgvServicesSummary.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ServiceName", HeaderText = "اسم الخدمة", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            dgvServicesSummary.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "TotalRevenue", HeaderText = "إجمالي الإيرادات", DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
+            dgvServicesSummary.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "TimesRequested", HeaderText = "عدد الطلبات" });
             dgvServicesSummary.DataSource = data;
+        }
+
+        private void BindExpensesGrid(object data)
+        {
+            dgvExpensesDetails.DataSource = null;
+            dgvExpensesDetails.Columns.Clear();
+            dgvExpensesDetails.AutoGenerateColumns = false;
+            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ExpenseName", HeaderText = "بيان المصروف", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Category", HeaderText = "التصنيف" });
+            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Amount", HeaderText = "المبلغ", DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
+            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ExpenseDate", HeaderText = "التاريخ" });
+            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "PaidFromSafe", HeaderText = "دُفع من" });
+            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "IssuedBy", HeaderText = "بواسطة" });
+            dgvExpensesDetails.DataSource = data;
+        }
+
+        private void BindPurchasesGrid(object data)
+        {
+            dgvPurchasesDetails.DataSource = null;
+            dgvPurchasesDetails.Columns.Clear();
+            dgvPurchasesDetails.AutoGenerateColumns = false;
+            dgvPurchasesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "SupplierName", HeaderText = "المورد", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            dgvPurchasesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "TotalAmount", HeaderText = "الإجمالي", DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
+            dgvPurchasesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "PurchaseDate", HeaderText = "التاريخ" });
+            dgvPurchasesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "PaidFromSafe", HeaderText = "دُفع من" });
+            dgvPurchasesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "IssuedBy", HeaderText = "بواسطة" });
+            dgvPurchasesDetails.DataSource = data;
+        }
+
+        private void BindSafesGrid(object data)
+        {
+            dgvSafesBalances.DataSource = null;
+            dgvSafesBalances.Columns.Clear();
+            dgvSafesBalances.AutoGenerateColumns = false;
+            dgvSafesBalances.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "SafeName", HeaderText = "اسم الخزنة", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            dgvSafesBalances.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Balance", HeaderText = "الرصيد الحالي", DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
+            dgvSafesBalances.DataSource = data;
+        }
+
+        private void BindSalesGrid(object data)
+        {
+            dgvSalesDetails.DataSource = null;
+            dgvSalesDetails.Columns.Clear();
+            dgvSalesDetails.AutoGenerateColumns = false;
+            dgvSalesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CustomerName", HeaderText = "اسم العميلة", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            dgvSalesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "AmountPaid", HeaderText = "المبلغ المدفوع", DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
+            dgvSalesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Discount", HeaderText = "الخصم" });
+            dgvSalesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "PaymentMethod", HeaderText = "طريقة الدفع" });
+            dgvSalesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "PaymentDate", HeaderText = "التاريخ" });
+            dgvSalesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "SafeName", HeaderText = "الخزنة" });
+            dgvSalesDetails.DataSource = data;
+        }
+
+        private void BindDailyClosingGrid(object data)
+        {
+            dgvDailyClosing.DataSource = null;
+            dgvDailyClosing.Columns.Clear();
+            dgvDailyClosing.AutoGenerateColumns = false;
+            dgvDailyClosing.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ClosureDate", HeaderText = "تاريخ الإغلاق", DefaultCellStyle = new DataGridViewCellStyle { Format = "yyyy-MM-dd HH:mm" } });
+            dgvDailyClosing.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "TotalCashSystem", HeaderText = "كاش (نظام)", DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
+            dgvDailyClosing.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "TotalCardSystem", HeaderText = "بطاقة (نظام)", DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
+            dgvDailyClosing.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ActualCashHand", HeaderText = "العد الفعلي", DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
+            dgvDailyClosing.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Difference", HeaderText = "الفرق", DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
+            dgvDailyClosing.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Notes", HeaderText = "ملاحظات", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            dgvDailyClosing.DataSource = data;
         }
 
         // حدث زر التحديث
@@ -220,51 +258,60 @@ namespace beautyCenterSystem.data.Repositories
             await RefreshDashboardData();
             btnRefresh.Enabled = true;
         }
-        // --- تاب تفاصيل المصروفات ---
-        private void BindExpensesGrid(object data)
+
+        private async void btnPrint_Click(object sender, EventArgs e)
         {
-            dgvExpensesDetails.DataSource = null;
-            dgvExpensesDetails.Columns.Clear();
-            dgvExpensesDetails.AutoGenerateColumns = false;
+            try
+            {
+                // 1. إظهار مؤشر الانتظار (اختياري لراحة المستخدم)
+                this.Cursor = Cursors.WaitCursor;
+                btnRefresh.Enabled = false; // تعطيل أزرار التحكم مؤقتاً
 
-            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ExpenseName", HeaderText = "بيان المصروف", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
-            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Category", HeaderText = "التصنيف" });
-            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Amount", HeaderText = "المبلغ" });
-            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ExpenseDate", HeaderText = "التاريخ" });
-            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "PaidFromSafe", HeaderText = "دُفع من" });
-            dgvExpensesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "IssuedBy", HeaderText = "بواسطة" });
+                // 2. جلب إعدادات المركز (الاسم، الهاتف، اللوغو)
+                var settingsRepo = new SettingsRepository(new DbConnectionFactory());
+                var centerSettings = await settingsRepo.GetSettingsAsync();
 
-            dgvExpensesDetails.DataSource = data;
+                // 3. تحديد الفترة الزمنية المختارة في الواجهة
+                DateTime fromDate = dtpFrom.Value.Date;
+                DateTime toDate = dtpTo.Value.Date.AddDays(1).AddSeconds(-1);
+
+                // 4. جلب البيانات المالية من الـ Repository (نفس البيانات المعروضة في الجداول)
+                var dashboardData = await _reportsRepo.GetFinancialDashboardAsync(fromDate, toDate);
+                var roomsData = (await _reportsRepo.GetRevenueByRoomAsync(fromDate, toDate)).ToList();
+                var servicesData = (await _reportsRepo.GetTopServicesAsync(fromDate, toDate)).ToList();
+
+                // 5. تجهيز مسار حفظ ملف الـ PDF (في المجلد المؤقت للنظام)
+                string fileName = $"Financial_Report_{DateTime.Now:yyyy_MM_dd___HHmm}.pdf";
+                string filePath = Path.Combine(Path.GetTempPath(), fileName);
+
+                // 6. استدعاء المولد لتوليد الملف
+                var reportGenerator = new FinancialReportGenerator();
+                reportGenerator.Generate(
+                    filePath,
+                    centerSettings,
+                    dashboardData,
+                    roomsData,
+                    servicesData,
+                    fromDate,
+                    toDate
+                );
+
+                // 7. فتح الملف للمعاينة (سيفتح في المتصفح أو قارئ PDF الافتراضي)
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(filePath)
+                {
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"حدث خطأ أثناء إعداد التقرير: {ex.Message}", "خطأ في الطباعة", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // 8. إعادة المؤشر لحالته الطبيعية
+                this.Cursor = Cursors.Default;
+                btnRefresh.Enabled = true;
+            }
         }
-
-        // --- تاب تفاصيل المشتريات ---
-        private void BindPurchasesGrid(object data)
-        {
-            dgvPurchasesDetails.DataSource = null;
-            dgvPurchasesDetails.Columns.Clear();
-            dgvPurchasesDetails.AutoGenerateColumns = false;
-
-            dgvPurchasesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "SupplierName", HeaderText = "المورد", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
-            dgvPurchasesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "TotalAmount", HeaderText = "الإجمالي" });
-            dgvPurchasesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "PurchaseDate", HeaderText = "التاريخ" });
-            dgvPurchasesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "PaidFromSafe", HeaderText = "دُفع من" });
-            dgvPurchasesDetails.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "IssuedBy", HeaderText = "بواسطة" });
-
-            dgvPurchasesDetails.DataSource = data;
-        }
-
-        // --- تاب أرصدة الخزائن ---
-        private void BindSafesGrid(object data)
-        {
-            dgvSafesBalances.DataSource = null;
-            dgvSafesBalances.Columns.Clear();
-            dgvSafesBalances.AutoGenerateColumns = false;
-
-            dgvSafesBalances.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "SafeName", HeaderText = "اسم الخزنة", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
-            dgvSafesBalances.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Balance", HeaderText = "الرصيد الحالي" });
-
-            dgvSafesBalances.DataSource = data;
-        }
-
     }
 }

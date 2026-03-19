@@ -142,6 +142,23 @@ namespace beautyCenterSystem
                     dgv.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                     dgv.RowTemplate.Height = 35;
                 }
+                // --- [تحديث] تلوين الـ MaterialTabSelector وإظهار شريط التحديد ---
+                // --- [تنسيق الـ MaterialTabSelector] ---
+                if (c is MaterialTabSelector selector)
+                {
+                    // 1. إعداد الألوان (خلفية حمراء وشريط داكن)
+                    var manager = MaterialSkinManager.Instance;
+                    manager.ColorScheme = new ColorScheme(Primary, Charcoal, Charcoal, Charcoal, TextShade.WHITE);
+
+                    // 2. تطبيق خط الثيم (Cairo) - تأكد من استخدام GetFont الخاصة بك
+                    // قمنا بزيادة الحجم لـ 14 ونمط Bold ليظهر بوضوح فوق الأحمر
+                    selector.Font = GetFont(18, FontStyle.Bold);
+                    selector.CharacterCasing = MaterialTabSelector.CustomCharacterCasing.Normal;
+                    selector.Text = selector.Text.ToUpper();
+                    // 3. سطر جوهري: إخبار المكتبة بأننا سنستخدم خطاً مخصصاً
+                    // ملاحظة: بعض إصدارات MaterialSkin تتطلب عمل Invalidate لإعادة الرسم بالخط الجديد
+                    selector.Invalidate();
+                }
 
                 if (c.HasChildren) ApplyToAllChildren(c);
             }

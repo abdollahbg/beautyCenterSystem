@@ -11,5 +11,6 @@ namespace beautyCenterSystem
         public int MaterialID { get; set; }
         public string MaterialName { get; set; }
         public bool IsAvailable { get; set; }
+        public bool IsActive { get; set; } 
     }
 }

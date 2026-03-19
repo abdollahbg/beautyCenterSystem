@@ -100,37 +100,49 @@ namespace beautyCenterSystem.Data.Repositories
             return await db.QueryAsync<Service>(sql, new { AppId = appId });
         }
         // 5. فحص تعارض المواعيد بناءً على الغرف والوقت
-        public async Task<string> CheckConflictAsync(DateTime startTime, int durationMinutes, List<int> serviceIds)
+        public async Task<string> CheckConflictAsync(DateTime startTime, int durationMinutes, List<int> serviceIds, int currentAppId = 0)
         {
             using var db = _dbFactory.CreateConnection();
 
+            // حساب وقت النهاية المتوقع بناءً على مدة الخدمات
             DateTime endTime = startTime.AddMinutes(durationMinutes);
 
-            // تم تعديل SUM(Duration) إلى SUM(DurationMinutes)
             string sql = @"
-        SELECT S.ServiceName + ' في غرفة: ' + CAST(S.RoomID AS VARCHAR)
-        FROM AppointmentDetails AD
+        SELECT TOP 1 S.ServiceName + N' في غرفة: ' + ISNULL(R.RoomName, CAST(S.RoomID AS NVARCHAR(10)))
+  FROM AppointmentDetails AD
         JOIN Appointments A ON AD.AppointmentID = A.AppointmentID
         JOIN Services S ON AD.ServiceID = S.ServiceID
-        WHERE A.Status != 'Cancelled'
-        AND S.ServiceID IN (
-            SELECT ServiceID FROM Services WHERE RoomID IN (
+        LEFT JOIN Rooms R ON S.RoomID = R.RoomID
+        WHERE 
+            -- 1. نفحص فقط المواعيد التي تشغل مكاناً فعلياً الآن أو مستقبلاً
+            A.Status IN ('Pending', 'InProgress') 
+            
+            -- 2. استثناء الحجز الحالي (في حالة التعديل) لعدم حدوث تعارض وهمي
+            AND A.AppointmentID != @CurrentId 
+
+            -- 3. نفحص الغرف المرتبطة بالخدمات المطلوبة فقط
+            AND S.RoomID IN (
                 SELECT RoomID FROM Services WHERE ServiceID IN @SIds
             )
-        )
-        AND (
-            (@Start < DATEADD(minute, (SELECT SUM(DurationMinutes) FROM Services s2 
-                                        JOIN AppointmentDetails ad2 ON s2.ServiceID = ad2.ServiceID 
-                                        WHERE ad2.AppointmentID = A.AppointmentID), A.AppointmentDate))
-            AND (@End > A.AppointmentDate)
-        )
-    ";
 
+            -- 4. منطق تداخل الوقت (تداخل فترتين زمنيتين)
+            AND (
+                (@Start < DATEADD(minute, (
+                    SELECT SUM(s2.DurationMinutes) 
+                    FROM Services s2 
+                    JOIN AppointmentDetails ad2 ON s2.ServiceID = ad2.ServiceID 
+                    WHERE ad2.AppointmentID = A.AppointmentID
+                ), A.AppointmentDate))
+                AND (@End > A.AppointmentDate)
+            )";
+
+            // تنفيذ الاستعلام وجلب أول تعارض يظهر (إن وجد)
             var conflictingService = await db.QueryFirstOrDefaultAsync<string>(sql, new
             {
                 Start = startTime,
                 End = endTime,
-                SIds = serviceIds
+                SIds = serviceIds,
+                CurrentId = currentAppId // سيتم تمريره كـ 0 في الإضافة، أو برقم الحجز في التعديل
             });
 
             return conflictingService;

@@ -46,6 +46,8 @@
             dgvPurchases = new DataGridView();
             splitContainer2 = new SplitContainer();
             dgvPurchaseDetails = new DataGridView();
+            contextMenuStrip1 = new ContextMenuStrip(components);
+            tsmiDeleteDetail = new ToolStripMenuItem();
             lblTotalItem = new Label();
             label8 = new Label();
             label7 = new Label();
@@ -56,8 +58,7 @@
             numQty = new NumericUpDown();
             cmbMaterials = new MaterialSearchableCombo();
             label1 = new Label();
-            contextMenuStrip1 = new ContextMenuStrip(components);
-            tsmiDeleteDetail = new ToolStripMenuItem();
+            btnPrintInvoice = new Button();
             panel1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox1.SuspendLayout();
@@ -71,13 +72,14 @@
             splitContainer2.Panel2.SuspendLayout();
             splitContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvPurchaseDetails).BeginInit();
+            contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numPrice).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numQty).BeginInit();
-            contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
             // 
+            panel1.Controls.Add(btnPrintInvoice);
             panel1.Controls.Add(groupBox2);
             panel1.Controls.Add(groupBox1);
             panel1.Dock = DockStyle.Top;
@@ -309,6 +311,19 @@
             dgvPurchaseDetails.Size = new Size(702, 317);
             dgvPurchaseDetails.TabIndex = 2;
             // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { tsmiDeleteDetail });
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new Size(135, 26);
+            // 
+            // tsmiDeleteDetail
+            // 
+            tsmiDeleteDetail.Name = "tsmiDeleteDetail";
+            tsmiDeleteDetail.Size = new Size(134, 22);
+            tsmiDeleteDetail.Text = "حذف السطر";
+            tsmiDeleteDetail.Click += tsmiDeleteDetail_Click;
+            // 
             // lblTotalItem
             // 
             lblTotalItem.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
@@ -420,18 +435,15 @@
             label1.TabIndex = 2;
             label1.Text = "اجمالي قيمة الفاتورة:";
             // 
-            // contextMenuStrip1
+            // btnPrintInvoice
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { tsmiDeleteDetail });
-            contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(135, 26);
-            // 
-            // tsmiDeleteDetail
-            // 
-            tsmiDeleteDetail.Name = "tsmiDeleteDetail";
-            tsmiDeleteDetail.Size = new Size(134, 22);
-            tsmiDeleteDetail.Text = "حذف السطر";
-            tsmiDeleteDetail.Click += tsmiDeleteDetail_Click;
+            btnPrintInvoice.Location = new Point(3, 11);
+            btnPrintInvoice.Name = "btnPrintInvoice";
+            btnPrintInvoice.Size = new Size(86, 28);
+            btnPrintInvoice.TabIndex = 10;
+            btnPrintInvoice.Text = "طباعة";
+            btnPrintInvoice.UseVisualStyleBackColor = true;
+            btnPrintInvoice.Click += btnPrintInvoice_Click;
             // 
             // frmPurchases
             // 
@@ -459,9 +471,9 @@
             ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
             splitContainer2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvPurchaseDetails).EndInit();
+            contextMenuStrip1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)numPrice).EndInit();
             ((System.ComponentModel.ISupportInitialize)numQty).EndInit();
-            contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -496,5 +508,6 @@
         private Label label9;
         private DateTimePicker dtpFilterDate;
         private MaterialSkin.Controls.MaterialTextBox2 txtSearchSupplier;
+        private Button btnPrintInvoice;
     }
 }

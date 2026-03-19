@@ -146,7 +146,6 @@
             contextMenuStrip1.Name = "contextMenuStrip1";
             contextMenuStrip1.RightToLeft = RightToLeft.Yes;
             contextMenuStrip1.Size = new Size(137, 26);
-            contextMenuStrip1.Opening += contextMenuStrip1_Opening;
             // 
             // btnDeleteMaterial
             // 

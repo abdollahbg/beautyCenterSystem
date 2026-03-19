@@ -21,7 +21,7 @@ namespace beautyCenterSystem
         private int _editAppId = 0;
 
         // متغير لاسم الموظفة الحالية (يمكنك جلبها من شاشة تسجيل الدخول لاحقاً)
-        private string _currentUserName = "الموظفة الحالية";
+        private string _currentUserName = CurrentSession.Username;
 
         public AddAppointmentForm()
         {
@@ -30,6 +30,7 @@ namespace beautyCenterSystem
             _serviceRepo = new ServiceRepository(new DbConnectionFactory());
             _appointmentRepo = new AppointmentRepository(new DbConnectionFactory());
             _customerRepo = new CustomerRepository(new DbConnectionFactory());
+            dtpAppointmentDate.MinDate = DateTime.Today;
         }
 
         public AddAppointmentForm(int appId) : this()
@@ -133,6 +134,16 @@ namespace beautyCenterSystem
                 // 2. تجميع التاريخ والوقت في متغير واحد
                 DateTime appointmentFullDate = dtpAppointmentDate.Value.Date + dtpAppointmentTime.Value.TimeOfDay;
 
+                // --- الخطوة الجديدة: منع الحجز في وقت ماضي ---
+                // نسمح بهامش بسيط (مثلاً دقيقة واحدة) لتجنب الأخطاء عند تأخر المستخدم في الضغط على حفظ
+                if (appointmentFullDate < DateTime.Now.AddMinutes(-1))
+                {
+                    MessageBox.Show("عذراً، لا يمكن حجز موعد في تاريخ أو وقت مضى. يرجى اختيار وقت مستقبلي.",
+                                    "خطأ في الوقت", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                // ------------------------------------------
+
                 // 3. تجهيز الخدمات المختارة وحساب الإجمالي
                 var selectedServices = new List<Service>();
                 int totalMinutes = 0;
@@ -148,7 +159,8 @@ namespace beautyCenterSystem
 
                 // 4. فحص تعارض المواعيد
                 var serviceIds = selectedServices.Select(s => s.ServiceID).ToList();
-                string conflictResult = await _appointmentRepo.CheckConflictAsync(appointmentFullDate, totalMinutes, serviceIds);
+                // نمرر _editAppId لاستثنائه من الفحص في حالة التعديل
+                string conflictResult = await _appointmentRepo.CheckConflictAsync(appointmentFullDate, totalMinutes, serviceIds, _editAppId);
 
                 if (!string.IsNullOrEmpty(conflictResult))
                 {
@@ -167,7 +179,7 @@ namespace beautyCenterSystem
                     AppointmentDate = appointmentFullDate,
                     TotalPrice = totalPrice,
                     Status = "Pending",
-                    CreatedBy = 1, // معرف الموظف الحالي
+                    CreatedBy = CurrentSession.UserID,
                     SelectedServices = selectedServices
                 };
 
@@ -176,12 +188,10 @@ namespace beautyCenterSystem
 
                 if (_editAppId > 0)
                 {
-                    // حالة التعديل
                     isSuccess = await _appointmentRepo.UpdateAsync(appointmentData);
                 }
                 else
                 {
-                    // حالة إضافة جديدة (إرجاع الـ ID للتأكد من النجاح فقط)
                     int finalAppId = await _appointmentRepo.CreateAndGetIdAsync(appointmentData);
                     isSuccess = finalAppId > 0;
                 }
@@ -201,7 +211,6 @@ namespace beautyCenterSystem
                 MessageBox.Show($"حدث خطأ غير متوقع: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         private void lvServices_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
             decimal total = 0;

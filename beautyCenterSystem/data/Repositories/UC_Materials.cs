@@ -15,28 +15,20 @@ namespace beautyCenterSystem.data.Repositories
     public partial class UC_Materials : UserControl
     {
         private readonly MaterialRepository _materialRepo;
-
-        // متغير للاحتفاظ بكل المواد في الذاكرة لعملية البحث السريع
         private List<Material> _allMaterials = new List<Material>();
 
         public UC_Materials()
         {
             InitializeComponent();
             _materialRepo = new MaterialRepository(new DbConnectionFactory());
-            LoadMaterials();
         }
 
         private async Task LoadMaterials()
         {
             try
             {
-                // 1. جلب القائمة من المستودع
                 var materials = await _materialRepo.GetAllAsync();
-
-                // 2. تخزينها في المتغير العام للبحث
                 _allMaterials = materials.ToList();
-
-                // 3. تطبيق البحث (إذا كان هناك نص مكتوب) أو عرض الكل
                 ApplyFilter();
             }
             catch (Exception ex)
@@ -45,12 +37,14 @@ namespace beautyCenterSystem.data.Repositories
             }
         }
 
-        // دالة الفلترة (البحث)
         private void ApplyFilter()
         {
             if (_allMaterials == null) return;
 
             string searchText = txtboxSearch.Text.Trim().ToLower();
+
+            // فك الارتباط مؤقتاً لتجنب إطلاق أحداث التغيير أثناء التحميل
+            dgvMaterials.CellValueChanged -= dgvMaterials_CellValueChanged;
 
             if (string.IsNullOrEmpty(searchText))
             {
@@ -58,16 +52,16 @@ namespace beautyCenterSystem.data.Repositories
             }
             else
             {
-                // فلترة المواد التي يحتوي اسمها على النص المكتوب
                 var filtered = _allMaterials.Where(m => m.MaterialName.ToLower().Contains(searchText)).ToList();
                 dgvMaterials.DataSource = filtered;
             }
 
-            // تطبيق التنسيقات بعد كل فلترة
             FormatGrid();
+
+            // إعادة ربط الحدث بعد انتهاء التحميل
+            dgvMaterials.CellValueChanged += dgvMaterials_CellValueChanged;
         }
 
-        // حدث الكتابة في مربع البحث
         private void txtboxSearch_TextChanged(object sender, EventArgs e)
         {
             ApplyFilter();
@@ -77,47 +71,48 @@ namespace beautyCenterSystem.data.Repositories
         {
             if (dgvMaterials.Columns.Count > 0)
             {
+                // 1. إخفاء المعرف
                 if (dgvMaterials.Columns.Contains("MaterialID"))
                     dgvMaterials.Columns["MaterialID"].Visible = false;
 
+                // 2. تنسيق اسم المادة
                 if (dgvMaterials.Columns.Contains("MaterialName"))
                 {
                     dgvMaterials.Columns["MaterialName"].HeaderText = "اسم العنصر / المادة";
                     dgvMaterials.Columns["MaterialName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                    dgvMaterials.Columns["MaterialName"].ReadOnly = false;
                 }
 
+                // 3. تحويل عمود الحالة إلى ComboBox إذا لم يكن كذلك
                 if (dgvMaterials.Columns.Contains("IsAvailable") && !(dgvMaterials.Columns["IsAvailable"] is DataGridViewComboBoxColumn))
                 {
                     int columnIndex = dgvMaterials.Columns["IsAvailable"].Index;
                     dgvMaterials.Columns.Remove("IsAvailable");
 
-                    DataGridViewComboBoxColumn comboCol = new DataGridViewComboBoxColumn();
-                    comboCol.Name = "IsAvailable";
-                    comboCol.HeaderText = "الحالة (متوفر؟)";
-                    comboCol.DataPropertyName = "IsAvailable";
-
-                    comboCol.DataSource = new[]
+                    DataGridViewComboBoxColumn comboCol = new DataGridViewComboBoxColumn
                     {
-                        new { Text = "متوفر", Value = true },
-                        new { Text = "غير متوفر", Value = false }
+                        Name = "IsAvailable",
+                        HeaderText = "الحالة (متوفر؟)",
+                        DataPropertyName = "IsAvailable",
+                        DataSource = new[]
+                        {
+                            new { Text = "متوفر", Value = true },
+                            new { Text = "غير متوفر", Value = false }
+                        },
+                        DisplayMember = "Text",
+                        ValueMember = "Value",
+                        FlatStyle = FlatStyle.Flat
                     };
-                    comboCol.DisplayMember = "Text";
-                    comboCol.ValueMember = "Value";
 
                     dgvMaterials.Columns.Insert(columnIndex, comboCol);
                 }
             }
 
             dgvMaterials.ReadOnly = false;
-
-            if (dgvMaterials.Columns.Contains("MaterialName"))
-                dgvMaterials.Columns["MaterialName"].ReadOnly = false;
         }
 
-        // حدث الضغط على الخلية (لفتح الكومبو بوكس من أول ضغطة)
         private void dgvMaterials_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            // التحقق من أن الخلية المضغوطة هي خلية الكومبو بوكس
             if (e.RowIndex >= 0 && dgvMaterials.Columns[e.ColumnIndex] is DataGridViewComboBoxColumn)
             {
                 dgvMaterials.BeginEdit(true);
@@ -134,18 +129,29 @@ namespace beautyCenterSystem.data.Repositories
             {
                 var row = dgvMaterials.Rows[e.RowIndex];
 
+                // التحقق من وجود البيانات
+                if (row.Cells["MaterialID"].Value == null) return;
+
                 var material = new Material
                 {
                     MaterialID = (int)row.Cells["MaterialID"].Value,
-                    MaterialName = row.Cells["MaterialName"].Value.ToString(),
-                    IsAvailable = (bool)row.Cells["IsAvailable"].Value
+                    MaterialName = row.Cells["MaterialName"].Value?.ToString() ?? "",
+                    IsAvailable = row.Cells["IsAvailable"].Value != null && (bool)row.Cells["IsAvailable"].Value
                 };
 
                 try
                 {
-                    bool success = await _materialRepo.UpdateAsync(material);
-                    // إعادة التحميل لضمان تطابق البيانات
-                    await LoadMaterials();
+                    // تحديث قاعدة البيانات فقط دون إعادة تحميل الجدول بالكامل 
+                    // لضمان استمرار وضع التعديل وسلاسة الكتابة
+                    await _materialRepo.UpdateAsync(material);
+
+                    // تحديث الكائن في القائمة المحلية أيضاً ليبقى البحث دقيقاً
+                    var localItem = _allMaterials.FirstOrDefault(m => m.MaterialID == material.MaterialID);
+                    if (localItem != null)
+                    {
+                        localItem.MaterialName = material.MaterialName;
+                        localItem.IsAvailable = material.IsAvailable;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -156,45 +162,32 @@ namespace beautyCenterSystem.data.Repositories
 
         private void dgvMaterials_CurrentCellDirtyStateChanged(object sender, EventArgs e)
         {
-            if (dgvMaterials.IsCurrentCellDirty)
+            // هذا السطر يضمن حفظ التغييرات فور اختيار قيمة من الـ ComboBox
+            if (dgvMaterials.IsCurrentCellDirty && dgvMaterials.CurrentCell is DataGridViewComboBoxCell)
             {
                 dgvMaterials.CommitEdit(DataGridViewDataErrorContexts.Commit);
             }
         }
 
-        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
-        {
-        }
-
         private async void btnDeleteMaterial_Click(object sender, EventArgs e)
         {
-            if (dgvMaterials.CurrentRow == null || dgvMaterials.CurrentRow.Index < 0)
+            if (dgvMaterials.CurrentRow == null)
             {
-                MessageBox.Show("يرجى اختيار العنصر المراد حذفه من الجدول أولاً.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("يرجى اختيار العنصر المراد حذفه.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             int materialId = (int)dgvMaterials.CurrentRow.Cells["MaterialID"].Value;
             string materialName = dgvMaterials.CurrentRow.Cells["MaterialName"].Value.ToString();
 
-            var confirmResult = MessageBox.Show($"هل أنت متأكد من حذف العنصر: ({materialName}) نهائياً؟",
-                                                "تأكيد الحذف", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var confirm = MessageBox.Show($"هل أنت متأكد من حذف ({materialName})؟", "تأكيد", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-            if (confirmResult == DialogResult.Yes)
+            if (confirm == DialogResult.Yes)
             {
-                try
+                if (await _materialRepo.DeleteAsync(materialId))
                 {
-                    bool isDeleted = await _materialRepo.DeleteAsync(materialId);
-
-                    if (isDeleted)
-                    {
-                        await LoadMaterials();
-                        MessageBox.Show("تم الحذف بنجاح.", "نجاح", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"تعذر الحذف: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    await LoadMaterials();
+                    MessageBox.Show("تم الحذف بنجاح.");
                 }
             }
         }
@@ -208,15 +201,22 @@ namespace beautyCenterSystem.data.Repositories
                 {
                     dgvMaterials.ClearSelection();
                     dgvMaterials.Rows[hit.RowIndex].Selected = true;
-                    dgvMaterials.CurrentCell = dgvMaterials.Rows[hit.RowIndex].Cells[0];
+
+                    // الحل لمشكلة الخلية المخفية: البحث عن أول عمود مرئي
+                    var firstVisibleCol = dgvMaterials.Columns.GetFirstColumn(DataGridViewElementStates.Visible);
+                    if (firstVisibleCol != null)
+                    {
+                        dgvMaterials.CurrentCell = dgvMaterials.Rows[hit.RowIndex].Cells[firstVisibleCol.Index];
+                    }
                 }
             }
         }
 
-        private void UC_Materials_Load(object sender, EventArgs e)
+        private async void UC_Materials_Load(object sender, EventArgs e)
         {
-            FormatGrid();
             AppTheme.Apply(this);
+            await LoadMaterials(); // جلب البيانات عند التحميل
+
             this.BeginInvoke((MethodInvoker)delegate
             {
                 btnAddMaterials.FlatStyle = FlatStyle.Flat;
@@ -232,15 +232,7 @@ namespace beautyCenterSystem.data.Repositories
             {
                 if (addForm.ShowDialog() == DialogResult.OK)
                 {
-                    try
-                    {
-                        await LoadMaterials();
-                        MessageBox.Show("تم تحديث القائمة بنجاح.", "تحديث", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"حدث خطأ أثناء تحديث الجدول: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    await LoadMaterials();
                 }
             }
         }
