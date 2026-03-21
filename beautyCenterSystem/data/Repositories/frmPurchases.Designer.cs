@@ -30,6 +30,7 @@
         {
             components = new System.ComponentModel.Container();
             panel1 = new Panel();
+            btnPrintInvoice = new Button();
             groupBox2 = new GroupBox();
             label9 = new Label();
             dtpFilterDate = new DateTimePicker();
@@ -58,7 +59,6 @@
             numQty = new NumericUpDown();
             cmbMaterials = new MaterialSearchableCombo();
             label1 = new Label();
-            btnPrintInvoice = new Button();
             panel1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox1.SuspendLayout();
@@ -87,6 +87,16 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(984, 155);
             panel1.TabIndex = 0;
+            // 
+            // btnPrintInvoice
+            // 
+            btnPrintInvoice.Location = new Point(3, 11);
+            btnPrintInvoice.Name = "btnPrintInvoice";
+            btnPrintInvoice.Size = new Size(86, 28);
+            btnPrintInvoice.TabIndex = 10;
+            btnPrintInvoice.Text = "طباعة";
+            btnPrintInvoice.UseVisualStyleBackColor = true;
+            btnPrintInvoice.Click += btnPrintInvoice_Click;
             // 
             // groupBox2
             // 
@@ -435,16 +445,6 @@
             label1.TabIndex = 2;
             label1.Text = "اجمالي قيمة الفاتورة:";
             // 
-            // btnPrintInvoice
-            // 
-            btnPrintInvoice.Location = new Point(3, 11);
-            btnPrintInvoice.Name = "btnPrintInvoice";
-            btnPrintInvoice.Size = new Size(86, 28);
-            btnPrintInvoice.TabIndex = 10;
-            btnPrintInvoice.Text = "طباعة";
-            btnPrintInvoice.UseVisualStyleBackColor = true;
-            btnPrintInvoice.Click += btnPrintInvoice_Click;
-            // 
             // frmPurchases
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -452,7 +452,9 @@
             Controls.Add(splitContainer1);
             Controls.Add(panel1);
             Name = "frmPurchases";
-            Text = "frmPurchases";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "المشتريات";
+            WindowState = FormWindowState.Maximized;
             Load += frmPurchases_Load;
             panel1.ResumeLayout(false);
             groupBox2.ResumeLayout(false);

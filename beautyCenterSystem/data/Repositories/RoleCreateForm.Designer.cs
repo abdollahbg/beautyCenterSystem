@@ -123,8 +123,10 @@
             Controls.Add(label2);
             Controls.Add(txtRoleName);
             Controls.Add(PnlHeader);
+            MaximizeBox = false;
             Name = "RoleCreateForm";
-            Text = "RoleCreateForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "إضافة دور جديد";
             PnlHeader.ResumeLayout(false);
             PnlHeader.PerformLayout();
             ResumeLayout(false);

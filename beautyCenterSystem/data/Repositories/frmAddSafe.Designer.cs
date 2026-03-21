@@ -171,9 +171,10 @@
             Controls.Add(BtnCancel);
             Controls.Add(btnSaveSafe);
             FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
             Name = "frmAddSafe";
             StartPosition = FormStartPosition.CenterParent;
-            Text = "frmAddSafe";
+            Text = "اضافة خزنة";
             Load += frmAddSafe_Load;
             PnlHeader.ResumeLayout(false);
             PnlHeader.PerformLayout();

@@ -130,7 +130,7 @@
             Name = "AddRoomForm";
             RightToLeft = RightToLeft.Yes;
             StartPosition = FormStartPosition.CenterParent;
-            Text = "AddRoomForm";
+            Text = "اضافة غرفة";
             Load += AddRoomForm_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();

@@ -252,11 +252,12 @@
             Controls.Add(btnSave);
             Controls.Add(PnlHeader);
             FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
             MinimizeBox = false;
             Name = "AddServiceForm";
             RightToLeft = RightToLeft.Yes;
             StartPosition = FormStartPosition.CenterParent;
-            Text = "AddServiceForm";
+            Text = "اضافة خدمة";
             PnlHeader.ResumeLayout(false);
             PnlHeader.PerformLayout();
             ResumeLayout(false);

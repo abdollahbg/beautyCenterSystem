@@ -408,7 +408,8 @@
             Controls.Add(TapControl1);
             Name = "frmSafes";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "frmSafes";
+            Text = "إدارة الخزنات";
+            WindowState = FormWindowState.Maximized;
             Load += frmSafes_Load;
             TapControl1.ResumeLayout(false);
             tpSafes.ResumeLayout(false);

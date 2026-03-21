@@ -165,7 +165,7 @@
             cmbRole.DropDownHeight = 174;
             cmbRole.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbRole.DropDownWidth = 121;
-            cmbRole.Font = new Font("Roboto Medium", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
+            cmbRole.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
             cmbRole.ForeColor = Color.FromArgb(222, 0, 0, 0);
             cmbRole.FormattingEnabled = true;
             cmbRole.IntegralHeight = false;
@@ -202,9 +202,10 @@
             Controls.Add(txtUsername);
             Controls.Add(PnlHeader);
             FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
             Name = "UserCreateForm";
             StartPosition = FormStartPosition.CenterParent;
-            Text = "UserCreateForm";
+            Text = "اضافة مستخدم";
             PnlHeader.ResumeLayout(false);
             PnlHeader.PerformLayout();
             ResumeLayout(false);

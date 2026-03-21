@@ -114,7 +114,8 @@
             // txtUsername
             // 
             txtUsername.AnimateReadOnly = false;
-           
+            txtUsername.AutoCompleteMode = AutoCompleteMode.None;
+            txtUsername.AutoCompleteSource = AutoCompleteSource.None;
             txtUsername.BackgroundImageLayout = ImageLayout.None;
             txtUsername.CharacterCasing = CharacterCasing.Normal;
             txtUsername.Depth = 0;
@@ -163,7 +164,8 @@
             // txtPassword
             // 
             txtPassword.AnimateReadOnly = false;
-           
+            txtPassword.AutoCompleteMode = AutoCompleteMode.None;
+            txtPassword.AutoCompleteSource = AutoCompleteSource.None;
             txtPassword.BackgroundImageLayout = ImageLayout.None;
             txtPassword.CharacterCasing = CharacterCasing.Normal;
             txtPassword.Depth = 0;
@@ -197,9 +199,10 @@
             ClientSize = new Size(434, 561);
             Controls.Add(materialCard1);
             Controls.Add(label1);
+            MaximizeBox = false;
             Name = "LoginForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Form1";
+            Text = "تسجيل الدخول";
             Load += Form1_Load;
             materialCard1.ResumeLayout(false);
             materialCard1.PerformLayout();

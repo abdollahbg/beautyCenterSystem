@@ -211,7 +211,8 @@
             Controls.Add(panel2);
             Controls.Add(panel1);
             Name = "AddAppointmentForm";
-            Text = "AddAppointmentForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "اضافة حجز";
             Load += AddAppointmentForm_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();

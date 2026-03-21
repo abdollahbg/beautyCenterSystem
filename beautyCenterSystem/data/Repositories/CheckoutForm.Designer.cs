@@ -202,7 +202,7 @@
             MaximizeBox = false;
             Name = "CheckoutForm";
             StartPosition = FormStartPosition.CenterParent;
-            Text = "CheckoutForm";
+            Text = "إعداد الدفع";
             Load += CheckoutForm_Load;
             ResumeLayout(false);
             PerformLayout();

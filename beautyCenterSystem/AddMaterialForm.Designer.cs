@@ -157,9 +157,10 @@
             Controls.Add(BtnCancel);
             Controls.Add(btnSave);
             Controls.Add(txtMaterialName);
+            MaximizeBox = false;
             Name = "AddMaterialForm";
             StartPosition = FormStartPosition.CenterParent;
-            Text = "AddMaterialForm";
+            Text = "اضافة عنصر";
             Load += AddMaterialForm_Load;
             PnlHeader.ResumeLayout(false);
             PnlHeader.PerformLayout();

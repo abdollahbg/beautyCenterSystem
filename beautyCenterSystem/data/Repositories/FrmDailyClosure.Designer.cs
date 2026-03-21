@@ -328,6 +328,7 @@
             Controls.Add(cardSystemInfo);
             Margin = new Padding(4, 3, 4, 3);
             MaximizeBox = false;
+            MinimizeBox = false;
             Name = "FrmDailyClosure";
             RightToLeft = RightToLeft.Yes;
             RightToLeftLayout = true;

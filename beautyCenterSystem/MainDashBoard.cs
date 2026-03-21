@@ -30,6 +30,7 @@ namespace beautyCenterSystem
 
             // افتراضياً: يمكن فتح شاشة المواعيد كشاشة رئيسية
             btnAppointments.PerformClick();
+            lblUserName.Text = $"المستخدم: {CurrentSession.Username}";
         }
 
         /// <summary>
@@ -177,10 +178,10 @@ namespace beautyCenterSystem
         {
             var settings = Properties.Settings.Default;
 
-            // تنفيذ النسخ التلقائي عند الإغلاق إذا كان مفعلاً وللمستخدم صلاحية الوصول له
+            // حالة 1: النسخ التلقائي مفعّل
             if (settings.EnableAutoBackup && !string.IsNullOrEmpty(settings.AutoBackupPath))
             {
-                e.Cancel = true; // إيقاف الإغلاق مؤقتاً
+                e.Cancel = true; // إيقاف الإغلاق مؤقتاً لتنفيذ النسخ
 
                 using (Form loading = CreateLoadingForm())
                 {
@@ -193,20 +194,26 @@ namespace beautyCenterSystem
                         await Task.Run(async () =>
                         {
                             await _backupRepo.CreateBackupAsync(settings.AutoBackupPath);
-                            await Task.Delay(1000); // تأخير بسيط لضمان اكتمال العملية
+                            await Task.Delay(1000);
                         });
-
-                        loading.Close();
                     }
                     catch (Exception ex)
                     {
-                        loading.Close();
                         MessageBox.Show($"فشل النسخ الاحتياطي التلقائي: {ex.Message}", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    finally
+                    {
+                        loading.Close();
                     }
                 }
 
-                // فك الحدث وإغلاق التطبيق نهائياً
+                // فك الحدث وإغلاق التطبيق نهائياً بعد انتهاء النسخ
                 this.FormClosing -= MainDashBoard_FormClosing;
+                Application.Exit();
+            }
+            else
+            {
+                // حالة 2: النسخ التلقائي غير مفعّل - أغلق البرنامج فوراً
                 Application.Exit();
             }
         }
@@ -279,6 +286,35 @@ namespace beautyCenterSystem
                 // أو إذا أردت إغلاقها تماماً وكان لديك Logic آخر في Program.cs استخدم:
                 // this.Close();
             }
+        }
+
+        private void btnAbout_Click(object sender, EventArgs e)
+        {
+            // معلومات الهوية والإصدار
+            string systemName = "نظام الصنوان لإدارة مراكز التجميل";
+            string version = "الإصدار: 1.0.0 (نسخة مستقرة)";
+            string company = "الجهة: شركة الصنوان للحلول التقنية";
+            string developer = "المطور: عبدالله بن غربية";
+
+            // معلومات التواصل والدعم الفني
+            string supportHeader = "--- قسم الدعم الفني وتطوير النظام ---";
+            string contact1 = "واتساب (عبدالله بن غربية): 0915725507";
+            string contact2 = "واتساب (مجدي شكاب): 0911860781";
+
+            // تجميع الرسالة بالكامل وتنسيقها
+            string fullMessage = $"{systemName}\n" +
+                                 $"{version}\n" +
+                                 $"{new string('-', 45)}\n" +
+                                 $"{company}\n" +
+                                 $"{developer}\n\n" +
+                                 $"{supportHeader}\n" +
+                                 $"{contact1}\n" +
+                                 $"{contact2}\n" +
+                                 $"{new string('-', 45)}\n" +
+                                 $"جميع الحقوق محفوظة © 2024 - 2026";
+
+            // عرض الرسالة في MessageBox مع أيقونة المعلومات
+            MessageBox.Show(fullMessage, "حول نظام الصنوان", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

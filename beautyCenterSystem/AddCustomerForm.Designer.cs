@@ -209,7 +209,7 @@
             Name = "AddCustomerForm";
             RightToLeft = RightToLeft.Yes;
             StartPosition = FormStartPosition.CenterParent;
-            Text = "AddCustomerForm";
+            Text = "اضافة عميل";
             Load += AddCustomerForm_Load;
             PnlHeader.ResumeLayout(false);
             PnlHeader.PerformLayout();

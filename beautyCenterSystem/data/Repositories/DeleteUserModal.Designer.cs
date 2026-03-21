@@ -101,8 +101,10 @@
             Controls.Add(btnSave);
             Controls.Add(label2);
             Controls.Add(txtPassword);
+            MinimizeBox = false;
             Name = "DeleteUserModal";
-            Text = "DeleteUserModal";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "تأكيد كلمة المرور";
             ResumeLayout(false);
             PerformLayout();
         }

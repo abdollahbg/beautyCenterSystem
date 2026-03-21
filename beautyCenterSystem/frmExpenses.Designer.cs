@@ -286,6 +286,7 @@
             txtAmount.TextAlign = HorizontalAlignment.Left;
             txtAmount.TrailingIcon = null;
             txtAmount.UseSystemPasswordChar = false;
+            txtAmount.KeyPress += txtAmount_KeyPress;
             // 
             // txtCategory
             // 

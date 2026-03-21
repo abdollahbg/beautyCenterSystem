@@ -159,8 +159,10 @@
             Controls.Add(label4);
             Controls.Add(cmbRole);
             FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
             Name = "UserEditForm";
-            Text = "UserEditForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "تعديل بيانات مستخدم";
             PnlHeader.ResumeLayout(false);
             PnlHeader.PerformLayout();
             ResumeLayout(false);

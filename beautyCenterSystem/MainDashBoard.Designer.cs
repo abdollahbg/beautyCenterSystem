@@ -2,15 +2,8 @@
 {
     partial class MainDashBoard
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,14 +15,9 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             pnlSidebar = new Panel();
-            btnLogout = new FontAwesome.Sharp.IconButton();
             btnSettings = new FontAwesome.Sharp.IconButton();
             btnInvoices = new FontAwesome.Sharp.IconButton();
             btnMaterials = new FontAwesome.Sharp.IconButton();
@@ -40,15 +28,20 @@
             btnHome = new FontAwesome.Sharp.IconButton();
             panel1 = new Panel();
             iconPictureBox1 = new FontAwesome.Sharp.IconPictureBox();
+            btnAbout = new FontAwesome.Sharp.IconButton();
+            btnLogout = new FontAwesome.Sharp.IconButton();
             pnlContainer = new Panel();
+            pnlFooter = new Panel();
+            lblRights = new Label();
+            lblUserName = new Label();
             pnlSidebar.SuspendLayout();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox1).BeginInit();
+            pnlFooter.SuspendLayout();
             SuspendLayout();
             // 
             // pnlSidebar
             // 
-            pnlSidebar.Controls.Add(btnLogout);
             pnlSidebar.Controls.Add(btnSettings);
             pnlSidebar.Controls.Add(btnInvoices);
             pnlSidebar.Controls.Add(btnMaterials);
@@ -58,34 +51,13 @@
             pnlSidebar.Controls.Add(btnAppointments);
             pnlSidebar.Controls.Add(btnHome);
             pnlSidebar.Controls.Add(panel1);
+            pnlSidebar.Controls.Add(btnAbout);
+            pnlSidebar.Controls.Add(btnLogout);
             pnlSidebar.Dock = DockStyle.Right;
-            pnlSidebar.Location = new Point(771, 0);
+            pnlSidebar.Location = new Point(784, 0);
             pnlSidebar.Name = "pnlSidebar";
-            pnlSidebar.Size = new Size(200, 609);
+            pnlSidebar.Size = new Size(200, 611);
             pnlSidebar.TabIndex = 0;
-            // 
-            // btnLogout
-            // 
-            btnLogout.BackColor = Color.FromArgb(255, 128, 128);
-            btnLogout.Dock = DockStyle.Bottom;
-            btnLogout.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnLogout.ForeColor = Color.White;
-            btnLogout.IconChar = FontAwesome.Sharp.IconChar.SignOutAlt;
-            btnLogout.IconColor = Color.White;
-            btnLogout.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnLogout.IconSize = 35;
-            btnLogout.ImageAlign = ContentAlignment.MiddleRight;
-            btnLogout.Location = new Point(0, 549);
-            btnLogout.Name = "btnLogout";
-            btnLogout.Padding = new Padding(0, 0, 15, 0);
-            btnLogout.RightToLeft = RightToLeft.No;
-            btnLogout.Size = new Size(200, 60);
-            btnLogout.TabIndex = 9;
-            btnLogout.Text = "تسجيل خروج";
-            btnLogout.TextAlign = ContentAlignment.MiddleRight;
-            btnLogout.TextImageRelation = TextImageRelation.ImageBeforeText;
-            btnLogout.UseVisualStyleBackColor = false;
-            btnLogout.Click += btnLogout_Click;
             // 
             // btnSettings
             // 
@@ -98,7 +70,6 @@
             btnSettings.Location = new Point(0, 490);
             btnSettings.Name = "btnSettings";
             btnSettings.Padding = new Padding(0, 0, 15, 0);
-            btnSettings.RightToLeft = RightToLeft.No;
             btnSettings.Size = new Size(200, 60);
             btnSettings.TabIndex = 8;
             btnSettings.Text = "الإعدادات";
@@ -118,7 +89,6 @@
             btnInvoices.Location = new Point(0, 430);
             btnInvoices.Name = "btnInvoices";
             btnInvoices.Padding = new Padding(0, 0, 15, 0);
-            btnInvoices.RightToLeft = RightToLeft.No;
             btnInvoices.Size = new Size(200, 60);
             btnInvoices.TabIndex = 7;
             btnInvoices.Text = "الفواتير والمالية";
@@ -138,7 +108,6 @@
             btnMaterials.Location = new Point(0, 370);
             btnMaterials.Name = "btnMaterials";
             btnMaterials.Padding = new Padding(0, 0, 15, 0);
-            btnMaterials.RightToLeft = RightToLeft.No;
             btnMaterials.Size = new Size(200, 60);
             btnMaterials.TabIndex = 6;
             btnMaterials.Text = "المخزون والمواد";
@@ -158,7 +127,6 @@
             btnRooms.Location = new Point(0, 310);
             btnRooms.Name = "btnRooms";
             btnRooms.Padding = new Padding(0, 0, 15, 0);
-            btnRooms.RightToLeft = RightToLeft.No;
             btnRooms.Size = new Size(200, 60);
             btnRooms.TabIndex = 5;
             btnRooms.Text = "إدارة الغرف";
@@ -178,7 +146,6 @@
             btnServices.Location = new Point(0, 250);
             btnServices.Name = "btnServices";
             btnServices.Padding = new Padding(0, 0, 15, 0);
-            btnServices.RightToLeft = RightToLeft.No;
             btnServices.Size = new Size(200, 60);
             btnServices.TabIndex = 4;
             btnServices.Text = "خدمات المركز";
@@ -198,7 +165,6 @@
             btnCustomers.Location = new Point(0, 190);
             btnCustomers.Name = "btnCustomers";
             btnCustomers.Padding = new Padding(0, 0, 15, 0);
-            btnCustomers.RightToLeft = RightToLeft.No;
             btnCustomers.Size = new Size(200, 60);
             btnCustomers.TabIndex = 3;
             btnCustomers.Text = "العملاء";
@@ -218,7 +184,6 @@
             btnAppointments.Location = new Point(0, 130);
             btnAppointments.Name = "btnAppointments";
             btnAppointments.Padding = new Padding(0, 0, 15, 0);
-            btnAppointments.RightToLeft = RightToLeft.No;
             btnAppointments.Size = new Size(200, 60);
             btnAppointments.TabIndex = 2;
             btnAppointments.Text = "مواعيد اليوم";
@@ -238,7 +203,6 @@
             btnHome.Location = new Point(0, 70);
             btnHome.Name = "btnHome";
             btnHome.Padding = new Padding(0, 0, 15, 0);
-            btnHome.RightToLeft = RightToLeft.No;
             btnHome.Size = new Size(200, 60);
             btnHome.TabIndex = 1;
             btnHome.Text = "الرئيسية";
@@ -259,8 +223,9 @@
             // iconPictureBox1
             // 
             iconPictureBox1.BackColor = SystemColors.Control;
+            iconPictureBox1.ForeColor = Color.PaleVioletRed;
             iconPictureBox1.IconChar = FontAwesome.Sharp.IconChar.Spa;
-            iconPictureBox1.IconColor = Color.White;
+            iconPictureBox1.IconColor = Color.PaleVioletRed;
             iconPictureBox1.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconPictureBox1.IconSize = 63;
             iconPictureBox1.Location = new Point(71, 4);
@@ -269,29 +234,112 @@
             iconPictureBox1.TabIndex = 0;
             iconPictureBox1.TabStop = false;
             // 
+            // btnAbout
+            // 
+            btnAbout.Dock = DockStyle.Bottom;
+            btnAbout.IconChar = FontAwesome.Sharp.IconChar.CircleInfo;
+            btnAbout.IconColor = Color.Black;
+            btnAbout.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnAbout.IconSize = 35;
+            btnAbout.ImageAlign = ContentAlignment.MiddleRight;
+            btnAbout.Location = new Point(0, 491);
+            btnAbout.Name = "btnAbout";
+            btnAbout.Padding = new Padding(0, 0, 15, 0);
+            btnAbout.Size = new Size(200, 60);
+            btnAbout.TabIndex = 10;
+            btnAbout.Text = "حول النظام";
+            btnAbout.TextAlign = ContentAlignment.MiddleRight;
+            btnAbout.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnAbout.UseVisualStyleBackColor = true;
+            btnAbout.Click += btnAbout_Click;
+            // 
+            // btnLogout
+            // 
+            btnLogout.BackColor = Color.FromArgb(255, 128, 128);
+            btnLogout.Dock = DockStyle.Bottom;
+            btnLogout.FlatStyle = FlatStyle.Flat;
+            btnLogout.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnLogout.ForeColor = Color.White;
+            btnLogout.IconChar = FontAwesome.Sharp.IconChar.SignOutAlt;
+            btnLogout.IconColor = Color.White;
+            btnLogout.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnLogout.IconSize = 35;
+            btnLogout.ImageAlign = ContentAlignment.MiddleRight;
+            btnLogout.Location = new Point(0, 551);
+            btnLogout.Name = "btnLogout";
+            btnLogout.Padding = new Padding(0, 0, 15, 0);
+            btnLogout.Size = new Size(200, 60);
+            btnLogout.TabIndex = 9;
+            btnLogout.Text = "تسجيل خروج";
+            btnLogout.TextAlign = ContentAlignment.MiddleRight;
+            btnLogout.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnLogout.UseVisualStyleBackColor = false;
+            btnLogout.Click += btnLogout_Click;
+            // 
             // pnlContainer
             // 
             pnlContainer.Dock = DockStyle.Fill;
             pnlContainer.Location = new Point(0, 0);
             pnlContainer.Name = "pnlContainer";
-            pnlContainer.Size = new Size(771, 609);
+            pnlContainer.Size = new Size(784, 581);
             pnlContainer.TabIndex = 1;
+            // 
+            // pnlFooter
+            // 
+            pnlFooter.BackColor = Color.FromArgb(245, 245, 245);
+            pnlFooter.Controls.Add(lblRights);
+            pnlFooter.Controls.Add(lblUserName);
+            pnlFooter.Dock = DockStyle.Bottom;
+            pnlFooter.Location = new Point(0, 581);
+            pnlFooter.Name = "pnlFooter";
+            pnlFooter.Size = new Size(784, 30);
+            pnlFooter.TabIndex = 2;
+            // 
+            // lblRights
+            // 
+            lblRights.Dock = DockStyle.Left;
+            lblRights.Font = new Font("Segoe UI", 8F);
+            lblRights.ForeColor = Color.DimGray;
+            lblRights.Location = new Point(0, 0);
+            lblRights.Name = "lblRights";
+            lblRights.Padding = new Padding(10, 0, 0, 0);
+            lblRights.Size = new Size(350, 30);
+            lblRights.TabIndex = 0;
+            lblRights.Text = "جميع الحقوق محفوظة © 2024 - شركة الصنوان للحلول التقنية";
+            lblRights.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // lblUserName
+            // 
+            lblUserName.Dock = DockStyle.Right;
+            lblUserName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblUserName.ForeColor = Color.DarkSlateGray;
+            lblUserName.Location = new Point(484, 0);
+            lblUserName.Name = "lblUserName";
+            lblUserName.Padding = new Padding(0, 0, 10, 0);
+            lblUserName.Size = new Size(300, 30);
+            lblUserName.TabIndex = 1;
+            lblUserName.Text = "المستخدم: جاري التحميل...";
+            lblUserName.TextAlign = ContentAlignment.MiddleRight;
             // 
             // MainDashBoard
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(971, 609);
+            ClientSize = new Size(984, 611);
             Controls.Add(pnlContainer);
+            Controls.Add(pnlFooter);
             Controls.Add(pnlSidebar);
+            MinimumSize = new Size(1000, 650);
             Name = "MainDashBoard";
-            Text = "MainDashBoard";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "نظام إدارة مركز التجميل - لوحة التحكم";
+            WindowState = FormWindowState.Maximized;
             FormClosing += MainDashBoard_FormClosing;
-            FormClosed += MainDashBoard_FormClosed;
             Load += MainDashBoard_Load;
             pnlSidebar.ResumeLayout(false);
             panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)iconPictureBox1).EndInit();
+            pnlFooter.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -310,5 +358,10 @@
         private FontAwesome.Sharp.IconButton btnSettings;
         private FontAwesome.Sharp.IconButton btnInvoices;
         private FontAwesome.Sharp.IconButton btnLogout;
+
+        private FontAwesome.Sharp.IconButton btnAbout;
+        private Panel pnlFooter;
+        private Label lblRights;
+        public Label lblUserName;
     }
 }

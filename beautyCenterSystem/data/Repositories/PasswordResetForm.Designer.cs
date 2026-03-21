@@ -209,8 +209,10 @@
             Controls.Add(txtNewPassword);
             Controls.Add(txtUsername);
             Controls.Add(PnlHeader);
+            MinimizeBox = false;
             Name = "PasswordResetForm";
-            Text = "PasswordResetForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "إعادة تعيين كلمة المرور";
             PnlHeader.ResumeLayout(false);
             PnlHeader.PerformLayout();
             ResumeLayout(false);
