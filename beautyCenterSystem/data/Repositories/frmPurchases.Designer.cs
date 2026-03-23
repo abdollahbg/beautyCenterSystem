@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmPurchases));
             panel1 = new Panel();
             btnPrintInvoice = new Button();
             groupBox2 = new GroupBox();
@@ -451,6 +452,7 @@
             ClientSize = new Size(984, 661);
             Controls.Add(splitContainer1);
             Controls.Add(panel1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "frmPurchases";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "المشتريات";

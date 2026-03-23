@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmFinancialReports));
             panel1 = new Panel();
             label4 = new Label();
             btnRefresh = new MaterialSkin.Controls.MaterialButton();
@@ -595,6 +596,7 @@
             Controls.Add(splitMain);
             Controls.Add(tableLayoutPanel1);
             Controls.Add(panel1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "FrmFinancialReports";
             RightToLeft = RightToLeft.Yes;
             RightToLeftLayout = true;

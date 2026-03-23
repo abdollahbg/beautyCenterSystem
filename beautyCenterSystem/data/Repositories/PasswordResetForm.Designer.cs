@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PasswordResetForm));
             label3 = new Label();
             label2 = new Label();
             txtNewPassword = new MaterialSkin.Controls.MaterialTextBox2();
@@ -209,6 +210,7 @@
             Controls.Add(txtNewPassword);
             Controls.Add(txtUsername);
             Controls.Add(PnlHeader);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MinimizeBox = false;
             Name = "PasswordResetForm";
             StartPosition = FormStartPosition.CenterParent;

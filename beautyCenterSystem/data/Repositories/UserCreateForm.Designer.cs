@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UserCreateForm));
             label3 = new Label();
             label2 = new Label();
             BtnCancel = new Button();
@@ -36,8 +37,8 @@
             txtUsername = new MaterialSkin.Controls.MaterialTextBox2();
             PnlHeader = new Panel();
             label1 = new Label();
-            cmbRole = new MaterialSkin.Controls.MaterialComboBox();
             label4 = new Label();
+            cmbRole = new MaterialSkin.Controls.MaterialComboBox();
             PnlHeader.SuspendLayout();
             SuspendLayout();
             // 
@@ -92,7 +93,7 @@
             txtPassword.MaxLength = 32767;
             txtPassword.MouseState = MaterialSkin.MouseState.OUT;
             txtPassword.Name = "txtPassword";
-            txtPassword.PasswordChar = '\0';
+            txtPassword.PasswordChar = '●';
             txtPassword.PrefixSuffixText = null;
             txtPassword.ReadOnly = false;
             txtPassword.RightToLeft = RightToLeft.Yes;
@@ -105,7 +106,7 @@
             txtPassword.TabStop = false;
             txtPassword.TextAlign = HorizontalAlignment.Right;
             txtPassword.TrailingIcon = null;
-            txtPassword.UseSystemPasswordChar = false;
+            txtPassword.UseSystemPasswordChar = true;
             // 
             // txtUsername
             // 
@@ -156,6 +157,15 @@
             label1.TabIndex = 1;
             label1.Text = "إضافة مستخدم جديد";
             // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(349, 309);
+            label4.Name = "label4";
+            label4.Size = new Size(77, 15);
+            label4.TabIndex = 18;
+            label4.Text = "الدور الوظيفي";
+            // 
             // cmbRole
             // 
             cmbRole.AutoResize = false;
@@ -168,32 +178,25 @@
             cmbRole.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
             cmbRole.ForeColor = Color.FromArgb(222, 0, 0, 0);
             cmbRole.FormattingEnabled = true;
+            cmbRole.Hint = "اختر الدور";
             cmbRole.IntegralHeight = false;
             cmbRole.ItemHeight = 43;
-            cmbRole.Location = new Point(222, 289);
+            cmbRole.Location = new Point(93, 291);
             cmbRole.MaxDropDownItems = 4;
             cmbRole.MouseState = MaterialSkin.MouseState.OUT;
             cmbRole.Name = "cmbRole";
-            cmbRole.Size = new Size(121, 49);
+            cmbRole.RightToLeft = RightToLeft.Yes;
+            cmbRole.Size = new Size(250, 49);
             cmbRole.StartIndex = 0;
-            cmbRole.TabIndex = 17;
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Location = new Point(349, 309);
-            label4.Name = "label4";
-            label4.Size = new Size(77, 15);
-            label4.TabIndex = 18;
-            label4.Text = "الدور الوظيفي";
+            cmbRole.TabIndex = 19;
             // 
             // UserCreateForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(434, 511);
-            Controls.Add(label4);
             Controls.Add(cmbRole);
+            Controls.Add(label4);
             Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(BtnCancel);
@@ -202,6 +205,7 @@
             Controls.Add(txtUsername);
             Controls.Add(PnlHeader);
             FormBorderStyle = FormBorderStyle.FixedDialog;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "UserCreateForm";
             StartPosition = FormStartPosition.CenterParent;

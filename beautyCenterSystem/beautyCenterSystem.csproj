@@ -6,11 +6,16 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>Gemini_Generated_Image_jzohhjzohhjzohhj-removebg-preview.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Cairo-Bold.ttf" />
     <None Remove="Cairo-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Gemini_Generated_Image_jzohhjzohhjzohhj-removebg-preview.ico" />
   </ItemGroup>
 
   <ItemGroup>

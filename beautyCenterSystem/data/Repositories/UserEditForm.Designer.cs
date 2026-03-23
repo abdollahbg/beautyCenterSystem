@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UserEditForm));
             label2 = new Label();
             BtnCancel = new Button();
             btnSave = new Button();
@@ -35,7 +36,6 @@
             PnlHeader = new Panel();
             label1 = new Label();
             label4 = new Label();
-            cmbRole = new MaterialSkin.Controls.MaterialComboBox();
             PnlHeader.SuspendLayout();
             SuspendLayout();
             // 
@@ -124,28 +124,6 @@
             label4.TabIndex = 27;
             label4.Text = "الدور الوظيفي";
             // 
-            // cmbRole
-            // 
-            cmbRole.AutoResize = false;
-            cmbRole.BackColor = Color.FromArgb(255, 255, 255);
-            cmbRole.Depth = 0;
-            cmbRole.DrawMode = DrawMode.OwnerDrawVariable;
-            cmbRole.DropDownHeight = 174;
-            cmbRole.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbRole.DropDownWidth = 121;
-            cmbRole.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
-            cmbRole.ForeColor = Color.FromArgb(222, 0, 0, 0);
-            cmbRole.FormattingEnabled = true;
-            cmbRole.IntegralHeight = false;
-            cmbRole.ItemHeight = 43;
-            cmbRole.Location = new Point(222, 239);
-            cmbRole.MaxDropDownItems = 4;
-            cmbRole.MouseState = MaterialSkin.MouseState.OUT;
-            cmbRole.Name = "cmbRole";
-            cmbRole.Size = new Size(121, 49);
-            cmbRole.StartIndex = 0;
-            cmbRole.TabIndex = 26;
-            // 
             // UserEditForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -157,8 +135,8 @@
             Controls.Add(txtUsername);
             Controls.Add(PnlHeader);
             Controls.Add(label4);
-            Controls.Add(cmbRole);
             FormBorderStyle = FormBorderStyle.FixedDialog;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "UserEditForm";
             StartPosition = FormStartPosition.CenterParent;

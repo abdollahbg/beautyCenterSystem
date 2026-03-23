@@ -13,7 +13,6 @@ namespace beautyCenterSystem.data.Repositories
         public CheckoutForm(string customerName, decimal totalAmount)
         {
             InitializeComponent();
-
             // 1. إعدادات الخطوط (خط عريض وواضح للأرقام)
             Font numericFont = new Font("Segoe UI", 14, FontStyle.Bold);
 

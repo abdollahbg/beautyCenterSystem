@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RoleCreateForm));
             label2 = new Label();
             txtRoleName = new MaterialSkin.Controls.MaterialTextBox2();
             PnlHeader = new Panel();
@@ -123,6 +124,7 @@
             Controls.Add(label2);
             Controls.Add(txtRoleName);
             Controls.Add(PnlHeader);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "RoleCreateForm";
             StartPosition = FormStartPosition.CenterParent;

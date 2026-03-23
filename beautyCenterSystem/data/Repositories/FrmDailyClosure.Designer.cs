@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmDailyClosure));
             cardSystemInfo = new MaterialSkin.Controls.MaterialCard();
             lblExpectedCash = new Label();
             lblTitleExpected = new Label();
@@ -326,6 +327,7 @@
             Controls.Add(lblWarning);
             Controls.Add(cardActualInfo);
             Controls.Add(cardSystemInfo);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4, 3, 4, 3);
             MaximizeBox = false;
             MinimizeBox = false;

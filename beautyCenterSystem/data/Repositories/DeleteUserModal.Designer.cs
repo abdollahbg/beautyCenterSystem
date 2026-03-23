@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DeleteUserModal));
             txtPassword = new MaterialSkin.Controls.MaterialTextBox2();
             label2 = new Label();
             BtnCancel = new Button();
@@ -101,6 +102,7 @@
             Controls.Add(btnSave);
             Controls.Add(label2);
             Controls.Add(txtPassword);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MinimizeBox = false;
             Name = "DeleteUserModal";
             StartPosition = FormStartPosition.CenterParent;

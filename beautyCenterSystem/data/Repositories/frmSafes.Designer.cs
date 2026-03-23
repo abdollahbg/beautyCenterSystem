@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSafes));
             TapControl1 = new TabControl();
             tpSafes = new TabPage();
             dgvSafes = new DataGridView();
@@ -406,6 +407,7 @@
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(984, 661);
             Controls.Add(TapControl1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "frmSafes";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "إدارة الخزنات";
