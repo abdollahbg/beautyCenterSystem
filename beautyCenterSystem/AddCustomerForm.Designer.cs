@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddCustomerForm));
             PnlHeader = new Panel();
             label1 = new Label();
             txtName = new MaterialSkin.Controls.MaterialTextBox2();
@@ -205,6 +206,7 @@
             Controls.Add(txtName);
             Controls.Add(PnlHeader);
             FormBorderStyle = FormBorderStyle.FixedDialog;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "AddCustomerForm";
             RightToLeft = RightToLeft.Yes;

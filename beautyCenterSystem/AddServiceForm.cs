@@ -23,6 +23,7 @@ namespace beautyCenterSystem
             InitializeComponent();
             _roomRepo = new RoomRepository(new DbConnectionFactory());
             _serviceRepo = new ServiceRepository(new DbConnectionFactory());
+            AppTheme.Apply(this);
 
         }
         protected override async void OnLoad(EventArgs e)

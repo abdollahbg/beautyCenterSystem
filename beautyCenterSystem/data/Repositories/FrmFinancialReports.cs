@@ -16,6 +16,7 @@ using beautyCenterSystem.helpers;
 
 namespace beautyCenterSystem.data.Repositories
 {
+
     public partial class FrmFinancialReports : Form
     {
         // 1. تعريف مراجع البيانات والرسوم
@@ -33,7 +34,6 @@ namespace beautyCenterSystem.data.Repositories
 
             // تطبيق الثيم العام
             AppTheme.Apply(this);
-
             // -----------
 
             // --- تخصيص ألوان المؤشرات المالية ---

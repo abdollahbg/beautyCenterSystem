@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddMaterialForm));
             label3 = new Label();
             PnlHeader = new Panel();
             label1 = new Label();
@@ -157,6 +158,7 @@
             Controls.Add(BtnCancel);
             Controls.Add(btnSave);
             Controls.Add(txtMaterialName);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "AddMaterialForm";
             StartPosition = FormStartPosition.CenterParent;

@@ -345,6 +345,14 @@ namespace beautyCenterSystem
                 decimal totalAmount = Convert.ToDecimal(selectedRow.Cells["TotalPrice"].Value);
                 string currentStatus = selectedRow.Cells["Status"].Value.ToString();
 
+                // --- التعديل المطلوب هنا ---
+                if (currentStatus == "Cancelled")
+                {
+                    MessageBox.Show("عذراً، لا يمكن إتمام أو دفع حجز ملغي.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                // ---------------------------
+
                 if (currentStatus == "Completed")
                 {
                     MessageBox.Show("هذا الحجز مكتمل ومدفوع بالفعل.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -374,7 +382,6 @@ namespace beautyCenterSystem
 
                                 ReceiptPrinter printer = new ReceiptPrinter
                                 {
-                                    // بيانات المركز من الإعدادات
                                     CenterName = settings.CenterName ?? "صالون التجميل الراقي",
                                     Phone = settings.Phone ?? "",
                                     Policy = settings.Note ?? "الرجاء مراجعة الفاتورة قبل المغادرة.",
@@ -383,7 +390,6 @@ namespace beautyCenterSystem
                                     InstagramHandle = settings.Instagram,
                                     WhatsAppHandle = settings.WhatsApp,
 
-                                    // بيانات الفاتورة
                                     InvoiceNumber = appId,
                                     CustomerName = customerName,
                                     TotalAmount = totalAmount,
@@ -391,7 +397,6 @@ namespace beautyCenterSystem
                                     NetAmount = payForm.AmountPaid,
                                     CashierName = CurrentSession.Username,
 
-                                    // تحويل الخدمات إلى InvoiceItem
                                     Items = services.Select(s => new InvoiceItem
                                     {
                                         ServiceName = s.ServiceName,
@@ -399,7 +404,6 @@ namespace beautyCenterSystem
                                     }).ToList()
                                 };
 
-                                // طباعة مباشرة بدون معاينة
                                 printer.PrintReceipt(showPreview: false);
                             }
                             catch (Exception printEx)
@@ -412,7 +416,10 @@ namespace beautyCenterSystem
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show($"خطأ: {ex.Message}"); }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"خطأ: {ex.Message}");
+            }
         }
 
         private async void btnPrintInvoice_Click(object sender, EventArgs e)

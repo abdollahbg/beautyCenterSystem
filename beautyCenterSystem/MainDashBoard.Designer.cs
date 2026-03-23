@@ -17,6 +17,7 @@
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainDashBoard));
             pnlSidebar = new Panel();
             btnSettings = new FontAwesome.Sharp.IconButton();
             btnInvoices = new FontAwesome.Sharp.IconButton();
@@ -27,7 +28,7 @@
             btnAppointments = new FontAwesome.Sharp.IconButton();
             btnHome = new FontAwesome.Sharp.IconButton();
             panel1 = new Panel();
-            iconPictureBox1 = new FontAwesome.Sharp.IconPictureBox();
+            pictureBox1 = new PictureBox();
             btnAbout = new FontAwesome.Sharp.IconButton();
             btnLogout = new FontAwesome.Sharp.IconButton();
             pnlContainer = new Panel();
@@ -36,7 +37,7 @@
             lblUserName = new Label();
             pnlSidebar.SuspendLayout();
             panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)iconPictureBox1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             pnlFooter.SuspendLayout();
             SuspendLayout();
             // 
@@ -213,26 +214,23 @@
             // 
             // panel1
             // 
-            panel1.Controls.Add(iconPictureBox1);
+            panel1.Controls.Add(pictureBox1);
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
             panel1.Size = new Size(200, 70);
             panel1.TabIndex = 0;
             // 
-            // iconPictureBox1
+            // pictureBox1
             // 
-            iconPictureBox1.BackColor = SystemColors.Control;
-            iconPictureBox1.ForeColor = Color.PaleVioletRed;
-            iconPictureBox1.IconChar = FontAwesome.Sharp.IconChar.Spa;
-            iconPictureBox1.IconColor = Color.PaleVioletRed;
-            iconPictureBox1.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconPictureBox1.IconSize = 63;
-            iconPictureBox1.Location = new Point(71, 4);
-            iconPictureBox1.Name = "iconPictureBox1";
-            iconPictureBox1.Size = new Size(66, 63);
-            iconPictureBox1.TabIndex = 0;
-            iconPictureBox1.TabStop = false;
+            pictureBox1.Image = Properties.Resources.Gemini_Generated_Image_jzohhjzohhjzohhj_removebg_preview;
+            pictureBox1.Location = new Point(68, -6);
+            pictureBox1.Margin = new Padding(0);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(90, 82);
+            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.TabIndex = 0;
+            pictureBox1.TabStop = false;
             // 
             // btnAbout
             // 
@@ -329,6 +327,7 @@
             Controls.Add(pnlContainer);
             Controls.Add(pnlFooter);
             Controls.Add(pnlSidebar);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MinimumSize = new Size(1000, 650);
             Name = "MainDashBoard";
             StartPosition = FormStartPosition.CenterScreen;
@@ -338,7 +337,7 @@
             Load += MainDashBoard_Load;
             pnlSidebar.ResumeLayout(false);
             panel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)iconPictureBox1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             pnlFooter.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -353,7 +352,6 @@
         private FontAwesome.Sharp.IconButton btnAppointments;
         private FontAwesome.Sharp.IconButton btnHome;
         private Panel panel1;
-        private FontAwesome.Sharp.IconPictureBox iconPictureBox1;
         private FontAwesome.Sharp.IconButton btnMaterials;
         private FontAwesome.Sharp.IconButton btnSettings;
         private FontAwesome.Sharp.IconButton btnInvoices;
@@ -363,5 +361,6 @@
         private Panel pnlFooter;
         private Label lblRights;
         public Label lblUserName;
+        private PictureBox pictureBox1;
     }
 }

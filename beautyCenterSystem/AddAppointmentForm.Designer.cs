@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddAppointmentForm));
             panel1 = new Panel();
             label4 = new Label();
             label3 = new Label();
@@ -167,7 +168,7 @@
             // 
             lblTotalDuration.AutoSize = true;
             lblTotalDuration.Font = new Font("Segoe UI", 11F);
-            lblTotalDuration.Location = new Point(62, 22);
+            lblTotalDuration.Location = new Point(49, 22);
             lblTotalDuration.Name = "lblTotalDuration";
             lblTotalDuration.Size = new Size(94, 20);
             lblTotalDuration.TabIndex = 1;
@@ -177,7 +178,7 @@
             // 
             lblTotalPrice.AutoSize = true;
             lblTotalPrice.Font = new Font("Segoe UI", 11F);
-            lblTotalPrice.Location = new Point(286, 22);
+            lblTotalPrice.Location = new Point(272, 22);
             lblTotalPrice.Name = "lblTotalPrice";
             lblTotalPrice.Size = new Size(62, 20);
             lblTotalPrice.TabIndex = 0;
@@ -210,6 +211,7 @@
             Controls.Add(panel3);
             Controls.Add(panel2);
             Controls.Add(panel1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "AddAppointmentForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "اضافة حجز";

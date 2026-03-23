@@ -36,6 +36,7 @@
             PnlHeader = new Panel();
             label1 = new Label();
             label4 = new Label();
+            cmbRole = new MaterialSkin.Controls.MaterialComboBox();
             PnlHeader.SuspendLayout();
             SuspendLayout();
             // 
@@ -124,11 +125,36 @@
             label4.TabIndex = 27;
             label4.Text = "الدور الوظيفي";
             // 
+            // cmbRole
+            // 
+            cmbRole.AutoResize = false;
+            cmbRole.BackColor = Color.FromArgb(255, 255, 255);
+            cmbRole.Depth = 0;
+            cmbRole.DrawMode = DrawMode.OwnerDrawVariable;
+            cmbRole.DropDownHeight = 174;
+            cmbRole.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbRole.DropDownWidth = 121;
+            cmbRole.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
+            cmbRole.ForeColor = Color.FromArgb(222, 0, 0, 0);
+            cmbRole.FormattingEnabled = true;
+            cmbRole.Hint = "اختر الدور";
+            cmbRole.IntegralHeight = false;
+            cmbRole.ItemHeight = 43;
+            cmbRole.Location = new Point(108, 242);
+            cmbRole.MaxDropDownItems = 4;
+            cmbRole.MouseState = MaterialSkin.MouseState.OUT;
+            cmbRole.Name = "cmbRole";
+            cmbRole.RightToLeft = RightToLeft.Yes;
+            cmbRole.Size = new Size(250, 49);
+            cmbRole.StartIndex = 0;
+            cmbRole.TabIndex = 28;
+            // 
             // UserEditForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(434, 511);
+            Controls.Add(cmbRole);
             Controls.Add(label2);
             Controls.Add(BtnCancel);
             Controls.Add(btnSave);

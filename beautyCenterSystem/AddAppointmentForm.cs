@@ -51,6 +51,7 @@ namespace beautyCenterSystem
 
                 if (currentApp != null)
                 {
+                    dtpAppointmentDate.MinDate = currentApp.AppointmentDate.Date.AddDays(-1);
                     cmbCustomerSearch.SelectedValue = currentApp.CustomerID;
                     dtpAppointmentDate.Value = currentApp.AppointmentDate.Date;
                     dtpAppointmentTime.Value = currentApp.AppointmentDate;
@@ -134,15 +135,15 @@ namespace beautyCenterSystem
                 // 2. تجميع التاريخ والوقت في متغير واحد
                 DateTime appointmentFullDate = dtpAppointmentDate.Value.Date + dtpAppointmentTime.Value.TimeOfDay;
 
-                // --- الخطوة الجديدة: منع الحجز في وقت ماضي ---
-                // نسمح بهامش بسيط (مثلاً دقيقة واحدة) لتجنب الأخطاء عند تأخر المستخدم في الضغط على حفظ
-                if (appointmentFullDate < DateTime.Now.AddMinutes(-1))
+                // --- التعديل: منع الحجز في وقت ماضي (فقط في حالة الإضافة الجديدة) ---
+                // نستخدم _editAppId == 0 للتأكد أننا في وضع "الإضافة" وليس "التعديل"
+                if (_editAppId == 0 && appointmentFullDate < DateTime.Now.AddMinutes(-1))
                 {
                     MessageBox.Show("عذراً، لا يمكن حجز موعد في تاريخ أو وقت مضى. يرجى اختيار وقت مستقبلي.",
                                     "خطأ في الوقت", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                // ------------------------------------------
+                // ------------------------------------------------------------------
 
                 // 3. تجهيز الخدمات المختارة وحساب الإجمالي
                 var selectedServices = new List<Service>();
@@ -151,15 +152,18 @@ namespace beautyCenterSystem
 
                 foreach (ListViewItem item in lvServices.CheckedItems)
                 {
-                    var service = (Service)item.Tag;
-                    selectedServices.Add(service);
-                    totalMinutes += service.DurationMinutes;
-                    totalPrice += service.Price;
+                    if (item.Tag is Service service)
+                    {
+                        selectedServices.Add(service);
+                        totalMinutes += service.DurationMinutes;
+                        totalPrice += service.Price;
+                    }
                 }
 
                 // 4. فحص تعارض المواعيد
                 var serviceIds = selectedServices.Select(s => s.ServiceID).ToList();
-                // نمرر _editAppId لاستثنائه من الفحص في حالة التعديل
+
+                // نمرر _editAppId لاستثنائه من الفحص في حالة التعديل حتى لا يتعارض الحجز مع نفسه
                 string conflictResult = await _appointmentRepo.CheckConflictAsync(appointmentFullDate, totalMinutes, serviceIds, _editAppId);
 
                 if (!string.IsNullOrEmpty(conflictResult))
@@ -188,10 +192,12 @@ namespace beautyCenterSystem
 
                 if (_editAppId > 0)
                 {
+                    // حالة التعديل
                     isSuccess = await _appointmentRepo.UpdateAsync(appointmentData);
                 }
                 else
                 {
+                    // حالة الإضافة الجديدة
                     int finalAppId = await _appointmentRepo.CreateAndGetIdAsync(appointmentData);
                     isSuccess = finalAppId > 0;
                 }
