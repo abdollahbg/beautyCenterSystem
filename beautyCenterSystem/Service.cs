@@ -16,5 +16,6 @@ namespace beautyCenterSystem
 
         // خاصية إضافية للعرض في الـ Grid
         public string RoomName { get; set; }
+        public bool IsActive { get; set; }
     }
 }

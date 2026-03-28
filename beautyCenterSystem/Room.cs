@@ -10,5 +10,8 @@ namespace beautyCenterSystem
     {
         public int RoomID { get; set; }
         public string RoomName { get; set; }
+        public string IconPath { get; set; }
+        public bool IsActive { get; set; }
+
     }
 }

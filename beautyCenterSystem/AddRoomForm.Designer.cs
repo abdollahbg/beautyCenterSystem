@@ -2,15 +2,8 @@
 {
     partial class AddRoomForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,19 +15,18 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddRoomForm));
             panel1 = new Panel();
             label1 = new Label();
             label2 = new Label();
+            label3 = new Label();
             BtnCancel = new Button();
             btnSave = new Button();
             txtRoomName2 = new MaterialSkin.Controls.MaterialTextBox2();
+            txtIconPath = new MaterialSkin.Controls.MaterialTextBox2();
+            btnBrowseIcon = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -60,31 +52,20 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(362, 121);
+            label2.Location = new Point(362, 104);
             label2.Name = "label2";
             label2.Size = new Size(60, 15);
             label2.TabIndex = 1;
             label2.Text = "إسم الغرفة";
             // 
-            // BtnCancel
+            // label3
             // 
-            BtnCancel.Location = new Point(58, 201);
-            BtnCancel.Name = "BtnCancel";
-            BtnCancel.Size = new Size(124, 48);
-            BtnCancel.TabIndex = 7;
-            BtnCancel.Text = "الغاء";
-            BtnCancel.UseVisualStyleBackColor = true;
-            BtnCancel.Click += BtnCancel_Click;
-            // 
-            // btnSave
-            // 
-            btnSave.Location = new Point(241, 201);
-            btnSave.Name = "btnSave";
-            btnSave.Size = new Size(124, 48);
-            btnSave.TabIndex = 6;
-            btnSave.Text = "حفظ";
-            btnSave.UseVisualStyleBackColor = true;
-            btnSave.Click += btnSave_Click;
+            label3.AutoSize = true;
+            label3.Location = new Point(362, 175);
+            label3.Name = "label3";
+            label3.Size = new Size(65, 15);
+            label3.TabIndex = 9;
+            label3.Text = "أيقونة الغرفة";
             // 
             // txtRoomName2
             // 
@@ -97,7 +78,7 @@
             txtRoomName2.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
             txtRoomName2.HideSelection = true;
             txtRoomName2.LeadingIcon = null;
-            txtRoomName2.Location = new Point(49, 104);
+            txtRoomName2.Location = new Point(49, 87);
             txtRoomName2.MaxLength = 32767;
             txtRoomName2.MouseState = MaterialSkin.MouseState.OUT;
             txtRoomName2.Name = "txtRoomName2";
@@ -116,11 +97,74 @@
             txtRoomName2.TrailingIcon = null;
             txtRoomName2.UseSystemPasswordChar = false;
             // 
+            // txtIconPath
+            // 
+            txtIconPath.AnimateReadOnly = false;
+            txtIconPath.AutoCompleteMode = AutoCompleteMode.None;
+            txtIconPath.AutoCompleteSource = AutoCompleteSource.None;
+            txtIconPath.BackgroundImageLayout = ImageLayout.None;
+            txtIconPath.CharacterCasing = CharacterCasing.Normal;
+            txtIconPath.Depth = 0;
+            txtIconPath.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
+            txtIconPath.HideSelection = true;
+            txtIconPath.LeadingIcon = null;
+            txtIconPath.Location = new Point(100, 158);
+            txtIconPath.MaxLength = 32767;
+            txtIconPath.MouseState = MaterialSkin.MouseState.OUT;
+            txtIconPath.Name = "txtIconPath";
+            txtIconPath.PasswordChar = '\0';
+            txtIconPath.PrefixSuffixText = null;
+            txtIconPath.ReadOnly = true;
+            txtIconPath.RightToLeft = RightToLeft.Yes;
+            txtIconPath.SelectedText = "";
+            txtIconPath.SelectionLength = 0;
+            txtIconPath.SelectionStart = 0;
+            txtIconPath.ShortcutsEnabled = true;
+            txtIconPath.Size = new Size(256, 48);
+            txtIconPath.TabIndex = 10;
+            txtIconPath.TabStop = false;
+            txtIconPath.TextAlign = HorizontalAlignment.Right;
+            txtIconPath.TrailingIcon = null;
+            txtIconPath.UseSystemPasswordChar = false;
+            // 
+            // btnBrowseIcon
+            // 
+            btnBrowseIcon.Location = new Point(49, 158);
+            btnBrowseIcon.Name = "btnBrowseIcon";
+            btnBrowseIcon.Size = new Size(45, 48);
+            btnBrowseIcon.TabIndex = 11;
+            btnBrowseIcon.Text = "...";
+            btnBrowseIcon.UseVisualStyleBackColor = true;
+            btnBrowseIcon.Click += btnBrowseIcon_Click;
+            // 
+            // BtnCancel
+            // 
+            BtnCancel.Location = new Point(58, 245);
+            BtnCancel.Name = "BtnCancel";
+            BtnCancel.Size = new Size(124, 48);
+            BtnCancel.TabIndex = 7;
+            BtnCancel.Text = "الغاء";
+            BtnCancel.UseVisualStyleBackColor = true;
+            BtnCancel.Click += BtnCancel_Click;
+            // 
+            // btnSave
+            // 
+            btnSave.Location = new Point(241, 245);
+            btnSave.Name = "btnSave";
+            btnSave.Size = new Size(124, 48);
+            btnSave.TabIndex = 6;
+            btnSave.Text = "حفظ";
+            btnSave.UseVisualStyleBackColor = true;
+            btnSave.Click += btnSave_Click;
+            // 
             // AddRoomForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(434, 261);
+            ClientSize = new Size(434, 315);
+            Controls.Add(btnBrowseIcon);
+            Controls.Add(txtIconPath);
+            Controls.Add(label3);
             Controls.Add(txtRoomName2);
             Controls.Add(BtnCancel);
             Controls.Add(btnSave);
@@ -143,11 +187,13 @@
         #endregion
 
         private Panel panel1;
-        private MaterialSkin.Controls.MaterialTextBox2 txtRoomName;
         private Label label1;
         private Label label2;
+        private Label label3;
         private Button BtnCancel;
         private Button btnSave;
         private MaterialSkin.Controls.MaterialTextBox2 txtRoomName2;
+        private MaterialSkin.Controls.MaterialTextBox2 txtIconPath;
+        private Button btnBrowseIcon;
     }
 }

@@ -11,13 +11,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BeautyCenterSystem.Models; // تأكد من وجود الموديلات
 
 namespace beautyCenterSystem
 {
     public partial class UC_Appointments : UserControl
     {
         private readonly AppointmentRepository _appointmentRepo;
-        // هذه القائمة ستحتفظ بنسخة من حجوزات اليوم المختار كاملة
         private List<Appointment> _allDayAppointments = new List<Appointment>();
 
         public UC_Appointments()
@@ -30,31 +30,22 @@ namespace beautyCenterSystem
         {
             try
             {
-                // 1. تنظيف جدول التفاصيل فوراً عند بدء تغيير التاريخ
                 dgvDetails.DataSource = null;
-
                 DateTime selectedDate = dtpFilterDate.Value.Date;
 
-                // 2. جلب البيانات من قاعدة البيانات
                 var appointments = await _appointmentRepo.GetByDateAsync(selectedDate);
                 _allDayAppointments = appointments.ToList();
 
-                // 3. ربط البيانات بالجدول الرئيسي
                 dgvAppointments.DataSource = null;
                 dgvAppointments.DataSource = _allDayAppointments;
 
-                // 4. تنسيق الأعمدة
                 FormatGrid();
 
-                // الحل لمشكلة التغييرة الأولى:
                 if (_allDayAppointments.Count > 0)
                 {
                     dgvAppointments.ClearSelection();
-
-                    // اختيار السطر الأول برمجياً سيجبر حدث SelectionChanged على العمل
                     dgvAppointments.Rows[0].Selected = true;
 
-                    // استدعاء يدوي لدالة جلب التفاصيل للسطر الأول لضمان التحديث من المرة الأولى
                     int firstAppId = Convert.ToInt32(dgvAppointments.Rows[0].Cells["AppointmentID"].Value);
                     var services = await _appointmentRepo.GetAppointmentServicesAsync(firstAppId);
                     dgvDetails.DataSource = services.ToList();
@@ -181,21 +172,45 @@ namespace beautyCenterSystem
             }
         }
 
+        // تم تعديل هذه الدالة لحل مشكلة الـ Handle Created
         private async void UC_Appointments_Load(object sender, EventArgs e)
         {
             FormatGrid();
             await LoadAppointments();
 
-            btnRefresh.Size = new Size(76, 67);
-            this.BeginInvoke((MethodInvoker)delegate
+            // ضبط التنسيق الجمالي للأزرار مع التحقق من الـ Handle
+            if (this.IsHandleCreated)
             {
-                btnRefresh.ForeColor = AppTheme.Charcoal;
-                btnRefresh.FlatStyle = FlatStyle.Flat;
-                btnRefresh.FlatAppearance.BorderSize = 1;
-                btnRefresh.FlatAppearance.BorderColor = AppTheme.Charcoal;
-                btnRefresh.BackColor = Color.White;
-                btnRefresh.TextAlign = ContentAlignment.MiddleCenter;
-            });
+                ApplyButtonStyles();
+            }
+            else
+            {
+                this.HandleCreated += (s, ev) => ApplyButtonStyles();
+            }
+        }
+
+        private void ApplyButtonStyles()
+        {
+            // نستخدم Invoke فقط إذا كنا خارج خيط الواجهة الأساسي
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke((MethodInvoker)delegate { InternalStyleLogic(); });
+            }
+            else
+            {
+                InternalStyleLogic();
+            }
+        }
+
+        private void InternalStyleLogic()
+        {
+            btnRefresh.Size = new Size(76, 67);
+            btnRefresh.ForeColor = AppTheme.Charcoal;
+            btnRefresh.FlatStyle = FlatStyle.Flat;
+            btnRefresh.FlatAppearance.BorderSize = 1;
+            btnRefresh.FlatAppearance.BorderColor = AppTheme.Charcoal;
+            btnRefresh.BackColor = Color.White;
+            btnRefresh.TextAlign = ContentAlignment.MiddleCenter;
         }
 
         private async void dtpFilterDate_ValueChanged(object sender, EventArgs e)
@@ -213,14 +228,13 @@ namespace beautyCenterSystem
             else
             {
                 dgvAppointments.DataSource = _allDayAppointments
-                    .Where(a => a.CustomerName.ToLower().Contains(filter)).ToList();
+                    .Where(a => a.CustomerName != null && a.CustomerName.ToLower().Contains(filter)).ToList();
             }
             FormatGrid();
         }
 
         private async void btnAddAppointment_Click(object sender, EventArgs e)
         {
-            // عند الإضافة نستخدم المشيد الافتراضي (appId = 0)
             using (var addForm = new AddAppointmentForm())
             {
                 AppTheme.Apply(addForm);
@@ -313,7 +327,6 @@ namespace beautyCenterSystem
                     return;
                 }
 
-                // التعديل الجوهري: نمرر appId للفورم لاستثنائه من فحص التعارض
                 using (var editForm = new AddAppointmentForm(appId))
                 {
                     if (editForm.ShowDialog() == DialogResult.OK)
@@ -330,7 +343,6 @@ namespace beautyCenterSystem
 
         private async void btnCompleteAndPay_Click(object sender, EventArgs e)
         {
-            // 1. التأكد من اختيار حجز
             if (dgvAppointments.SelectedRows.Count == 0)
             {
                 MessageBox.Show("يرجى اختيار الحجز المراد إتمامه من الجدول أولاً.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -345,13 +357,11 @@ namespace beautyCenterSystem
                 decimal totalAmount = Convert.ToDecimal(selectedRow.Cells["TotalPrice"].Value);
                 string currentStatus = selectedRow.Cells["Status"].Value.ToString();
 
-                // --- التعديل المطلوب هنا ---
                 if (currentStatus == "Cancelled")
                 {
                     MessageBox.Show("عذراً، لا يمكن إتمام أو دفع حجز ملغي.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-                // ---------------------------
 
                 if (currentStatus == "Completed")
                 {
@@ -359,21 +369,18 @@ namespace beautyCenterSystem
                     return;
                 }
 
-                // 2. فتح فورم الدفع
                 using (var payForm = new CheckoutForm(customerName, totalAmount))
                 {
                     if (payForm.ShowDialog() == DialogResult.OK)
                     {
-                        // 3. تحديث البيانات في قاعدة البيانات
                         bool isSuccess = await _appointmentRepo.CompleteAndPayAsync(
                             appId, totalAmount, payForm.AmountPaid, payForm.Discount,
                             payForm.PaymentMethod, CurrentSession.UserID);
 
                         if (isSuccess)
                         {
-                            await LoadAppointments(); // تحديث الجدول
+                            await LoadAppointments();
 
-                            // 4. عملية الطباعة
                             try
                             {
                                 var settingsRepo = new SettingsRepository(new DbConnectionFactory());
@@ -430,7 +437,6 @@ namespace beautyCenterSystem
             {
                 int appId = Convert.ToInt32(dgvAppointments.CurrentRow.Cells["AppointmentID"].Value);
 
-                // جلب البيانات اللازمة
                 var settingsRepo = new SettingsRepository(new DbConnectionFactory());
                 var settings = await settingsRepo.GetSettingsAsync();
                 var services = await _appointmentRepo.GetAppointmentServicesAsync(appId);
@@ -451,12 +457,11 @@ namespace beautyCenterSystem
                     InvoiceNumber = appId,
                     CustomerName = row.Cells["CustomerName"].Value.ToString(),
                     TotalAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value),
-                    NetAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value), // افترضنا هنا الصافي هو الإجمالي لإعادة الطباعة
+                    NetAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value),
                     CashierName = CurrentSession.Username,
                     Items = services.Select(s => new InvoiceItem { ServiceName = s.ServiceName, Price = s.Price }).ToList()
                 };
 
-                // هنا نستخدم المعاينة قبل الطباعة
                 printer.PrintReceipt(showPreview: false);
             }
             catch (Exception ex) { MessageBox.Show("خطأ في الطباعة: " + ex.Message); }

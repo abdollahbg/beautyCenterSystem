@@ -1,13 +1,11 @@
 ﻿using beautyCenterSystem.Data.Repositories;
 using BeautyCenterSystem.Data;
 using BeautyCenterSystem.Data.Repositories;
+using BeautyCenterSystem.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -18,302 +16,207 @@ namespace beautyCenterSystem
         private readonly ServiceRepository _serviceRepo;
         private readonly AppointmentRepository _appointmentRepo;
         private readonly CustomerRepository _customerRepo;
+        private readonly RoomRepository _roomRepo;
         private int _editAppId = 0;
 
-        // متغير لاسم الموظفة الحالية (يمكنك جلبها من شاشة تسجيل الدخول لاحقاً)
-        private string _currentUserName = CurrentSession.Username;
+        private UC_CartSummary _cartSummary;
+        private UC_RoomNavigator _roomNav;
+        private UC_ServiceSelector _serviceSelector;
+
+        private List<Service> _selectedServices = new List<Service>();
 
         public AddAppointmentForm()
         {
             InitializeComponent();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            _serviceRepo = new ServiceRepository(new DbConnectionFactory());
-            _appointmentRepo = new AppointmentRepository(new DbConnectionFactory());
-            _customerRepo = new CustomerRepository(new DbConnectionFactory());
-            dtpAppointmentDate.MinDate = DateTime.Today;
+            this.AutoScaleMode = AutoScaleMode.None;
+
+            var factory = new DbConnectionFactory();
+            _serviceRepo = new ServiceRepository(factory);
+            _appointmentRepo = new AppointmentRepository(factory);
+            _customerRepo = new CustomerRepository(factory);
+            _roomRepo = new RoomRepository(factory);
         }
 
         public AddAppointmentForm(int appId) : this()
         {
             _editAppId = appId;
             this.Text = "تعديل بيانات الحجز";
-            btnSave.Text = "تحديث البيانات";
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-        }
-
-        private async Task LoadAppointmentDataForEdit()
-        {
-            if (_editAppId <= 0) return;
-
-            try
-            {
-                var currentApp = await _appointmentRepo.GetByIdAsync(_editAppId);
-
-                if (currentApp != null)
-                {
-                    dtpAppointmentDate.MinDate = currentApp.AppointmentDate.Date.AddDays(-1);
-                    cmbCustomerSearch.SelectedValue = currentApp.CustomerID;
-                    dtpAppointmentDate.Value = currentApp.AppointmentDate.Date;
-                    dtpAppointmentTime.Value = currentApp.AppointmentDate;
-                }
-
-                var selectedServices = await _appointmentRepo.GetAppointmentServicesAsync(_editAppId);
-                var selectedServiceIds = selectedServices.Select(s => s.ServiceID).ToList();
-
-                foreach (ListViewItem item in lvServices.Items)
-                {
-                    if (item.Tag is Service service)
-                    {
-                        if (selectedServiceIds.Contains(service.ServiceID))
-                        {
-                            item.Checked = true;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"خطأ في تحميل بيانات التعديل: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private async Task LoadServicesToListView()
-        {
-            try
-            {
-                var services = await _serviceRepo.GetAllWithRoomNamesAsync();
-                lvServices.Items.Clear();
-
-                foreach (var service in services)
-                {
-                    ListViewItem item = new ListViewItem(service.ServiceName);
-                    item.SubItems.Add(service.Price.ToString("N2"));
-                    item.SubItems.Add($"{service.DurationMinutes} دقيقة");
-                    item.Tag = service;
-                    lvServices.Items.Add(item);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"خطأ في تحميل الخدمات: {ex.Message}");
-            }
-        }
-
-        private async Task LoadCustomersToCombo()
-        {
-            try
-            {
-                var customers = await _customerRepo.GetAllAsync();
-                cmbCustomerSearch.DataSource = customers.ToList();
-                cmbCustomerSearch.DisplayMember = "CustomerName";
-                cmbCustomerSearch.ValueMember = "CustomerID";
-                cmbCustomerSearch.SelectedIndex = -1;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"خطأ في تحميل قائمة العميلات: {ex.Message}");
-            }
-        }
-
-        private async void btnSave_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // 1. التحقق من البيانات الأساسية
-                if (cmbCustomerSearch.SelectedValue == null)
-                {
-                    MessageBox.Show("من فضلك، اختر عميلة أولاً.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (lvServices.CheckedItems.Count == 0)
-                {
-                    MessageBox.Show("يجب اختيار خدمة واحدة على الأقل.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // 2. تجميع التاريخ والوقت في متغير واحد
-                DateTime appointmentFullDate = dtpAppointmentDate.Value.Date + dtpAppointmentTime.Value.TimeOfDay;
-
-                // --- التعديل: منع الحجز في وقت ماضي (فقط في حالة الإضافة الجديدة) ---
-                // نستخدم _editAppId == 0 للتأكد أننا في وضع "الإضافة" وليس "التعديل"
-                if (_editAppId == 0 && appointmentFullDate < DateTime.Now.AddMinutes(-1))
-                {
-                    MessageBox.Show("عذراً، لا يمكن حجز موعد في تاريخ أو وقت مضى. يرجى اختيار وقت مستقبلي.",
-                                    "خطأ في الوقت", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                // ------------------------------------------------------------------
-
-                // 3. تجهيز الخدمات المختارة وحساب الإجمالي
-                var selectedServices = new List<Service>();
-                int totalMinutes = 0;
-                decimal totalPrice = 0;
-
-                foreach (ListViewItem item in lvServices.CheckedItems)
-                {
-                    if (item.Tag is Service service)
-                    {
-                        selectedServices.Add(service);
-                        totalMinutes += service.DurationMinutes;
-                        totalPrice += service.Price;
-                    }
-                }
-
-                // 4. فحص تعارض المواعيد
-                var serviceIds = selectedServices.Select(s => s.ServiceID).ToList();
-
-                // نمرر _editAppId لاستثنائه من الفحص في حالة التعديل حتى لا يتعارض الحجز مع نفسه
-                string conflictResult = await _appointmentRepo.CheckConflictAsync(appointmentFullDate, totalMinutes, serviceIds, _editAppId);
-
-                if (!string.IsNullOrEmpty(conflictResult))
-                {
-                    var confirm = MessageBox.Show(
-                        $"تنبيه تعارض: {conflictResult} مشغولة في هذا الوقت.\nهل تريد إتمام العملية على أي حال؟",
-                        "تأكيد التعارض", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-
-                    if (confirm == DialogResult.No) return;
-                }
-
-                // 5. إنشاء كائن الحجز (Appointment Object)
-                var appointmentData = new Appointment
-                {
-                    AppointmentID = _editAppId,
-                    CustomerID = (int)cmbCustomerSearch.SelectedValue,
-                    AppointmentDate = appointmentFullDate,
-                    TotalPrice = totalPrice,
-                    Status = "Pending",
-                    CreatedBy = CurrentSession.UserID,
-                    SelectedServices = selectedServices
-                };
-
-                // 6. تنفيذ العملية (إضافة أو تحديث)
-                bool isSuccess = false;
-
-                if (_editAppId > 0)
-                {
-                    // حالة التعديل
-                    isSuccess = await _appointmentRepo.UpdateAsync(appointmentData);
-                }
-                else
-                {
-                    // حالة الإضافة الجديدة
-                    int finalAppId = await _appointmentRepo.CreateAndGetIdAsync(appointmentData);
-                    isSuccess = finalAppId > 0;
-                }
-
-                // 7. النتيجة النهائية وإغلاق الفورم
-                if (isSuccess)
-                {
-                    string msg = _editAppId > 0 ? "تم تحديث بيانات الحجز بنجاح!" : "تم تسجيل الحجز بنجاح!";
-                    MessageBox.Show(msg, "تم العملية", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    this.DialogResult = DialogResult.OK;
-                    this.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"حدث خطأ غير متوقع: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-        private void lvServices_ItemChecked(object sender, ItemCheckedEventArgs e)
-        {
-            decimal total = 0;
-            int totalMinutes = 0;
-
-            foreach (ListViewItem item in lvServices.CheckedItems)
-            {
-                var service = (Service)item.Tag;
-                total += service.Price;
-                totalMinutes += service.DurationMinutes;
-            }
-
-            lblTotalPrice.Text = $"إجمالي السعر: {total:N2} د.ل";
-            lblTotalDuration.Text = $"المدة الإجمالية: {totalMinutes} دقيقة";
-        }
-
-        private async void btnAddCustomer_Click(object sender, EventArgs e)
-        {
-            using (var customerForm = new AddCustomerForm())
-            {
-                if (customerForm.ShowDialog() == DialogResult.OK)
-                {
-                    await LoadCustomersToCombo();
-                    MessageBox.Show("تم إضافة العميلة وتحديث القائمة بنجاح.");
-                    if (cmbCustomerSearch.Items.Count > 0)
-                    {
-                        cmbCustomerSearch.SelectedIndex = 0;
-                    }
-                }
-            }
         }
 
         private async void AddAppointmentForm_Load(object sender, EventArgs e)
         {
             try
             {
-                AppTheme.Apply(this);
-                BtnCancel.BackColor = Color.DarkGray;
-                SetupServicesListView();
+                SetupNewUI();
+                await InitializeData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"حدث خطأ أثناء تحميل البيانات: {ex.Message}");
+            }
+        }
 
-                await Task.WhenAll(LoadServicesToListView(), LoadCustomersToCombo());
+        private void SetupNewUI()
+        {
+            _cartSummary = new UC_CartSummary { Dock = DockStyle.Fill };
+            pnlSidebar.Controls.Clear();
+            pnlSidebar.Controls.Add(_cartSummary);
 
-                dtpAppointmentTime.Format = DateTimePickerFormat.Custom;
-               dtpAppointmentTime.CustomFormat = "mm : hh tt";
-                dtpAppointmentTime.ShowUpDown = true;
-
-                dtpAppointmentDate.Value = DateTime.Now;
-                dtpAppointmentTime.Value = DateTime.Now;
-
-                if (_editAppId > 0)
+            _cartSummary.OnAddCustomerClicked += btnAddCustomer_Click;
+            _cartSummary.OnSaveAppointmentClicked += btnSave_Click;
+            _cartSummary.OnRemoveServiceRequested += (s, id) => {
+                var item = _selectedServices.FirstOrDefault(x => x.ServiceID == id);
+                if (item != null)
                 {
-                    await LoadAppointmentDataForEdit();
+                    _selectedServices.Remove(item);
+                    _cartSummary.RefreshCart(_selectedServices);
+                }
+            };
+
+            _roomNav = new UC_RoomNavigator();
+            // لضمان عدم تغير شكل الكارد، تأكد أن UC_RoomNavigator يحتوي على FlowLayoutPanel 
+            // بخاصية WrapContents = true و Anchor محدد بشكل صحيح.
+            _roomNav.OnRoomSelected += async (s, id) => await OpenRoomServices(id);
+
+            _serviceSelector = new UC_ServiceSelector();
+            _serviceSelector.OnBackClicked += (s, ev) => ShowUC(_roomNav);
+            _serviceSelector.OnServiceAdded += async (s, id) => await AddServiceToCart(id);
+
+            dtpAppointmentDate.Value = DateTime.Now;
+            dtpAppointmentTime.Value = DateTime.Now;
+
+            AppTheme.Apply(this);
+        }
+
+        private async Task InitializeData()
+        {
+            await LoadCustomersToCartCombo();
+
+            // جلب الغرف (ويمكن فلترتها هنا إذا كان هناك عمود IsActive للغرف)
+            var rooms = await _roomRepo.GetAllAsync();
+            _roomNav.LoadRooms(rooms.ToList());
+
+            ShowUC(_roomNav);
+
+            if (_editAppId > 0) await LoadAppointmentDataForEdit();
+        }
+
+        private void ShowUC(UserControl uc)
+        {
+            // 1. إذا لم تكن الواجهة مضافة مسبقاً للوحة العرض، قم بإضافتها
+            if (!pnlMainContent.Controls.Contains(uc))
+            {
+                uc.Dock = DockStyle.Fill;
+                pnlMainContent.Controls.Add(uc);
+            }
+
+            // 2. اجلب الواجهة إلى المقدمة لتغطية الواجهات الأخرى (بدون مسحها)
+            uc.BringToFront();
+
+            // 3. إنعاش الواجهة لضمان جودة الرسم
+            uc.Refresh();
+        }
+
+        private async Task OpenRoomServices(int roomId)
+        {
+            var allServices = await _serviceRepo.GetByRoomIdAsync(roomId);
+
+            // التعديل: فلترة الخدمات النشطة فقط برمجياً لضمان عدم ظهور المحذوف
+            var activeServices = allServices.Where(s => s.IsActive).ToList();
+
+            var room = await _roomRepo.GetByIdAsync(roomId);
+            _serviceSelector.LoadServices(room?.RoomName ?? "", activeServices);
+            ShowUC(_serviceSelector);
+        }
+
+        private async Task AddServiceToCart(int serviceId)
+        {
+            var services = await _serviceRepo.GetAllWithRoomNamesAsync();
+
+            // التعديل: التأكد من أن الخدمة المختارة نشطة وليست محذوفة
+            var service = services.FirstOrDefault(s => s.ServiceID == serviceId && s.IsActive);
+
+            if (service != null && !_selectedServices.Any(x => x.ServiceID == serviceId))
+            {
+                _selectedServices.Add(service);
+                _cartSummary.RefreshCart(_selectedServices);
+            }
+        }
+
+        private async Task LoadCustomersToCartCombo()
+        {
+            var customers = await _customerRepo.GetAllAsync();
+            _cartSummary.FillCustomers(customers.ToList());
+        }
+
+        private async void btnAddCustomer_Click(object sender, EventArgs e)
+        {
+            using (var f = new AddCustomerForm())
+                if (f.ShowDialog() == DialogResult.OK) await LoadCustomersToCartCombo();
+        }
+
+        private async void btnSave_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int? customerId = _cartSummary.SelectedCustomerId;
+                if (!customerId.HasValue || customerId <= 0 || _selectedServices.Count == 0)
+                {
+                    MessageBox.Show("يرجى اختيار عميلة وخدمة واحدة على الأقل.");
+                    return;
+                }
+
+                DateTime fullDate = dtpAppointmentDate.Value.Date + dtpAppointmentTime.Value.TimeOfDay;
+                var serviceIds = _selectedServices.Select(s => s.ServiceID).ToList();
+
+                string conflict = await _appointmentRepo.CheckConflictAsync(fullDate, _selectedServices.Sum(s => s.DurationMinutes), serviceIds, _editAppId);
+                if (!string.IsNullOrEmpty(conflict))
+                {
+                    if (MessageBox.Show($"{conflict} مشغولة. هل تريد المتابعة على أي حال؟", "تنبيه تعارض", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+                        return;
+                }
+
+                var app = new Appointment
+                {
+                    AppointmentID = _editAppId,
+                    CustomerID = customerId.Value,
+                    AppointmentDate = fullDate,
+                    TotalPrice = _selectedServices.Sum(s => s.Price),
+                    Status = "Pending",
+                    CreatedBy = CurrentSession.UserID,
+                    SelectedServices = _selectedServices
+                };
+
+                bool success = _editAppId > 0
+                    ? await _appointmentRepo.UpdateAsync(app)
+                    : (await _appointmentRepo.CreateAndGetIdAsync(app)) > 0;
+
+                if (success)
+                {
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"حدث خطأ أثناء تهيئة الشاشة: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"خطأ أثناء الحفظ: {ex.Message}");
             }
         }
 
-        private void BtnCancel_Click(object sender, EventArgs e)
+        private async Task LoadAppointmentDataForEdit()
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
-        }
-
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (keyData == Keys.Enter)
+            var app = await _appointmentRepo.GetByIdAsync(_editAppId);
+            if (app != null)
             {
-                btnSave.PerformClick();
-                return true;
+                dtpAppointmentDate.Value = app.AppointmentDate.Date;
+                dtpAppointmentTime.Value = app.AppointmentDate;
+                _cartSummary.SelectedCustomerId = app.CustomerID;
             }
-            if (keyData == Keys.Escape)
-            {
-                BtnCancel.PerformClick();
-                return true;
-            }
-            return base.ProcessCmdKey(ref msg, keyData);
-        }
 
-        private void SetupServicesListView()
-        {
-            lvServices.View = View.Details;
-            lvServices.FullRowSelect = true;
-            lvServices.CheckBoxes = true;
-            lvServices.HeaderStyle = ColumnHeaderStyle.Nonclickable;
-            lvServices.RightToLeft = RightToLeft.Yes;
-            lvServices.RightToLeftLayout = true;
-
-            lvServices.Columns.Clear();
-            lvServices.Columns.Add("الخدمة", 220, HorizontalAlignment.Right);
-            lvServices.Columns.Add("السعر", 100, HorizontalAlignment.Center);
-            lvServices.Columns.Add("المدة", 100, HorizontalAlignment.Center);
-
-            lvServices.ItemChecked -= lvServices_ItemChecked;
-            lvServices.ItemChecked += lvServices_ItemChecked;
+            var services = await _appointmentRepo.GetAppointmentServicesAsync(_editAppId);
+            // عند التعديل، نعرض الخدمات المحجوزة مسبقاً حتى لو أصبحت غير نشطة الآن لضمان دقة البيانات التاريخية
+            _selectedServices = services.ToList();
+            _cartSummary.RefreshCart(_selectedServices);
         }
     }
 }

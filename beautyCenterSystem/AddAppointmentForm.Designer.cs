@@ -2,15 +2,8 @@
 {
     partial class AddAppointmentForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,224 +15,111 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddAppointmentForm));
-            panel1 = new Panel();
-            label4 = new Label();
-            label3 = new Label();
-            label2 = new Label();
+            pnlSidebar = new Panel();
+            pnlMainContent = new Panel();
+            pnlFormHeader = new Panel();
             dtpAppointmentTime = new DateTimePicker();
             dtpAppointmentDate = new DateTimePicker();
-            btnAddCustomer = new Button();
-            cmbCustomerSearch = new MaterialSearchableCombo();
-            panel2 = new Panel();
-            BtnCancel = new Button();
-            btnSave = new Button();
-            lblTotalDuration = new Label();
-            lblTotalPrice = new Label();
-            panel3 = new Panel();
-            lvServices = new ListView();
-            panel1.SuspendLayout();
-            panel2.SuspendLayout();
-            panel3.SuspendLayout();
+            label3 = new Label();
+            label4 = new Label();
+            pnlFormHeader.SuspendLayout();
             SuspendLayout();
             // 
-            // panel1
+            // pnlSidebar
             // 
-            panel1.Controls.Add(label4);
-            panel1.Controls.Add(label3);
-            panel1.Controls.Add(label2);
-            panel1.Controls.Add(dtpAppointmentTime);
-            panel1.Controls.Add(dtpAppointmentDate);
-            panel1.Controls.Add(btnAddCustomer);
-            panel1.Controls.Add(cmbCustomerSearch);
-            panel1.Dock = DockStyle.Top;
-            panel1.Location = new Point(0, 0);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(434, 174);
-            panel1.TabIndex = 0;
+            pnlSidebar.Dock = DockStyle.Right;
+            pnlSidebar.Location = new Point(750, 0);
+            pnlSidebar.Name = "pnlSidebar";
+            pnlSidebar.Size = new Size(350, 700);
+            pnlSidebar.TabIndex = 0;
             // 
-            // label4
+            // pnlMainContent
             // 
-            label4.AutoSize = true;
-            label4.Location = new Point(368, 140);
-            label4.Name = "label4";
-            label4.Size = new Size(59, 15);
-            label4.TabIndex = 6;
-            label4.Text = "وقت الحجز";
+            pnlMainContent.Dock = DockStyle.Fill;
+            pnlMainContent.Location = new Point(0, 60);
+            pnlMainContent.Name = "pnlMainContent";
+            pnlMainContent.Size = new Size(750, 640);
+            pnlMainContent.TabIndex = 2;
             // 
-            // label3
+            // pnlFormHeader
             // 
-            label3.AutoSize = true;
-            label3.Location = new Point(367, 97);
-            label3.Name = "label3";
-            label3.Size = new Size(60, 15);
-            label3.TabIndex = 5;
-            label3.Text = "تاريخ الحجز";
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(368, 45);
-            label2.Name = "label2";
-            label2.Size = new Size(63, 15);
-            label2.TabIndex = 4;
-            label2.Text = "اسم العميل";
+            pnlFormHeader.BackColor = Color.White;
+            pnlFormHeader.Controls.Add(dtpAppointmentTime);
+            pnlFormHeader.Controls.Add(dtpAppointmentDate);
+            pnlFormHeader.Controls.Add(label3);
+            pnlFormHeader.Controls.Add(label4);
+            pnlFormHeader.Dock = DockStyle.Top;
+            pnlFormHeader.Location = new Point(0, 0);
+            pnlFormHeader.Name = "pnlFormHeader";
+            pnlFormHeader.Size = new Size(750, 60);
+            pnlFormHeader.TabIndex = 1;
             // 
             // dtpAppointmentTime
             // 
-            dtpAppointmentTime.CustomFormat = "hh:mm tt";
+            dtpAppointmentTime.CustomFormat = "mm:hh tt";
             dtpAppointmentTime.Format = DateTimePickerFormat.Custom;
-            dtpAppointmentTime.Location = new Point(158, 134);
+            dtpAppointmentTime.Location = new Point(20, 18);
             dtpAppointmentTime.Name = "dtpAppointmentTime";
             dtpAppointmentTime.RightToLeft = RightToLeft.Yes;
             dtpAppointmentTime.ShowUpDown = true;
-            dtpAppointmentTime.Size = new Size(200, 23);
+            dtpAppointmentTime.Size = new Size(120, 23);
             dtpAppointmentTime.TabIndex = 3;
             // 
             // dtpAppointmentDate
             // 
-            dtpAppointmentDate.Location = new Point(158, 89);
+            dtpAppointmentDate.Format = DateTimePickerFormat.Short;
+            dtpAppointmentDate.Location = new Point(220, 18);
             dtpAppointmentDate.Name = "dtpAppointmentDate";
-            dtpAppointmentDate.Size = new Size(200, 23);
+            dtpAppointmentDate.Size = new Size(140, 23);
             dtpAppointmentDate.TabIndex = 2;
             // 
-            // btnAddCustomer
+            // label3
             // 
-            btnAddCustomer.Location = new Point(3, 16);
-            btnAddCustomer.Name = "btnAddCustomer";
-            btnAddCustomer.Size = new Size(73, 54);
-            btnAddCustomer.TabIndex = 1;
-            btnAddCustomer.Text = "اضافة عميل جديد";
-            btnAddCustomer.UseVisualStyleBackColor = true;
-            btnAddCustomer.Click += btnAddCustomer_Click;
+            label3.AutoSize = true;
+            label3.Location = new Point(370, 22);
+            label3.Name = "label3";
+            label3.RightToLeft = RightToLeft.Yes;
+            label3.Size = new Size(63, 15);
+            label3.TabIndex = 4;
+            label3.Text = "تاريخ الحجز:";
             // 
-            // cmbCustomerSearch
+            // label4
             // 
-            cmbCustomerSearch.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            cmbCustomerSearch.AutoCompleteSource = AutoCompleteSource.ListItems;
-            cmbCustomerSearch.BackColor = Color.White;
-            cmbCustomerSearch.FlatStyle = FlatStyle.Flat;
-            cmbCustomerSearch.Font = new Font("Segoe UI", 15F);
-            cmbCustomerSearch.FormattingEnabled = true;
-            cmbCustomerSearch.Location = new Point(106, 34);
-            cmbCustomerSearch.Name = "cmbCustomerSearch";
-            cmbCustomerSearch.Size = new Size(252, 36);
-            cmbCustomerSearch.TabIndex = 0;
-            // 
-            // panel2
-            // 
-            panel2.Controls.Add(BtnCancel);
-            panel2.Controls.Add(btnSave);
-            panel2.Controls.Add(lblTotalDuration);
-            panel2.Controls.Add(lblTotalPrice);
-            panel2.Dock = DockStyle.Bottom;
-            panel2.Location = new Point(0, 368);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(434, 143);
-            panel2.TabIndex = 1;
-            // 
-            // BtnCancel
-            // 
-            BtnCancel.Location = new Point(74, 83);
-            BtnCancel.Name = "BtnCancel";
-            BtnCancel.Size = new Size(124, 48);
-            BtnCancel.TabIndex = 9;
-            BtnCancel.Text = "الغاء";
-            BtnCancel.UseVisualStyleBackColor = true;
-            BtnCancel.Click += BtnCancel_Click;
-            // 
-            // btnSave
-            // 
-            btnSave.Location = new Point(257, 83);
-            btnSave.Name = "btnSave";
-            btnSave.Size = new Size(124, 48);
-            btnSave.TabIndex = 8;
-            btnSave.Text = "حفظ";
-            btnSave.UseVisualStyleBackColor = true;
-            btnSave.Click += btnSave_Click;
-            // 
-            // lblTotalDuration
-            // 
-            lblTotalDuration.AutoSize = true;
-            lblTotalDuration.Font = new Font("Segoe UI", 11F);
-            lblTotalDuration.Location = new Point(49, 22);
-            lblTotalDuration.Name = "lblTotalDuration";
-            lblTotalDuration.Size = new Size(94, 20);
-            lblTotalDuration.TabIndex = 1;
-            lblTotalDuration.Text = "الزمن المتوقع";
-            // 
-            // lblTotalPrice
-            // 
-            lblTotalPrice.AutoSize = true;
-            lblTotalPrice.Font = new Font("Segoe UI", 11F);
-            lblTotalPrice.Location = new Point(272, 22);
-            lblTotalPrice.Name = "lblTotalPrice";
-            lblTotalPrice.Size = new Size(62, 20);
-            lblTotalPrice.TabIndex = 0;
-            lblTotalPrice.Text = "الاجمالي";
-            // 
-            // panel3
-            // 
-            panel3.Controls.Add(lvServices);
-            panel3.Dock = DockStyle.Fill;
-            panel3.Location = new Point(0, 174);
-            panel3.Name = "panel3";
-            panel3.Size = new Size(434, 194);
-            panel3.TabIndex = 2;
-            // 
-            // lvServices
-            // 
-            lvServices.Dock = DockStyle.Fill;
-            lvServices.Location = new Point(0, 0);
-            lvServices.Name = "lvServices";
-            lvServices.RightToLeft = RightToLeft.Yes;
-            lvServices.Size = new Size(434, 194);
-            lvServices.TabIndex = 0;
-            lvServices.UseCompatibleStateImageBehavior = false;
+            label4.AutoSize = true;
+            label4.Location = new Point(150, 22);
+            label4.Name = "label4";
+            label4.RightToLeft = RightToLeft.Yes;
+            label4.Size = new Size(62, 15);
+            label4.TabIndex = 5;
+            label4.Text = "وقت الحجز:";
             // 
             // AddAppointmentForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(434, 511);
-            Controls.Add(panel3);
-            Controls.Add(panel2);
-            Controls.Add(panel1);
-            Icon = (Icon)resources.GetObject("$this.Icon");
+            ClientSize = new Size(1100, 700);
+            Controls.Add(pnlMainContent);
+            Controls.Add(pnlFormHeader);
+            Controls.Add(pnlSidebar);
             Name = "AddAppointmentForm";
             StartPosition = FormStartPosition.CenterParent;
-            Text = "اضافة حجز";
+            Text = "إضافة حجز جديد";
             Load += AddAppointmentForm_Load;
-            panel1.ResumeLayout(false);
-            panel1.PerformLayout();
-            panel2.ResumeLayout(false);
-            panel2.PerformLayout();
-            panel3.ResumeLayout(false);
+            pnlFormHeader.ResumeLayout(false);
+            pnlFormHeader.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
 
-        private Panel panel1;
-        private Panel panel2;
-        private Panel panel3;
-        private MaterialSearchableCombo cmbCustomerSearch;
-        private DateTimePicker dtpAppointmentTime;
-        private DateTimePicker dtpAppointmentDate;
-        private Button btnAddCustomer;
-        private Label lblTotalDuration;
-        private Label lblTotalPrice;
-        private Label label4;
-        private Label label3;
-        private Label label2;
-        private Button BtnCancel;
-        private Button btnSave;
-        private ListView lvServices;
+        private System.Windows.Forms.Panel pnlSidebar;
+        private System.Windows.Forms.Panel pnlMainContent;
+        private System.Windows.Forms.Panel pnlFormHeader;
+        private System.Windows.Forms.DateTimePicker dtpAppointmentTime;
+        private System.Windows.Forms.DateTimePicker dtpAppointmentDate;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
     }
 }

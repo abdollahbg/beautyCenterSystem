@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BeautyCenterSystem.Models; // تم إضافة الموديلات
 
 namespace beautyCenterSystem
 {
@@ -21,7 +22,8 @@ namespace beautyCenterSystem
             InitializeComponent();
             _roomRepo = new RoomRepository(new DbConnectionFactory());
 
-
+            // ربط حدث الضغط المزدوج برمجياً لضمان عمله
+            this.dgvRooms.CellDoubleClick += dgvRooms_CellDoubleClick;
         }
 
         protected override async void OnLoad(EventArgs e)
@@ -50,11 +52,52 @@ namespace beautyCenterSystem
         {
             if (dgvRooms.Columns.Count > 0)
             {
-                dgvRooms.Columns["RoomID"].Visible = false;
+                // إخفاء الأعمدة غير الضرورية
+                if (dgvRooms.Columns.Contains("RoomID")) dgvRooms.Columns["RoomID"].Visible = false;
+                if (dgvRooms.Columns.Contains("IsActive")) dgvRooms.Columns["IsActive"].Visible = false;
+
                 dgvRooms.Columns["RoomName"].HeaderText = "اسم الغرفة";
                 dgvRooms.Columns["RoomName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+
+                // --- التعديل الجديد: إضافة تنسيق عمود الأيقونة ---
+                if (dgvRooms.Columns.Contains("IconPath"))
+                {
+                    dgvRooms.Columns["IconPath"].HeaderText = "مسار الأيقونة (نقر مزدوج للتغيير)";
+                    dgvRooms.Columns["IconPath"].Width = 200;
+                    dgvRooms.Columns["IconPath"].ReadOnly = true; // للقراءة فقط لإجبار المستخدم على اختيار ملف
+                }
             }
         }
+
+        // --- التعديل الجديد: دالة اختيار الأيقونة عند النقر المزدوج ---
+        private async void dgvRooms_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // التأكد من أن النقر تم على صف حقيقي وليس العنوان، وعلى عمود الأيقونة
+            if (e.RowIndex >= 0 && dgvRooms.Columns[e.ColumnIndex].Name == "IconPath")
+            {
+                var room = dgvRooms.Rows[e.RowIndex].DataBoundItem as Room;
+                if (room == null) return;
+
+                using (OpenFileDialog ofd = new OpenFileDialog())
+                {
+                    ofd.Title = "اختر أيقونة للغرفة";
+                    ofd.Filter = "Image Files|*.png;*.jpg;*.jpeg;*.bmp";
+
+                    if (ofd.ShowDialog() == DialogResult.OK)
+                    {
+                        room.IconPath = ofd.FileName;
+
+                        // تحديث قاعدة البيانات
+                        bool success = await _roomRepo.UpdateAsync(room);
+                        if (success)
+                        {
+                            await LoadRooms(); // إعادة تحميل البيانات لتحديث المسار في الجدول
+                        }
+                    }
+                }
+            }
+        }
+
         private void dgvRooms_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right && e.RowIndex >= 0)
@@ -79,8 +122,6 @@ namespace beautyCenterSystem
                 await _roomRepo.UpdateAsync(room);
             }
         }
-
-
 
         private async void btnDeleteRoom_Click(object sender, EventArgs e)
         {
@@ -132,7 +173,7 @@ namespace beautyCenterSystem
             }
         }
 
-        private async  void btnAddRoom_Click(object sender, EventArgs e)
+        private async void btnAddRoom_Click(object sender, EventArgs e)
         {
             using (var addForm = new AddRoomForm())
             {
@@ -143,11 +184,8 @@ namespace beautyCenterSystem
                 if (result == DialogResult.OK)
                 {
                     await LoadRooms();
-
                 }
-
             }
         }
     }
 }
-

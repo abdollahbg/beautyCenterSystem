@@ -58,7 +58,8 @@ namespace beautyCenterSystem.Data.Repositories
         public async Task<IEnumerable<Service>> GetByRoomIdAsync(int roomId)
         {
             using var db = _dbFactory.CreateConnection();
-            string sql = "SELECT * FROM Services WHERE RoomID = @RoomId";
+            // التعديل: إضافة شرط WHERE S.IsActive = 1 لضمان جلب النشط فقط
+            string sql = "SELECT * FROM Services WHERE RoomID = @RoomId AND IsActive = 1";
             return await db.QueryAsync<Service>(sql, new { RoomId = roomId });
         }
     }

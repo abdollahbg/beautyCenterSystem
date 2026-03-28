@@ -120,6 +120,7 @@
             dgvRooms.RightToLeft = RightToLeft.Yes;
             dgvRooms.Size = new Size(1000, 635);
             dgvRooms.TabIndex = 2;
+            dgvRooms.CellDoubleClick += dgvRooms_CellDoubleClick;
             dgvRooms.CellEndEdit += dgvRooms_CellEndEdit;
             dgvRooms.CellMouseDown += dgvRooms_CellMouseDown;
             // 
