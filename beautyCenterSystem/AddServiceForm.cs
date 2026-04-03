@@ -24,8 +24,8 @@ namespace beautyCenterSystem
             _roomRepo = new RoomRepository(new DbConnectionFactory());
             _serviceRepo = new ServiceRepository(new DbConnectionFactory());
             AppTheme.Apply(this);
-
         }
+
         protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -33,10 +33,10 @@ namespace beautyCenterSystem
             PnlHeader.BackColor = AppTheme.Primary;
             BtnCancel.BackColor = Color.Gray;
         }
+
         private async Task FillRoomsCombo()
         {
             var rooms = await _roomRepo.GetAllAsync();
-
             cmbRooms.DataSource = rooms.ToList();
             cmbRooms.DisplayMember = "RoomName";
             cmbRooms.ValueMember = "RoomID";
@@ -44,91 +44,110 @@ namespace beautyCenterSystem
 
         private async void btnSave_Click(object sender, EventArgs e)
         {
+            // 1. التحقق من اسم الخدمة
             if (string.IsNullOrWhiteSpace(txtServiceName.Text))
             {
-                MessageBox.Show("يرجى إدخال اسم الخدمة");
+                MessageBox.Show("يرجى إدخال اسم الخدمة", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtServiceName.Focus();
                 return;
             }
 
-            // 2. التحقق من السعر وتحويله بأمان
+            // 2. التحقق من السعر النهائي
             if (!decimal.TryParse(txtPrice.Text, out decimal price) || price <= 0)
             {
-                MessageBox.Show("يرجى إدخال سعر صحيح (أكبر من صفر)");
+                MessageBox.Show("يرجى إدخال سعر الخدمة بشكل صحيح", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtPrice.Focus();
                 return;
             }
 
-            // 3. التحقق من المدة
+            // 3. التحقق من سعر الموظفة (الحقل الجديد)
+            if (!decimal.TryParse(txtEmployeeBasePrice.Text, out decimal empPrice))
+            {
+                // إذا كان الحقل فارغاً نعتبره 0، وإذا كان فيه نص خاطئ ننبه المستخدم
+                if (!string.IsNullOrWhiteSpace(txtEmployeeBasePrice.Text))
+                {
+                    MessageBox.Show("يرجى إدخال سعر الموظفة بشكل صحيح", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtEmployeeBasePrice.Focus();
+                    return;
+                }
+                empPrice = 0;
+            }
+
+            // 4. التحقق من المدة
             if (!int.TryParse(txtDuration.Text, out int duration) || duration <= 0)
             {
-                MessageBox.Show("يرجى إدخال مدة الخدمة بالدقائق");
+                MessageBox.Show("يرجى إدخال مدة الخدمة بالدقائق", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtDuration.Focus();
                 return;
             }
 
-            // 4. التحقق من اختيار الغرفة
+            // 5. التحقق من اختيار الغرفة
             if (cmbRooms.SelectedValue == null)
             {
-                MessageBox.Show("يرجى اختيار غرفة لهذه الخدمة");
+                MessageBox.Show("يرجى اختيار غرفة لهذه الخدمة", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (cmbRooms.SelectedValue == null) return;
-
+            // بناء الكائن مع إضافة الحقل الجديد
             var service = new Service
             {
                 ServiceName = txtServiceName.Text.Trim(),
-                Price = decimal.Parse(txtPrice.Text),
-                DurationMinutes = int.Parse(txtDuration.Text),
-                RoomID = (int)cmbRooms.SelectedValue
+                Price = price,
+                EmployeeBasePrice = empPrice, // ربط القيمة هنا
+                DurationMinutes = duration,
+                RoomID = (int)cmbRooms.SelectedValue,
+                IsActive = true
             };
 
-            await _serviceRepo.AddAsync(service);
-            this.DialogResult = DialogResult.OK;
+            try
+            {
+                await _serviceRepo.AddAsync(service);
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"حدث خطأ أثناء الحفظ: {ex.Message}");
+            }
         }
 
+        // توحيد حدث منع الحروف للأسعار (يمكنك ربط الحقلين بهذا الحدث من الديزاينر)
         private void txtPrice_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // 1. السماح بالأرقام، مفاتيح التحكم (مثل Backspace)، والنقطة العشرية
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.'))
             {
                 e.Handled = true;
-                return;
             }
 
-            // 2. التحقق من النقطة العشرية باستخدام اسم الأداة مباشرة لتجنب الـ Null
-            if (e.KeyChar == '.')
+            // منع تكرار النقطة العشرية
+            var textBox = sender as MaterialTextBox2;
+            if (e.KeyChar == '.' && textBox.Text.Contains("."))
             {
-                // استخدم اسم التكست بوكس الخاص بك مباشرة هنا
-                if (txtPrice.Text.Contains("."))
-                {
-                    e.Handled = true;
-                }
+                e.Handled = true;
             }
         }
+
+        private void txtDuration_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            // إذا ضغط المستخدم Enter وكان التركيز (Focus) "ليس" في حقل الملاحظات
             if (keyData == Keys.Enter)
             {
-                btnSave.PerformClick(); // نفذ كود زر الحفظ
-                return true; // أخبر النظام أننا تعاملنا مع الضغطة ولا داعي لعمل "Beep"
+                btnSave.PerformClick();
+                return true;
             }
-
-            // إذا ضغط Esc، أغلق الفورم (مثل زر الكانسل)
             if (keyData == Keys.Escape)
             {
                 BtnCancel.PerformClick();
                 return true;
             }
-
             return base.ProcessCmdKey(ref msg, keyData);
-        }
-        private void txtDuration_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            // السماح بالأرقام ومفتاح Backspace فقط
-            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
-            {
-                e.Handled = true;
-            }
         }
 
         private void BtnCancel_Click(object sender, EventArgs e)

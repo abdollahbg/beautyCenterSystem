@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq; // أضفنا هذا لاستخدام Linq
 using System.Windows.Forms;
 using BeautyCenterSystem.Models;
 
@@ -9,10 +10,12 @@ namespace beautyCenterSystem
 {
     public partial class UC_RoomNavigator : UserControl
     {
-        public event EventHandler<int> OnRoomSelected;
+        // التعديل الجوهري: الحدث الآن يمرر كائن الغرفة بالكامل لسهولة فحص البيانات (مثل الاسم)
+        public event EventHandler<Room> OnRoomSelected;
 
         private FlowLayoutPanel _flpRooms;
         private Label _lblTitle;
+        private List<Room> _loadedRooms; // حفظ النسخة المحلية للغرف
 
         public UC_RoomNavigator()
         {
@@ -27,7 +30,7 @@ namespace beautyCenterSystem
 
             _lblTitle = new Label
             {
-                Text = "اختر الغرفة",
+                Text = "اختر القسم أو الغرفة",
                 Font = AppTheme.GetFont(20, FontStyle.Bold),
                 ForeColor = AppTheme.Charcoal,
                 AutoSize = true,
@@ -41,8 +44,7 @@ namespace beautyCenterSystem
                 Size = new Size(this.Width - 40, this.Height - 100),
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
                 AutoScroll = true,
-                RightToLeft = RightToLeft.Yes, // هذا يعكس الترتيب تلقائياً ليكون من اليمين لليسار
-                // التعديل الأول: نجعله LeftToRight لأن RightToLeft.Yes ستقوم بعكسه. وضع الاثنان معاً يسبب مشاكل الاستطالة
+                RightToLeft = RightToLeft.Yes,
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = true
             };
@@ -58,6 +60,7 @@ namespace beautyCenterSystem
 
         public void LoadRooms(List<Room> rooms)
         {
+            _loadedRooms = rooms; // تخزين الغرف
             _flpRooms.SuspendLayout();
             _flpRooms.Controls.Clear();
 
@@ -65,14 +68,15 @@ namespace beautyCenterSystem
             {
                 foreach (var room in rooms)
                 {
-                    Panel roomCard = CreateRoomCard(room.RoomID, room.RoomName, room.IconPath);
+                    // نمرر الكائن كاملاً للدالة المنشئة للكارت
+                    Panel roomCard = CreateRoomCard(room);
                     _flpRooms.Controls.Add(roomCard);
                 }
             }
             _flpRooms.ResumeLayout();
         }
 
-        private Panel CreateRoomCard(int roomId, string roomName, string iconPath)
+        private Panel CreateRoomCard(Room room)
         {
             Size cardSize = new Size(180, 180);
 
@@ -84,8 +88,7 @@ namespace beautyCenterSystem
                 Margin = new Padding(15),
                 BackColor = AppTheme.White,
                 Cursor = Cursors.Hand,
-                Tag = roomId,
-                // التعديل الثاني الحاسم: منع الكارد من التمدد العشوائي نهائياً
+                Tag = room.RoomID, // لا نزال نحتفظ بالـ ID في الـ Tag للضرورة
                 Anchor = AnchorStyles.None,
                 Dock = DockStyle.None
             };
@@ -100,16 +103,16 @@ namespace beautyCenterSystem
 
             try
             {
-                if (!string.IsNullOrEmpty(iconPath) && File.Exists(iconPath))
-                    picIcon.Image = Image.FromFile(iconPath);
+                if (!string.IsNullOrEmpty(room.IconPath) && File.Exists(room.IconPath))
+                    picIcon.Image = Image.FromFile(room.IconPath);
                 else
                     picIcon.BackColor = Color.Transparent;
             }
-            catch { }
+            catch { /* معالجة الخطأ في حال كانت الصورة تالفة */ }
 
             Label lblName = new Label
             {
-                Text = roomName,
+                Text = room.RoomName,
                 Font = AppTheme.GetFont(14, FontStyle.Bold),
                 ForeColor = AppTheme.Charcoal,
                 AutoSize = false,
@@ -119,6 +122,7 @@ namespace beautyCenterSystem
                 Enabled = false
             };
 
+            // تأثيرات التمرير
             card.MouseEnter += (s, e) => {
                 card.BackColor = AppTheme.RoseGold;
                 lblName.ForeColor = AppTheme.Primary;
@@ -129,7 +133,8 @@ namespace beautyCenterSystem
                 lblName.ForeColor = AppTheme.Charcoal;
             };
 
-            card.Click += (s, e) => OnRoomSelected?.Invoke(this, roomId);
+            // عند الضغط، نرسل كائن الغرفة بالكامل
+            card.Click += (s, e) => OnRoomSelected?.Invoke(this, room);
 
             card.Controls.Add(picIcon);
             card.Controls.Add(lblName);

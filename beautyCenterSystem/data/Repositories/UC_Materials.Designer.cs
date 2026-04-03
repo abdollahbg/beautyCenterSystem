@@ -174,10 +174,8 @@
             dgvMaterials.RightToLeft = RightToLeft.Yes;
             dgvMaterials.Size = new Size(1000, 635);
             dgvMaterials.TabIndex = 2;
-            dgvMaterials.CellClick += dgvMaterials_CellClick;
             dgvMaterials.CellValueChanged += dgvMaterials_CellValueChanged;
             dgvMaterials.CurrentCellDirtyStateChanged += dgvMaterials_CurrentCellDirtyStateChanged;
-            dgvMaterials.MouseDown += dgvMaterials_MouseDown;
             // 
             // UC_Materials
             // 

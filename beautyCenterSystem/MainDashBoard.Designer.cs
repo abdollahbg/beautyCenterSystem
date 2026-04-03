@@ -22,6 +22,8 @@
             btnSettings = new FontAwesome.Sharp.IconButton();
             btnInvoices = new FontAwesome.Sharp.IconButton();
             btnMaterials = new FontAwesome.Sharp.IconButton();
+            btnGym = new FontAwesome.Sharp.IconButton();
+            btnEmployees = new FontAwesome.Sharp.IconButton();
             btnRooms = new FontAwesome.Sharp.IconButton();
             btnServices = new FontAwesome.Sharp.IconButton();
             btnCustomers = new FontAwesome.Sharp.IconButton();
@@ -46,6 +48,8 @@
             pnlSidebar.Controls.Add(btnSettings);
             pnlSidebar.Controls.Add(btnInvoices);
             pnlSidebar.Controls.Add(btnMaterials);
+            pnlSidebar.Controls.Add(btnGym);
+            pnlSidebar.Controls.Add(btnEmployees);
             pnlSidebar.Controls.Add(btnRooms);
             pnlSidebar.Controls.Add(btnServices);
             pnlSidebar.Controls.Add(btnCustomers);
@@ -68,10 +72,10 @@
             btnSettings.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnSettings.IconSize = 35;
             btnSettings.ImageAlign = ContentAlignment.MiddleRight;
-            btnSettings.Location = new Point(0, 490);
+            btnSettings.Location = new Point(0, 475);
             btnSettings.Name = "btnSettings";
             btnSettings.Padding = new Padding(0, 0, 15, 0);
-            btnSettings.Size = new Size(200, 60);
+            btnSettings.Size = new Size(200, 45);
             btnSettings.TabIndex = 8;
             btnSettings.Text = "الإعدادات";
             btnSettings.TextAlign = ContentAlignment.MiddleRight;
@@ -90,7 +94,7 @@
             btnInvoices.Location = new Point(0, 430);
             btnInvoices.Name = "btnInvoices";
             btnInvoices.Padding = new Padding(0, 0, 15, 0);
-            btnInvoices.Size = new Size(200, 60);
+            btnInvoices.Size = new Size(200, 45);
             btnInvoices.TabIndex = 7;
             btnInvoices.Text = "الفواتير والمالية";
             btnInvoices.TextAlign = ContentAlignment.MiddleRight;
@@ -106,16 +110,53 @@
             btnMaterials.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnMaterials.IconSize = 35;
             btnMaterials.ImageAlign = ContentAlignment.MiddleRight;
-            btnMaterials.Location = new Point(0, 370);
+            btnMaterials.Location = new Point(0, 385);
             btnMaterials.Name = "btnMaterials";
             btnMaterials.Padding = new Padding(0, 0, 15, 0);
-            btnMaterials.Size = new Size(200, 60);
+            btnMaterials.Size = new Size(200, 45);
             btnMaterials.TabIndex = 6;
             btnMaterials.Text = "المخزون والمواد";
             btnMaterials.TextAlign = ContentAlignment.MiddleRight;
             btnMaterials.TextImageRelation = TextImageRelation.ImageBeforeText;
             btnMaterials.UseVisualStyleBackColor = true;
             btnMaterials.Click += btnMaterials_Click;
+            // 
+            // btnGym
+            // 
+            btnGym.Dock = DockStyle.Top;
+            btnGym.IconChar = FontAwesome.Sharp.IconChar.Dumbbell;
+            btnGym.IconColor = Color.Black;
+            btnGym.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnGym.IconSize = 35;
+            btnGym.ImageAlign = ContentAlignment.MiddleRight;
+            btnGym.Location = new Point(0, 340);
+            btnGym.Name = "btnGym";
+            btnGym.Padding = new Padding(0, 0, 15, 0);
+            btnGym.Size = new Size(200, 45);
+            btnGym.TabIndex = 12;
+            btnGym.Text = "الصالة الرياضية";
+            btnGym.TextAlign = ContentAlignment.MiddleRight;
+            btnGym.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnGym.UseVisualStyleBackColor = true;
+            // 
+            // btnEmployees
+            // 
+            btnEmployees.Dock = DockStyle.Top;
+            btnEmployees.IconChar = FontAwesome.Sharp.IconChar.UserTie;
+            btnEmployees.IconColor = Color.Black;
+            btnEmployees.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnEmployees.IconSize = 35;
+            btnEmployees.ImageAlign = ContentAlignment.MiddleRight;
+            btnEmployees.Location = new Point(0, 295);
+            btnEmployees.Name = "btnEmployees";
+            btnEmployees.Padding = new Padding(0, 0, 15, 0);
+            btnEmployees.Size = new Size(200, 45);
+            btnEmployees.TabIndex = 11;
+            btnEmployees.Text = "الموظفات";
+            btnEmployees.TextAlign = ContentAlignment.MiddleRight;
+            btnEmployees.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnEmployees.UseVisualStyleBackColor = true;
+            btnEmployees.Click += btnEmployees_Click;
             // 
             // btnRooms
             // 
@@ -125,10 +166,10 @@
             btnRooms.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnRooms.IconSize = 35;
             btnRooms.ImageAlign = ContentAlignment.MiddleRight;
-            btnRooms.Location = new Point(0, 310);
+            btnRooms.Location = new Point(0, 250);
             btnRooms.Name = "btnRooms";
             btnRooms.Padding = new Padding(0, 0, 15, 0);
-            btnRooms.Size = new Size(200, 60);
+            btnRooms.Size = new Size(200, 45);
             btnRooms.TabIndex = 5;
             btnRooms.Text = "إدارة الغرف";
             btnRooms.TextAlign = ContentAlignment.MiddleRight;
@@ -144,10 +185,10 @@
             btnServices.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnServices.IconSize = 35;
             btnServices.ImageAlign = ContentAlignment.MiddleRight;
-            btnServices.Location = new Point(0, 250);
+            btnServices.Location = new Point(0, 205);
             btnServices.Name = "btnServices";
             btnServices.Padding = new Padding(0, 0, 15, 0);
-            btnServices.Size = new Size(200, 60);
+            btnServices.Size = new Size(200, 45);
             btnServices.TabIndex = 4;
             btnServices.Text = "خدمات المركز";
             btnServices.TextAlign = ContentAlignment.MiddleRight;
@@ -163,10 +204,10 @@
             btnCustomers.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnCustomers.IconSize = 35;
             btnCustomers.ImageAlign = ContentAlignment.MiddleRight;
-            btnCustomers.Location = new Point(0, 190);
+            btnCustomers.Location = new Point(0, 160);
             btnCustomers.Name = "btnCustomers";
             btnCustomers.Padding = new Padding(0, 0, 15, 0);
-            btnCustomers.Size = new Size(200, 60);
+            btnCustomers.Size = new Size(200, 45);
             btnCustomers.TabIndex = 3;
             btnCustomers.Text = "العملاء";
             btnCustomers.TextAlign = ContentAlignment.MiddleRight;
@@ -182,10 +223,10 @@
             btnAppointments.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnAppointments.IconSize = 35;
             btnAppointments.ImageAlign = ContentAlignment.MiddleRight;
-            btnAppointments.Location = new Point(0, 130);
+            btnAppointments.Location = new Point(0, 115);
             btnAppointments.Name = "btnAppointments";
             btnAppointments.Padding = new Padding(0, 0, 15, 0);
-            btnAppointments.Size = new Size(200, 60);
+            btnAppointments.Size = new Size(200, 45);
             btnAppointments.TabIndex = 2;
             btnAppointments.Text = "مواعيد اليوم";
             btnAppointments.TextAlign = ContentAlignment.MiddleRight;
@@ -204,7 +245,7 @@
             btnHome.Location = new Point(0, 70);
             btnHome.Name = "btnHome";
             btnHome.Padding = new Padding(0, 0, 15, 0);
-            btnHome.Size = new Size(200, 60);
+            btnHome.Size = new Size(200, 45);
             btnHome.TabIndex = 1;
             btnHome.Text = "الرئيسية";
             btnHome.TextAlign = ContentAlignment.MiddleRight;
@@ -356,8 +397,9 @@
         private FontAwesome.Sharp.IconButton btnSettings;
         private FontAwesome.Sharp.IconButton btnInvoices;
         private FontAwesome.Sharp.IconButton btnLogout;
-
         private FontAwesome.Sharp.IconButton btnAbout;
+        private FontAwesome.Sharp.IconButton btnEmployees;
+        private FontAwesome.Sharp.IconButton btnGym;
         private Panel pnlFooter;
         private Label lblRights;
         public Label lblUserName;

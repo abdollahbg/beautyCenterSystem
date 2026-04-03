@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using BeautyCenterSystem.Models; // تأكد من وجود الموديلات
+using BeautyCenterSystem.Models;
 
 namespace beautyCenterSystem
 {
@@ -128,26 +128,52 @@ namespace beautyCenterSystem
         {
             if (dgvDetails.Columns.Count > 0)
             {
-                string[] hiddenCols = { "ServiceID", "RoomID", "IsActive", "DurationMinutes" };
+                // تم إضافة الموظفين والعمولة لقائمة الإخفاء هنا
+                string[] hiddenCols = {
+                    "ServiceID",
+                    "MaterialID",
+                    "AppointmentID",
+                    "DetailID",
+                    "EmployeeID",        // جديد
+                    "EmployeeName",      // جديد
+                    "CommissionAmount"    // جديد
+                    
+                };
+
                 foreach (var col in hiddenCols)
                 {
                     if (dgvDetails.Columns.Contains(col))
                         dgvDetails.Columns[col].Visible = false;
                 }
 
-                if (dgvDetails.Columns.Contains("ServiceName"))
+                if (dgvDetails.Columns.Contains("Name"))
                 {
-                    dgvDetails.Columns["ServiceName"].HeaderText = "الخدمة";
-                    dgvDetails.Columns["ServiceName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                    dgvDetails.Columns["Name"].HeaderText = "الصنف / الخدمة";
+                    dgvDetails.Columns["Name"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                }
+                if (dgvDetails.Columns.Contains("RoomName"))
+                {
+                    dgvDetails.Columns["RoomName"].HeaderText = "اسم الغرفة";
+                    dgvDetails.Columns["RoomName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                }
+
+                if (dgvDetails.Columns.Contains("Quantity"))
+                {
+                    dgvDetails.Columns["Quantity"].HeaderText = "العدد";
+                    dgvDetails.Columns["Quantity"].Width = 60;
+                    dgvDetails.Columns["Quantity"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 }
 
                 if (dgvDetails.Columns.Contains("Price"))
                 {
                     dgvDetails.Columns["Price"].HeaderText = "السعر";
-                    dgvDetails.Columns["Price"].Width = 70;
+                    dgvDetails.Columns["Price"].Width = 80;
+                    dgvDetails.Columns["Price"].DefaultCellStyle.Format = "N2";
                 }
             }
+
             dgvDetails.ReadOnly = true;
+            dgvDetails.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         }
 
         private async void dgvAppointments_SelectionChanged(object sender, EventArgs e)
@@ -172,13 +198,11 @@ namespace beautyCenterSystem
             }
         }
 
-        // تم تعديل هذه الدالة لحل مشكلة الـ Handle Created
         private async void UC_Appointments_Load(object sender, EventArgs e)
         {
             FormatGrid();
             await LoadAppointments();
 
-            // ضبط التنسيق الجمالي للأزرار مع التحقق من الـ Handle
             if (this.IsHandleCreated)
             {
                 ApplyButtonStyles();
@@ -191,7 +215,6 @@ namespace beautyCenterSystem
 
         private void ApplyButtonStyles()
         {
-            // نستخدم Invoke فقط إذا كنا خارج خيط الواجهة الأساسي
             if (this.InvokeRequired)
             {
                 this.BeginInvoke((MethodInvoker)delegate { InternalStyleLogic(); });
@@ -404,9 +427,12 @@ namespace beautyCenterSystem
                                     NetAmount = payForm.AmountPaid,
                                     CashierName = CurrentSession.Username,
 
+                                    // التعديل هنا لتمرير الغرفة والكمية
                                     Items = services.Select(s => new InvoiceItem
                                     {
-                                        ServiceName = s.ServiceName,
+                                        ServiceName = s.Name,
+                                        RoomName = s.RoomName, // تأكد أن خاصية اسم الغرفة في قاعدة البيانات تسمى RoomName
+                                        Quantity = s.Quantity > 0 ? s.Quantity : 1, // إذا كانت القيمة 0 نضع 1 كافتراضي
                                         Price = s.Price
                                     }).ToList()
                                 };
@@ -459,7 +485,13 @@ namespace beautyCenterSystem
                     TotalAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value),
                     NetAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value),
                     CashierName = CurrentSession.Username,
-                    Items = services.Select(s => new InvoiceItem { ServiceName = s.ServiceName, Price = s.Price }).ToList()
+                    Items = services.Select(s => new InvoiceItem
+                    {
+                        ServiceName = s.Name,
+                        RoomName = s.RoomName, // جلب اسم الغرفة (النوع)
+                        Quantity = s.Quantity > 0 ? s.Quantity : 1, // جلب الكمية
+                        Price = s.Price
+                    }).ToList()
                 };
 
                 printer.PrintReceipt(showPreview: false);

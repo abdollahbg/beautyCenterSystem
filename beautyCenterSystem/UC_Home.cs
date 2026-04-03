@@ -196,15 +196,28 @@ namespace beautyCenterSystem
 
         private void FormatMaterialsGrid()
         {
+            // 1. التأكد من وجود أعمدة أولاً
             if (dgvOutofStock.Columns.Count > 0)
             {
-                if (dgvOutofStock.Columns["MaterialID"] != null) dgvOutofStock.Columns["MaterialID"].Visible = false;
-                if (dgvOutofStock.Columns["IsAvailable"] != null) dgvOutofStock.Columns["IsAvailable"].Visible = false;
+                // 2. إخفاء جميع الأعمدة دفعة واحدة (طريقة أسرع وأنظف)
+                foreach (DataGridViewColumn col in dgvOutofStock.Columns)
+                {
+                    col.Visible = false;
+                }
+
+                // 3. إظهار وتنسيق عمود الاسم فقط
                 if (dgvOutofStock.Columns["MaterialName"] != null)
                 {
-                    dgvOutofStock.Columns["MaterialName"].HeaderText = "المادة الناقصة";
-                    dgvOutofStock.Columns["MaterialName"].FillWeight = 100;
+                    var nameCol = dgvOutofStock.Columns["MaterialName"];
+                    nameCol.Visible = true;
+                    nameCol.HeaderText = "المادة الناقصة";
+                    nameCol.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill; // ليملأ المساحة بالكامل
+
+                    // اختياري: محاذاة النص لليمين ليتناسب مع اللغة العربية
+                    nameCol.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 }
+
+                // ملاحظة: بما أنك طلبت إظهار الاسم فقط، لا داعي للتحقق من الأعمدة الأخرى يدوياً لإخفائها
             }
         }
 

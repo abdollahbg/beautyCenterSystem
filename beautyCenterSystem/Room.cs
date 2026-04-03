@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace beautyCenterSystem
 {
@@ -12,6 +8,7 @@ namespace beautyCenterSystem
         public string RoomName { get; set; }
         public string IconPath { get; set; }
         public bool IsActive { get; set; }
-
+        // الحقل الجديد للتمييز بين غرف الخدمات والكافيتيريا
+        public bool IsCaffeteria { get; set; }
     }
 }

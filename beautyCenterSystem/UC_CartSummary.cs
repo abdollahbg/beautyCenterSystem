@@ -1,92 +1,171 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
-using BeautyCenterSystem.Models; // تأكد من وجود الـ Model الخاص بك
+using BeautyCenterSystem.Models;
+using beautyCenterSystem.viewsmodels;
 
 namespace beautyCenterSystem
 {
     public partial class UC_CartSummary : UserControl
     {
-        // الأحداث للتواصل مع الفورم الرئيسي
         public event EventHandler OnAddCustomerClicked;
         public event EventHandler OnSaveAppointmentClicked;
         public event EventHandler<int> OnRemoveServiceRequested;
+        public event Action<int, int> OnQuantityChanged;
 
-        private decimal _lastTotal = 0; // لحفظ الإجمالي قبل الخصم
+        private decimal _currentTotal = 0;
+        private bool _isRefreshing = false;
 
         public UC_CartSummary()
         {
             InitializeComponent();
             SetupCustomEvents();
-
-            // تعيين القيمة الافتراضية للخصم لمنع قيم الـ null
-            cmbDiscountPercent.SelectedIndex = 0; // 0%
         }
 
         private void SetupCustomEvents()
         {
-            // ربط أحداث الأزرار
             btnAddCustomer.Click += (s, e) => OnAddCustomerClicked?.Invoke(this, e);
-            btnSave.Click += (s, e) => OnSaveAppointmentClicked?.Invoke(this, e);
 
-            // حدث حذف خدمة من السلة
+            btnSave.Click += (s, e) =>
+            {
+                dgvCart.EndEdit();
+                OnSaveAppointmentClicked?.Invoke(this, e);
+            };
+
             dgvCart.CellContentClick += (s, e) =>
             {
                 if (e.RowIndex >= 0 && dgvCart.Columns[e.ColumnIndex].Name == "DeleteCol")
                 {
-                    int id = (int)dgvCart.Rows[e.RowIndex].Cells["IDCol"].Value;
-                    OnRemoveServiceRequested?.Invoke(this, id);
+                    var val = dgvCart.Rows[e.RowIndex].Cells["IDCol"].Value;
+                    if (val != null) OnRemoveServiceRequested?.Invoke(this, (int)val);
                 }
             };
 
-            // حدث تغيير نسبة الخصم
-            cmbDiscountPercent.SelectedIndexChanged += (s, e) => CalculateSummary();
+            dgvCart.CurrentCellDirtyStateChanged += (s, e) =>
+            {
+                if (dgvCart.IsCurrentCellDirty)
+                {
+                    dgvCart.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                }
+            };
+
+            dgvCart.EditingControlShowing += (s, e) =>
+            {
+                if (dgvCart.CurrentCell.OwningColumn.Name == "QuantityCol")
+                {
+                    TextBox txt = e.Control as TextBox;
+                    if (txt != null)
+                    {
+                        txt.KeyPress -= Quantity_KeyPress;
+                        txt.KeyPress += Quantity_KeyPress;
+                    }
+                }
+            };
+
+            dgvCart.KeyDown += (s, e) =>
+            {
+                if (dgvCart.CurrentCell != null && dgvCart.CurrentCell.OwningColumn.Name == "QuantityCol")
+                {
+                    if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
+                    {
+                        UpdateQuantityByArrow(e.KeyCode);
+                        e.Handled = true;
+                    }
+                }
+            };
+
+            dgvCart.CellValueChanged += (s, e) =>
+            {
+                if (_isRefreshing) return;
+
+                if (e.RowIndex >= 0 && dgvCart.Columns[e.ColumnIndex].Name == "QuantityCol")
+                {
+                    // تحديث إجمالي السطر والإجمالي الكلي بصرياً فوراً
+                    UpdateVisualTotals();
+
+                    var idVal = dgvCart.Rows[e.RowIndex].Cells["IDCol"].Value;
+                    var qtyVal = dgvCart.Rows[e.RowIndex].Cells["QuantityCol"].Value;
+
+                    if (idVal != null && int.TryParse(qtyVal?.ToString(), out int newQty))
+                    {
+                        if (newQty < 1) newQty = 1;
+                        OnQuantityChanged?.Invoke((int)idVal, newQty);
+                    }
+                }
+            };
         }
 
-        // دالة لتحديث قائمة الخدمات وحساب الإجمالي
-        public void RefreshCart(List<Service> services)
+        // دالة لتحديث الإجماليات بصرياً دون إعادة بناء الجدول
+        public void UpdateVisualTotals()
         {
-            dgvCart.Rows.Clear();
-            _lastTotal = 0;
-
-            if (services != null)
+            decimal total = 0;
+            foreach (DataGridViewRow row in dgvCart.Rows)
             {
-                foreach (var service in services)
+                if (decimal.TryParse(row.Cells["PriceCol"].Value?.ToString(), out decimal price) &&
+                    int.TryParse(row.Cells["QuantityCol"].Value?.ToString(), out int qty))
                 {
-                    dgvCart.Rows.Add(service.ServiceID, service.ServiceName, service.Price.ToString("N2"), "❌");
-                    _lastTotal += service.Price;
+                    decimal lineTotal = price * qty;
+                    row.Cells["LineTotalCol"].Value = lineTotal.ToString("N2");
+                    total += lineTotal;
                 }
             }
-
-            CalculateSummary();
+            _currentTotal = total;
+            lblTotalPrice.Text = $"{_currentTotal:N2} د.ل";
         }
 
-        // دالة الحسابات المركزية (الإجمالي، الخصم، الصافي)
-        private void CalculateSummary()
+        private void Quantity_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // 1. استخراج النسبة المئوية من الكومبو بوكس (مثلاً "10%" تصبح 10)
-            string discountStr = cmbDiscountPercent.SelectedItem?.ToString().Replace("%", "") ?? "0";
-            decimal discountPercent = decimal.Parse(discountStr);
-
-            // 2. حساب قيمة الخصم بالدينار
-            decimal discountAmount = _lastTotal * (discountPercent / 100);
-
-            // 3. حساب الصافي
-            decimal finalNet = _lastTotal - discountAmount;
-
-            // 4. تحديث الواجهة
-            lblSubTotalValue.Text = $"{_lastTotal:N2} د.ل";
-
-            // عرض قيمة الخصم بجانب النص التوضيحي أو في مكان الصافي (حسب حاجتك)
-            // هنا سنعرض الصافي في الليبل الكبير الرئيسي
-            lblTotalPrice.Text = $"{finalNet:N2} د.ل";
-
-            // إذا أردت تحديث نص الخصم ليظهر المبلغ المخصوم:
-            lblDiscountText.Text = $"نسبة الخصم ({discountAmount:N2} د.ل):";
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) e.Handled = true;
         }
 
-        // دالة لتعبئة كومبو بوكس العميلات
+        private void UpdateQuantityByArrow(Keys key)
+        {
+            var cell = dgvCart.CurrentCell;
+            if (cell == null || cell.ReadOnly) return;
+
+            if (int.TryParse(cell.Value?.ToString(), out int currentQty))
+            {
+                int newQty = (key == Keys.Up) ? currentQty + 1 : currentQty - 1;
+                if (newQty >= 1) cell.Value = newQty;
+            }
+        }
+
+        public void RefreshCart(List<AppointmentDetailDto> items)
+        {
+            _isRefreshing = true;
+            dgvCart.Rows.Clear();
+            _currentTotal = 0;
+
+            if (items != null)
+            {
+                foreach (var item in items)
+                {
+                    decimal lineTotal = item.Price * item.Quantity;
+                    bool isMaterial = item.MaterialID.HasValue && item.MaterialID.Value > 0;
+                    int itemId = item.ServiceID ?? item.MaterialID ?? 0;
+
+                    int rowIndex = dgvCart.Rows.Add();
+                    DataGridViewRow row = dgvCart.Rows[rowIndex];
+
+                    row.Cells["IDCol"].Value = itemId;
+                    row.Cells["NameCol"].Value = item.Name;
+                    row.Cells["PriceCol"].Value = item.Price.ToString("N2");
+                    row.Cells["QuantityCol"].Value = item.Quantity;
+                    row.Cells["LineTotalCol"].Value = lineTotal.ToString("N2");
+                    row.Cells["TypeCol"].Value = isMaterial ? "Material" : "Service";
+
+                    row.Cells["QuantityCol"].ReadOnly = !isMaterial;
+                    if (!isMaterial) row.Cells["QuantityCol"].Style.ForeColor = Color.Gray;
+
+                    _currentTotal += lineTotal;
+                }
+            }
+            lblTotalPrice.Text = $"{_currentTotal:N2} د.ل";
+            _isRefreshing = false;
+        }
+
         public void FillCustomers(object dataSource)
         {
             cmbCustomers.DataSource = dataSource;
@@ -97,20 +176,10 @@ namespace beautyCenterSystem
 
         public int? SelectedCustomerId
         {
-            get => (int?)cmbCustomers.SelectedValue;
+            get => cmbCustomers.SelectedValue as int?;
             set => cmbCustomers.SelectedValue = value;
         }
 
-        // خصائص إضافية قد تحتاجها عند حفظ الفاتورة في قاعدة البيانات
-        public decimal TotalBeforeDiscount => _lastTotal;
-        public decimal DiscountPercentage
-        {
-            get
-            {
-                string val = cmbDiscountPercent.SelectedItem?.ToString().Replace("%", "") ?? "0";
-                return decimal.Parse(val);
-            }
-        }
-        public decimal FinalAmount => decimal.Parse(lblTotalPrice.Text.Replace(" د.ل", ""));
+        public decimal TotalAmount => _currentTotal;
     }
 }

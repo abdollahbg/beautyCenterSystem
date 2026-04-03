@@ -115,5 +115,75 @@ namespace BeautyCenterSystem.Data.Repositories
                 ORDER BY D.ClosureDate DESC";
             return await db.QueryAsync(sql, new { From = from, To = to });
         }
+        // 1. جلب مدفوعات الموظفين الفعلية (التي تم صرفها من الخزنة)
+        public async Task<IEnumerable<dynamic>> GetEmployeeExpensesAsync(DateTime from, DateTime to)
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                string sql = @"
+            SELECT 
+                e.EmployeeName AS EmployeeName,
+                ep.AmountPaid AS ExpenseAmount,
+                ep.PaymentDate AS ExpenseDate,
+                s.SafeName AS SafeName,
+                ep.Notes AS Notes
+            FROM EmployeePayments ep
+            INNER JOIN Employees e ON ep.EmployeeID = e.EmployeeID
+            INNER JOIN Safes s ON ep.SafeID = s.SafeID
+            WHERE ep.PaymentDate BETWEEN @from AND @to
+            ORDER BY ep.PaymentDate DESC";
+
+                return await conn.QueryAsync<dynamic>(sql, new { from, to });
+            }
+        }
+
+        // 2. جلب إيرادات الكافتيريا (المواد التي تم تعليمها كعنصر كافتيريا)
+        public async Task<IEnumerable<dynamic>> GetCafeteriaReportsAsync(DateTime from, DateTime to)
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                string sql = @"
+            SELECT 
+                m.MaterialName AS ItemName,
+                SUM(ad.Quantity) AS QuantitySold,
+                SUM(ad.Quantity * ISNULL(ad.PriceAtSale, m.SalePrice)) AS TotalRevenue
+            FROM AppointmentDetails ad
+            INNER JOIN Materials m ON ad.MaterialID = m.MaterialID
+            INNER JOIN Appointments a ON ad.AppointmentID = a.AppointmentID
+            WHERE a.AppointmentDate BETWEEN @from AND @to
+            AND m.IsCaffeteriaItem = 1
+            GROUP BY m.MaterialName
+            ORDER BY TotalRevenue DESC";
+
+                return await conn.QueryAsync<dynamic>(sql, new { from, to });
+            }
+        }
+
+        // 3. جلب ملخص أداء الموظفات (العمولات المستحقة والعمليات المنفذة)
+        public async Task<IEnumerable<dynamic>> GetEmployeePerformanceAsync(DateTime from, DateTime to)
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                // الاستعلام يدمج بين استحقاقات العمليات (Ad) وبين المدفوعات الفعلية (Ep) لكل موظفة
+                string sql = @"
+            SELECT 
+                e.EmployeeName AS EmployeeName,
+                COUNT(ad.DetailID) AS ServicesCount,
+                ISNULL(SUM(ad.PriceAtSale * ad.Quantity), 0) AS TotalServicesRevenue,
+                ISNULL(SUM(ad.CommissionAmount), 0) AS TotalEarnedCommissions,
+                (SELECT ISNULL(SUM(AmountPaid), 0) 
+                 FROM EmployeePayments 
+                 WHERE EmployeeID = e.EmployeeID 
+                 AND PaymentDate BETWEEN @from AND @to) AS TotalActuallyPaid
+            FROM Employees e
+            LEFT JOIN AppointmentDetails ad ON e.EmployeeID = ad.EmployeeID
+            LEFT JOIN Appointments a ON ad.AppointmentID = a.AppointmentID AND a.Status = 'Completed'
+            WHERE (a.AppointmentDate BETWEEN @from AND @to OR a.AppointmentDate IS NULL)
+            GROUP BY e.EmployeeID, e.EmployeeName
+            ORDER BY TotalServicesRevenue DESC";
+
+                return await conn.QueryAsync<dynamic>(sql, new { from, to });
+            }
+        }
     }
 }

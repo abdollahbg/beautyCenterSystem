@@ -10,49 +10,60 @@ namespace beautyCenterSystem.data.Repositories
         public decimal Discount { get; private set; }
         public string PaymentMethod { get; private set; }
 
+        // متغير لحفظ قيمة الخصم الفعلية (بالمال وليس كنسبة) لإرسالها لاحقاً
+        private decimal _calculatedDiscountAmount = 0;
+
         public CheckoutForm(string customerName, decimal totalAmount)
         {
             InitializeComponent();
+
             // 1. إعدادات الخطوط (خط عريض وواضح للأرقام)
             Font numericFont = new Font("Segoe UI", 14, FontStyle.Bold);
 
             // 2. ضبط خصائص الحقول
             txtTotalSystem.ReadOnly = true; // غير قابل للتعديل
-            txtTotalSystem.BackColor = Color.WhiteSmoke; // تمييزه لونياً كحقل للقراءة فقط
+            txtTotalSystem.BackColor = Color.WhiteSmoke;
             txtTotalSystem.TextAlign = HorizontalAlignment.Center;
             txtTotalSystem.Font = numericFont;
 
             txtAmountPaid.TextAlign = HorizontalAlignment.Center;
             txtAmountPaid.Font = numericFont;
 
-            txtDiscount.TextAlign = HorizontalAlignment.Center;
-            txtDiscount.Font = numericFont;
+            // جعل حقل الصافي للقراءة فقط لأنه يُحسب آلياً الآن
+            txtNet.ReadOnly = true;
+            txtNet.BackColor = Color.WhiteSmoke;
+            txtNet.TextAlign = HorizontalAlignment.Center;
+            txtNet.Font = numericFont;
+
+            cmbDiscountPercent.Font = numericFont;
 
             // 3. ضبط القيم الابتدائية
             lblCustomerName.Text = customerName;
             txtTotalSystem.Text = totalAmount.ToString("N2");
             txtAmountPaid.Text = totalAmount.ToString("N2");
-            txtDiscount.Text = "0.00"; // قيمة افتراضية للخصم لمنع خطأ التحويل
 
-            // 1. إضافة الخيارات أولاً
+            // تحديد القيمة الافتراضية للخصم بـ 0%
+            if (cmbDiscountPercent.Items.Count > 0)
+                cmbDiscountPercent.SelectedIndex = 0;
+
+            // 4. إضافة خيارات الدفع
+            cmbPaymentMethod.Items.Clear();
             cmbPaymentMethod.Items.Add("نقدي (Cash)");
             cmbPaymentMethod.Items.Add("بطاقة (Card)");
-
-
             cmbPaymentMethod.SelectedIndex = 0;
         }
 
-        // تعديل طريقة جلب قيمة الدفع في زر التأكيد
         private void btnConfirm_Click(object sender, EventArgs e)
         {
             decimal.TryParse(txtNet.Text, out decimal netValue);
-            decimal.TryParse(txtDiscount.Text, out decimal discountValue);
 
+            // الإجمالي المدفوع هو الصافي
             this.AmountPaid = netValue;
-            this.Discount = discountValue;
 
-            // --- التعديل هنا ---
-            // بدلاً من أخذ النص الكامل، نتحقق من الخيار المختار
+            // تمرير قيمة الخصم الفعلية المحسوبة في الدالة (بالدينار)
+            this.Discount = _calculatedDiscountAmount;
+
+            // تحديد طريقة الدفع بناءً على الاختيار
             if (cmbPaymentMethod.SelectedIndex == 0)
                 this.PaymentMethod = "Cash";
             else
@@ -62,11 +73,11 @@ namespace beautyCenterSystem.data.Repositories
             this.Close();
         }
 
-
-
         private void CheckoutForm_Load(object sender, EventArgs e)
         {
-            AppTheme.Apply(this);
+            // لا تنسَ التحقق من وجود كلاس AppTheme لديك، وإلا يمكنك مسح هذا السطر
+            // AppTheme.Apply(this); 
+
             CalculateNet();
             btnCancel.BackColor = Color.DarkGray;
 
@@ -75,35 +86,42 @@ namespace beautyCenterSystem.data.Repositories
             txtAmountPaid.SelectAll();
         }
 
+        // ملاحظة: تأكد من ربط هذا الحدث بزر الإلغاء في شاشة التصميم
         private void btnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
-        // داخل CheckoutForm.cs
-
-        private void txtDiscount_TextChanged(object sender, EventArgs e)
+        // الحدث الجديد الخاص بالكومبو بوكس
+        private void cmbDiscountPercent_SelectedIndexChanged(object sender, EventArgs e)
         {
             CalculateNet();
         }
 
         private void CalculateNet()
         {
-            // تحويل القيم بأمان
-            decimal total = 0;
-            decimal discount = 0;
+            // 1. جلب الإجمالي بأمان
+            decimal.TryParse(txtTotalSystem.Text, out decimal total);
 
-            decimal.TryParse(txtTotalSystem.Text, out total);
-            decimal.TryParse(txtDiscount.Text, out discount);
+            // 2. استخراج النسبة المئوية من الكومبو بوكس
+            string selectedDiscount = cmbDiscountPercent.SelectedItem?.ToString() ?? "0%";
+            string cleanDiscount = selectedDiscount.Replace("%", "").Trim();
+            decimal.TryParse(cleanDiscount, out decimal discountPercent);
 
-            // الحساب: الصافي = الإجمالي - الخصم
-            decimal net = total - discount;
+            // 3. حساب قيمة الخصم الفعلية
+            _calculatedDiscountAmount = total * (discountPercent / 100);
+
+            // 4. الحساب: الصافي = الإجمالي - الخصم الفعلي
+            decimal net = total - _calculatedDiscountAmount;
 
             if (net < 0) net = 0;
 
-            // تحديث خانة الصافي
+            // 5. تحديث خانة الصافي
             txtNet.Text = net.ToString("N2");
+
+            // تحديث حقل "المدفوع" ليكون مطابقاً للصافي لتسهيل العمل على الموظف
+            txtAmountPaid.Text = net.ToString("N2");
         }
     }
 }

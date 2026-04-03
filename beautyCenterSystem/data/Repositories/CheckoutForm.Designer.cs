@@ -36,7 +36,7 @@
             cmbPaymentMethod = new ComboBox();
             lblCustomerName = new Label();
             txtAmountPaid = new TextBox();
-            txtDiscount = new TextBox();
+            cmbDiscountPercent = new ComboBox();
             label5 = new Label();
             btnConfirm = new Button();
             btnCancel = new Button();
@@ -123,14 +123,18 @@
             txtAmountPaid.Size = new Size(121, 34);
             txtAmountPaid.TabIndex = 8;
             // 
-            // txtDiscount
+            // cmbDiscountPercent
             // 
-            txtDiscount.Font = new Font("Segoe UI", 15F);
-            txtDiscount.Location = new Point(186, 227);
-            txtDiscount.Name = "txtDiscount";
-            txtDiscount.Size = new Size(121, 34);
-            txtDiscount.TabIndex = 9;
-            txtDiscount.TextChanged += txtDiscount_TextChanged;
+            cmbDiscountPercent.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbDiscountPercent.Font = new Font("Segoe UI", 15F);
+            cmbDiscountPercent.FormattingEnabled = true;
+            cmbDiscountPercent.Items.AddRange(new object[] {
+            "0%", "5%", "10%", "15%", "20%", "25%", "30%", "35%", "40%", "50%", "100%"});
+            cmbDiscountPercent.Location = new Point(186, 227);
+            cmbDiscountPercent.Name = "cmbDiscountPercent";
+            cmbDiscountPercent.Size = new Size(121, 36);
+            cmbDiscountPercent.TabIndex = 9;
+            cmbDiscountPercent.SelectedIndexChanged += cmbDiscountPercent_SelectedIndexChanged;
             // 
             // label5
             // 
@@ -189,7 +193,7 @@
             Controls.Add(btnCancel);
             Controls.Add(btnConfirm);
             Controls.Add(label5);
-            Controls.Add(txtDiscount);
+            Controls.Add(cmbDiscountPercent);
             Controls.Add(txtAmountPaid);
             Controls.Add(lblCustomerName);
             Controls.Add(cmbPaymentMethod);
@@ -219,7 +223,7 @@
         private ComboBox cmbPaymentMethod;
         private Label lblCustomerName;
         private TextBox txtAmountPaid;
-        private TextBox txtDiscount;
+        private ComboBox cmbDiscountPercent;
         private Label label5;
         private Button btnConfirm;
         private Button btnCancel;

@@ -35,10 +35,12 @@
             btnSave = new Button();
             txtServiceName = new MaterialSkin.Controls.MaterialTextBox2();
             txtPrice = new MaterialSkin.Controls.MaterialTextBox2();
+            txtEmployeeBasePrice = new MaterialSkin.Controls.MaterialTextBox2();
             txtDuration = new MaterialSkin.Controls.MaterialTextBox2();
             cmbRooms = new MaterialSkin.Controls.MaterialComboBox();
             label2 = new Label();
             label3 = new Label();
+            labelEmployeeBasePrice = new Label();
             label4 = new Label();
             label5 = new Label();
             PnlHeader.SuspendLayout();
@@ -65,7 +67,7 @@
             // 
             // BtnCancel
             // 
-            BtnCancel.Location = new Point(59, 437);
+            BtnCancel.Location = new Point(59, 480);
             BtnCancel.Name = "BtnCancel";
             BtnCancel.Size = new Size(124, 48);
             BtnCancel.TabIndex = 7;
@@ -75,7 +77,7 @@
             // 
             // btnSave
             // 
-            btnSave.Location = new Point(242, 437);
+            btnSave.Location = new Point(242, 480);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(124, 48);
             btnSave.TabIndex = 6;
@@ -94,7 +96,7 @@
             txtServiceName.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
             txtServiceName.HideSelection = true;
             txtServiceName.LeadingIcon = null;
-            txtServiceName.Location = new Point(92, 141);
+            txtServiceName.Location = new Point(92, 110);
             txtServiceName.MaxLength = 32767;
             txtServiceName.MouseState = MaterialSkin.MouseState.OUT;
             txtServiceName.Name = "txtServiceName";
@@ -124,7 +126,7 @@
             txtPrice.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
             txtPrice.HideSelection = true;
             txtPrice.LeadingIcon = null;
-            txtPrice.Location = new Point(257, 200);
+            txtPrice.Location = new Point(257, 169);
             txtPrice.MaxLength = 32767;
             txtPrice.MouseState = MaterialSkin.MouseState.OUT;
             txtPrice.Name = "txtPrice";
@@ -144,6 +146,37 @@
             txtPrice.UseSystemPasswordChar = false;
             txtPrice.KeyPress += txtPrice_KeyPress;
             // 
+            // txtEmployeeBasePrice
+            // 
+            txtEmployeeBasePrice.AnimateReadOnly = false;
+            txtEmployeeBasePrice.AutoCompleteMode = AutoCompleteMode.None;
+            txtEmployeeBasePrice.AutoCompleteSource = AutoCompleteSource.None;
+            txtEmployeeBasePrice.BackgroundImageLayout = ImageLayout.None;
+            txtEmployeeBasePrice.CharacterCasing = CharacterCasing.Normal;
+            txtEmployeeBasePrice.Depth = 0;
+            txtEmployeeBasePrice.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
+            txtEmployeeBasePrice.HideSelection = true;
+            txtEmployeeBasePrice.LeadingIcon = null;
+            txtEmployeeBasePrice.Location = new Point(257, 228);
+            txtEmployeeBasePrice.MaxLength = 32767;
+            txtEmployeeBasePrice.MouseState = MaterialSkin.MouseState.OUT;
+            txtEmployeeBasePrice.Name = "txtEmployeeBasePrice";
+            txtEmployeeBasePrice.PasswordChar = '\0';
+            txtEmployeeBasePrice.PrefixSuffixText = null;
+            txtEmployeeBasePrice.ReadOnly = false;
+            txtEmployeeBasePrice.RightToLeft = RightToLeft.Yes;
+            txtEmployeeBasePrice.SelectedText = "";
+            txtEmployeeBasePrice.SelectionLength = 0;
+            txtEmployeeBasePrice.SelectionStart = 0;
+            txtEmployeeBasePrice.ShortcutsEnabled = true;
+            txtEmployeeBasePrice.Size = new Size(85, 48);
+            txtEmployeeBasePrice.TabIndex = 10;
+            txtEmployeeBasePrice.TabStop = false;
+            txtEmployeeBasePrice.TextAlign = HorizontalAlignment.Right;
+            txtEmployeeBasePrice.TrailingIcon = null;
+            txtEmployeeBasePrice.UseSystemPasswordChar = false;
+            txtEmployeeBasePrice.KeyPress += txtPrice_KeyPress; // استخدام نفس حدث التحقق من الأرقام
+            // 
             // txtDuration
             // 
             txtDuration.AnimateReadOnly = false;
@@ -155,7 +188,7 @@
             txtDuration.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
             txtDuration.HideSelection = true;
             txtDuration.LeadingIcon = null;
-            txtDuration.Location = new Point(257, 259);
+            txtDuration.Location = new Point(257, 287);
             txtDuration.MaxLength = 32767;
             txtDuration.MouseState = MaterialSkin.MouseState.OUT;
             txtDuration.Name = "txtDuration";
@@ -168,7 +201,7 @@
             txtDuration.SelectionStart = 0;
             txtDuration.ShortcutsEnabled = true;
             txtDuration.Size = new Size(85, 48);
-            txtDuration.TabIndex = 10;
+            txtDuration.TabIndex = 11;
             txtDuration.TabStop = false;
             txtDuration.TextAlign = HorizontalAlignment.Right;
             txtDuration.TrailingIcon = null;
@@ -189,64 +222,76 @@
             cmbRooms.FormattingEnabled = true;
             cmbRooms.IntegralHeight = false;
             cmbRooms.ItemHeight = 43;
-            cmbRooms.Location = new Point(92, 313);
+            cmbRooms.Location = new Point(92, 341);
             cmbRooms.MaxDropDownItems = 4;
             cmbRooms.MouseState = MaterialSkin.MouseState.OUT;
             cmbRooms.Name = "cmbRooms";
             cmbRooms.Size = new Size(250, 49);
             cmbRooms.StartIndex = 0;
-            cmbRooms.TabIndex = 11;
+            cmbRooms.TabIndex = 12;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(348, 157);
+            label2.Location = new Point(348, 126);
             label2.Name = "label2";
             label2.RightToLeft = RightToLeft.Yes;
             label2.Size = new Size(63, 15);
-            label2.TabIndex = 12;
+            label2.TabIndex = 13;
             label2.Text = "اسم الخدمة";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(348, 215);
+            label3.Location = new Point(348, 184);
             label3.Name = "label3";
             label3.Size = new Size(36, 15);
-            label3.TabIndex = 13;
+            label3.TabIndex = 14;
             label3.Text = "السعر";
+            // 
+            // labelEmployeeBasePrice
+            // 
+            labelEmployeeBasePrice.AutoSize = true;
+            labelEmployeeBasePrice.Location = new Point(348, 243);
+            labelEmployeeBasePrice.Name = "labelEmployeeBasePrice";
+            labelEmployeeBasePrice.RightToLeft = RightToLeft.Yes;
+            labelEmployeeBasePrice.Size = new Size(68, 15);
+            labelEmployeeBasePrice.TabIndex = 15;
+            labelEmployeeBasePrice.Text = "سعر الموظفة";
             // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(348, 273);
+            label4.Location = new Point(348, 301);
             label4.Name = "label4";
             label4.RightToLeft = RightToLeft.Yes;
             label4.Size = new Size(83, 15);
-            label4.TabIndex = 14;
+            label4.TabIndex = 16;
             label4.Text = "المدة (بالدقائق)";
             // 
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(348, 332);
+            label5.Location = new Point(348, 360);
             label5.Name = "label5";
             label5.RightToLeft = RightToLeft.Yes;
             label5.Size = new Size(40, 15);
-            label5.TabIndex = 15;
+            label5.TabIndex = 17;
             label5.Text = "الغرفة ";
             // 
             // AddServiceForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(434, 511);
+            ClientSize = new Size(434, 550);
             Controls.Add(label5);
             Controls.Add(label4);
+            Controls.Add(labelEmployeeBasePrice);
             Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(cmbRooms);
             Controls.Add(txtDuration);
+            Controls.Add(txtEmployeeBasePrice);
             Controls.Add(txtPrice);
             Controls.Add(txtServiceName);
             Controls.Add(BtnCancel);
@@ -274,10 +319,12 @@
         private Button btnSave;
         private MaterialSkin.Controls.MaterialTextBox2 txtServiceName;
         private MaterialSkin.Controls.MaterialTextBox2 txtPrice;
+        private MaterialSkin.Controls.MaterialTextBox2 txtEmployeeBasePrice;
         private MaterialSkin.Controls.MaterialTextBox2 txtDuration;
         private MaterialSkin.Controls.MaterialComboBox cmbRooms;
         private Label label2;
         private Label label3;
+        private Label labelEmployeeBasePrice;
         private Label label4;
         private Label label5;
     }

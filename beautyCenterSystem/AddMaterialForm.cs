@@ -19,6 +19,7 @@ namespace beautyCenterSystem
         public AddMaterialForm()
         {
             InitializeComponent();
+            // تهيئة الريبوزيتوري
             _materialRepo = new MaterialRepository(new DbConnectionFactory());
         }
 
@@ -27,27 +28,35 @@ namespace beautyCenterSystem
             // 1. التحقق من صحة المدخلات (Validation)
             if (string.IsNullOrWhiteSpace(txtMaterialName.Text))
             {
-                MessageBox.Show("يرجى إدخال اسم الخامة أو المادة.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("يرجى إدخال اسم المادة.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtMaterialName.Focus();
                 return;
             }
 
+            // التحقق من صحة السعر والكمية (تحويل آمن)
+            decimal.TryParse(txtSalePrice.Text, out decimal salePrice);
+            int.TryParse(txtStockQuantity.Text, out int stockQty);
+
             try
             {
-                // 2. إنشاء كائن المادة الجديد بالبيانات من الواجهة
+                // 2. إنشاء كائن المادة الجديد بالبيانات المحدثة
                 var newMaterial = new Material
                 {
                     MaterialName = txtMaterialName.Text.Trim(),
-                    IsAvailable = chkIsAvailable.Checked // تأكد أن هذا هو اسم الـ CheckBox لديك
+                    SalePrice = salePrice,
+                    StockQuantity = stockQty,
+                    IsAvailable = chkIsAvailable.Checked,
+                    IsCaffeteriaItem = chkIsCaffeteria.Checked,
+                    IsActive = true // افتراضياً المادة مضافة كنشطة
                 };
 
                 // 3. استدعاء الريبو للحفظ في قاعدة البيانات
-                // ملاحظة: تأكد أنك قمت بتعريف _materialRepo في الـ Constructor الخاص بالفورم
+                // ملاحظة: تأكد أن اسم الدالة في الريبو هو CreateAsync أو AddAsync
                 bool isSuccess = await _materialRepo.CreateAsync(newMaterial);
 
                 if (isSuccess)
                 {
-                    // 4. في حال النجاح، نضبط نتيجة الفورم ونغلقه
+                    MessageBox.Show("تمت إضافة المادة بنجاح.", "نجاح", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.DialogResult = DialogResult.OK;
                     this.Close();
                 }
@@ -58,20 +67,20 @@ namespace beautyCenterSystem
             }
             catch (Exception ex)
             {
-                // معالجة أي أخطاء غير متوقعة (مثل مشاكل الاتصال بقاعدة البيانات)
                 MessageBox.Show($"حدث خطأ أثناء عملية الحفظ: {ex.Message}", "خطأ نظام", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            // إذا ضغط المستخدم Enter وكان التركيز (Focus) "ليس" في حقل الملاحظات
+            // Enter للحفظ
             if (keyData == Keys.Enter)
             {
-                btnSave.PerformClick(); // نفذ كود زر الحفظ
-                return true; // أخبر النظام أننا تعاملنا مع الضغطة ولا داعي لعمل "Beep"
+                btnSave.PerformClick();
+                return true;
             }
 
-            // إذا ضغط Esc، أغلق الفورم (مثل زر الكانسل)
+            // Esc للإلغاء
             if (keyData == Keys.Escape)
             {
                 BtnCancel.PerformClick();
@@ -83,15 +92,24 @@ namespace beautyCenterSystem
 
         private void AddMaterialForm_Load(object sender, EventArgs e)
         {
+            // تطبيق الثيم العام
             AppTheme.Apply(this);
-            PnlHeader.BackColor = AppTheme.Primary;
+
+            // تخصيص الألوان بناءً على AppTheme
+            PnlHeader.BackColor = AppTheme.Charcoal;
+            label1.ForeColor = Color.White;
+
+            // تنسيق الأزرار
+            btnSave.BackColor = AppTheme.Primary;
+            btnSave.ForeColor = Color.White;
+
             BtnCancel.BackColor = Color.Gray;
+            BtnCancel.ForeColor = Color.White;
         }
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
-
             this.Close();
         }
     }

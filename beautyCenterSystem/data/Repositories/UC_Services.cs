@@ -10,47 +10,55 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BeautyCenterSystem.Data;
 
-
 namespace beautyCenterSystem.data.Repositories
 {
-
     public partial class UC_Services : UserControl
     {
-
         private readonly ServiceRepository _serviceRepo;
-
 
         public UC_Services()
         {
             _serviceRepo = new ServiceRepository(new DbConnectionFactory());
             InitializeComponent();
         }
+
         private async Task LoadServices()
         {
             var services = await _serviceRepo.GetAllWithRoomNamesAsync();
             dgvServices.DataSource = services.ToList();
-
         }
-
-
 
         private void FormatGrid()
         {
             if (dgvServices.Columns.Count > 0)
             {
+                // إخفاء الأعمدة التقنية
                 dgvServices.Columns["ServiceID"].Visible = false;
-                dgvServices.Columns["RoomID"].Visible = false; // نخفي الآيدي ونبقي الاسم
+                dgvServices.Columns["RoomID"].Visible = false;
+                dgvServices.Columns["IsActive"].Visible = false;
 
+                // تسمية الأعمدة وتنسيقها
                 dgvServices.Columns["ServiceName"].HeaderText = "الخدمة";
-                dgvServices.Columns["Price"].HeaderText = "السعر";
+                dgvServices.Columns["Price"].HeaderText = "السعر النهائي";
+
+                // العمود الجديد: سعر الموظفة
+                dgvServices.Columns["EmployeeBasePrice"].HeaderText = "سعر الموظفة";
+
                 dgvServices.Columns["DurationMinutes"].HeaderText = "المدة (دقائق)";
                 dgvServices.Columns["RoomName"].HeaderText = "الغرفة";
 
-                // منع تعديل اسم الغرفة من جدول الخدمات مباشرة (لأنها مرتبطة بآيدي)
+                // منع تعديل اسم الغرفة (لأنها Join)
                 dgvServices.Columns["RoomName"].ReadOnly = true;
+
+                // تنسيق العملات (رقمين بعد الفاصلة)
                 dgvServices.Columns["Price"].DefaultCellStyle.Format = "N2";
+                dgvServices.Columns["EmployeeBasePrice"].DefaultCellStyle.Format = "N2";
+
+                // تحسين المظهر
+                dgvServices.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             }
         }
+
         protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -69,19 +77,16 @@ namespace beautyCenterSystem.data.Repositories
 
         private async void btnDeleteService_Click(object sender, EventArgs e)
         {
-            // 1. التأكد من تحديد صف
             if (dgvServices.CurrentRow == null)
             {
                 MessageBox.Show("يرجى تحديد الخدمة من الجدول أولاً.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            // 2. الحصول على كائن الخدمة
             var service = dgvServices.CurrentRow.DataBoundItem as Service;
 
             if (service != null)
             {
-                // 3. رسالة تأكيد احترافية (توضح أن البيانات القديمة لن تتأثر)
                 var confirmResult = MessageBox.Show(
                     $"هل أنت متأكد من إيقاف خدمة ({service.ServiceName})؟\n\n" +
                     "ملاحظة: الخدمة لن تظهر في الحجوزات الجديدة، ولكنها ستبقى في التقارير القديمة.",
@@ -93,15 +98,11 @@ namespace beautyCenterSystem.data.Repositories
                 {
                     try
                     {
-                        // 4. استدعاء الريبو (الذي ينفذ UPDATE IsActive = 0)
                         bool isDeactivated = await _serviceRepo.DeleteAsync(service.ServiceID);
 
                         if (isDeactivated)
                         {
-                            // 5. تحديث الجدول فوراً (سيختفي السطر لأن GetAll تجلب IsActive = 1 فقط)
                             await LoadServices();
-
-                            // إشعار نجاح بسيط
                             MessageBox.Show("تم إيقاف الخدمة بنجاح.", "تم الإجراء", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
@@ -123,63 +124,43 @@ namespace beautyCenterSystem.data.Repositories
             {
                 dgvServices.ClearSelection();
                 dgvServices.Rows[e.RowIndex].Selected = true;
-                // جعل الصف الذي ضغطنا عليه هو الـ CurrentRow
                 dgvServices.CurrentCell = dgvServices.Rows[e.RowIndex].Cells[e.ColumnIndex];
             }
         }
 
         private void dgvServices_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
+            // إذا كان المستخدم لم يغير القيمة الأصلية، لا داعي للتحقق
+            if (!dgvServices.IsCurrentCellDirty) return;
+
             string columnName = dgvServices.Columns[e.ColumnIndex].Name;
             string newValue = e.FormattedValue.ToString().Trim();
 
-            // التحقق من اسم الخدمة (لا يجب أن يكون فارغاً)
-            if (columnName == "ServiceName")
+            // التحقق من الأسعار (السعر النهائي وسعر الموظفة)
+            if (columnName == "Price" || columnName == "EmployeeBasePrice")
             {
-                if (string.IsNullOrEmpty(newValue))
+                if (!decimal.TryParse(newValue, out decimal price) || price < 0)
                 {
-                    MessageBox.Show("اسم الخدمة لا يمكن أن يكون فارغاً.", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    e.Cancel = true; // منع الخروج من الخلية
-                }
-            }
-
-            // التحقق من السعر (يجب أن يكون رقماً عشرياً أكبر من صفر)
-            if (columnName == "Price")
-            {
-                if (!decimal.TryParse(newValue, out decimal price) || price <= 0)
-                {
-                    MessageBox.Show("يرجى إدخال سعر صحيح أكبر من الصفر.", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    e.Cancel = true;
-                }
-            }
-
-            // التحقق من المدة (يجب أن تكون رقماً صحيحاً أكبر من صفر)
-            if (columnName == "DurationMinutes")
-            {
-                if (!int.TryParse(newValue, out int duration) || duration <= 0)
-                {
-                    MessageBox.Show("يرجى إدخال مدة صحيحة بالدقائق.", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    e.Cancel = true;
+                    MessageBox.Show("يرجى إدخال مبلغ صحيح (0 أو أكثر).", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    e.Cancel = true; // هنا يمنع الخروج، لكن فقط إذا حاول إدخال قيمة خاطئة فعلياً
                 }
             }
         }
 
         private async void dgvServices_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            // الحصول على كائن الخدمة من الصف الذي تم تعديله
             var service = dgvServices.Rows[e.RowIndex].DataBoundItem as Service;
 
             if (service != null)
             {
                 try
                 {
-                    // إرسال التحديث لقاعدة البيانات عبر الريبوستري
                     bool isUpdated = await _serviceRepo.UpdateAsync(service);
 
                     if (!isUpdated)
                     {
                         MessageBox.Show("فشل تحديث البيانات في قاعدة البيانات.", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        await LoadServices(); // إعادة تحميل البيانات الأصلية في حال الفشل
+                        await LoadServices();
                     }
                 }
                 catch (Exception ex)
@@ -195,18 +176,13 @@ namespace beautyCenterSystem.data.Repositories
             using (var addForm = new AddServiceForm())
             {
                 AppTheme.Apply(addForm);
-
                 var result = addForm.ShowDialog();
 
                 if (result == DialogResult.OK)
                 {
                     await LoadServices();
-
                 }
-
             }
         }
     }
-
-
 }

@@ -17,25 +17,26 @@
 
         private void InitializeComponent()
         {
-            pnlHeader = new Panel();
-            pnlComboBorder = new Panel();
-            cmbCustomers = new MaterialSearchableCombo();
-            lblTitle = new Label();
+            pnlHeader = new System.Windows.Forms.Panel();
+            pnlComboBorder = new System.Windows.Forms.Panel();
+            cmbCustomers = new beautyCenterSystem.MaterialSearchableCombo();
+            lblTitle = new System.Windows.Forms.Label();
             btnAddCustomer = new FontAwesome.Sharp.IconButton();
-            pnlFooter = new Panel();
-            pnlSummary = new TableLayoutPanel();
-            lblSubTotalText = new Label();
-            lblSubTotalValue = new Label();
-            lblDiscountText = new Label();
-            cmbDiscountPercent = new ComboBox();
-            lblTotalText = new Label();
-            lblTotalPrice = new Label();
-            btnSave = new Button();
-            dgvCart = new DataGridView();
-            IDCol = new DataGridViewTextBoxColumn();
-            NameCol = new DataGridViewTextBoxColumn();
-            PriceCol = new DataGridViewTextBoxColumn();
-            DeleteCol = new DataGridViewButtonColumn();
+            pnlFooter = new System.Windows.Forms.Panel();
+            pnlSummary = new System.Windows.Forms.TableLayoutPanel();
+            lblTotalText = new System.Windows.Forms.Label();
+            lblTotalPrice = new System.Windows.Forms.Label();
+            btnSave = new System.Windows.Forms.Button();
+            dgvCart = new System.Windows.Forms.DataGridView();
+
+            // تعريف الأعمدة المختصرة (بدون IncreaseCol و DecreaseCol)
+            IDCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            NameCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            PriceCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            QuantityCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            LineTotalCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            TypeCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            DeleteCol = new System.Windows.Forms.DataGridViewButtonColumn();
 
             pnlHeader.SuspendLayout();
             pnlComboBorder.SuspendLayout();
@@ -44,195 +45,235 @@
             ((System.ComponentModel.ISupportInitialize)dgvCart).BeginInit();
             SuspendLayout();
 
+            // 
             // pnlHeader
+            // 
             pnlHeader.Controls.Add(pnlComboBorder);
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Controls.Add(btnAddCustomer);
-            pnlHeader.Dock = DockStyle.Top;
-            pnlHeader.Location = new Point(10, 10);
+            pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
+            pnlHeader.Location = new System.Drawing.Point(10, 10);
             pnlHeader.Name = "pnlHeader";
-            pnlHeader.Size = new Size(330, 110);
+            pnlHeader.Size = new System.Drawing.Size(430, 110);
             pnlHeader.TabIndex = 0;
 
-            // lblTitle
-            lblTitle.AutoSize = true;
-            lblTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            lblTitle.Location = new Point(215, 10);
-            lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(106, 21);
-            lblTitle.Text = "بيانات العميلة";
-
+            // 
             // pnlComboBorder
-            pnlComboBorder.BackColor = Color.Gainsboro;
+            // 
+            pnlComboBorder.BackColor = System.Drawing.Color.Gainsboro;
             pnlComboBorder.Controls.Add(cmbCustomers);
-            pnlComboBorder.Location = new Point(51, 52);
+            pnlComboBorder.Location = new System.Drawing.Point(51, 52);
             pnlComboBorder.Name = "pnlComboBorder";
-            pnlComboBorder.Padding = new Padding(1);
-            pnlComboBorder.Size = new Size(254, 30);
+            pnlComboBorder.Padding = new System.Windows.Forms.Padding(1);
+            pnlComboBorder.Size = new System.Drawing.Size(254, 30);
+            pnlComboBorder.TabIndex = 0;
 
+            // 
             // cmbCustomers
-            cmbCustomers.Dock = DockStyle.Fill;
-            cmbCustomers.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            cmbCustomers.AutoCompleteSource = AutoCompleteSource.ListItems;
-            cmbCustomers.BackColor = Color.White;
-            cmbCustomers.FlatStyle = FlatStyle.Flat;
-            cmbCustomers.Font = new Font("Segoe UI", 11F);
+            // 
+            cmbCustomers.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            cmbCustomers.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            cmbCustomers.BackColor = System.Drawing.Color.White;
+            cmbCustomers.Dock = System.Windows.Forms.DockStyle.Fill;
+            cmbCustomers.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            cmbCustomers.Font = new System.Drawing.Font("Segoe UI", 11F);
             cmbCustomers.FormattingEnabled = true;
-            cmbCustomers.Location = new Point(1, 1);
+            cmbCustomers.Location = new System.Drawing.Point(1, 1);
             cmbCustomers.Name = "cmbCustomers";
-            cmbCustomers.Size = new Size(252, 28);
+            cmbCustomers.Size = new System.Drawing.Size(252, 28);
             cmbCustomers.TabIndex = 3;
 
+            // 
+            // lblTitle
+            // 
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            lblTitle.Location = new System.Drawing.Point(215, 10);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new System.Drawing.Size(97, 21);
+            lblTitle.TabIndex = 1;
+            lblTitle.Text = "بيانات العميلة";
+
+            // 
             // btnAddCustomer
-            btnAddCustomer.BackColor = Color.Transparent;
-            btnAddCustomer.Cursor = Cursors.Hand;
+            // 
+            btnAddCustomer.BackColor = System.Drawing.Color.Transparent;
+            btnAddCustomer.Cursor = System.Windows.Forms.Cursors.Hand;
             btnAddCustomer.FlatAppearance.BorderSize = 0;
-            btnAddCustomer.FlatStyle = FlatStyle.Flat;
+            btnAddCustomer.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnAddCustomer.IconChar = FontAwesome.Sharp.IconChar.CirclePlus;
-            btnAddCustomer.IconColor = Color.FromArgb(230, 25, 70);
+            btnAddCustomer.IconColor = System.Drawing.Color.FromArgb(230, 25, 70);
             btnAddCustomer.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnAddCustomer.IconSize = 35;
-            btnAddCustomer.Location = new Point(5, 48);
+            btnAddCustomer.Location = new System.Drawing.Point(5, 48);
             btnAddCustomer.Name = "btnAddCustomer";
-            btnAddCustomer.Size = new Size(40, 40);
+            btnAddCustomer.Size = new System.Drawing.Size(40, 40);
             btnAddCustomer.TabIndex = 2;
+            btnAddCustomer.UseVisualStyleBackColor = false;
 
+            // 
             // pnlFooter
+            // 
             pnlFooter.Controls.Add(pnlSummary);
             pnlFooter.Controls.Add(btnSave);
-            pnlFooter.Dock = DockStyle.Bottom;
-            pnlFooter.Location = new Point(10, 490);
+            pnlFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
+            pnlFooter.Location = new System.Drawing.Point(10, 490);
             pnlFooter.Name = "pnlFooter";
-            pnlFooter.Size = new Size(330, 200);
+            pnlFooter.Size = new System.Drawing.Size(430, 200);
             pnlFooter.TabIndex = 1;
 
+            // 
             // pnlSummary
+            // 
             pnlSummary.ColumnCount = 2;
-            pnlSummary.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            pnlSummary.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            pnlSummary.Controls.Add(lblSubTotalText, 0, 0);
-            pnlSummary.Controls.Add(lblSubTotalValue, 1, 0);
-            pnlSummary.Controls.Add(lblDiscountText, 0, 1);
-            pnlSummary.Controls.Add(cmbDiscountPercent, 1, 1);
+            pnlSummary.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            pnlSummary.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             pnlSummary.Controls.Add(lblTotalText, 0, 2);
             pnlSummary.Controls.Add(lblTotalPrice, 1, 2);
-            pnlSummary.Dock = DockStyle.Top;
-            pnlSummary.Location = new Point(0, 0);
+            pnlSummary.Dock = System.Windows.Forms.DockStyle.Top;
+            pnlSummary.Location = new System.Drawing.Point(0, 0);
             pnlSummary.Name = "pnlSummary";
             pnlSummary.RowCount = 3;
-            pnlSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 35F));
-            pnlSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 35F));
-            pnlSummary.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
-            pnlSummary.Size = new Size(330, 120);
+            pnlSummary.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            pnlSummary.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            pnlSummary.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+            pnlSummary.Size = new System.Drawing.Size(430, 120);
+            pnlSummary.TabIndex = 0;
 
-            // lblSubTotalText
-            lblSubTotalText.Text = "الإجمالي قبل الخصم:";
-            lblSubTotalText.TextAlign = ContentAlignment.MiddleLeft;
-            lblSubTotalText.Dock = DockStyle.Fill;
-
-            // lblSubTotalValue
-            lblSubTotalValue.Text = "0.00 د.ل";
-            lblSubTotalValue.TextAlign = ContentAlignment.MiddleRight;
-            lblSubTotalValue.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            lblSubTotalValue.Dock = DockStyle.Fill;
-
-            // lblDiscountText
-            lblDiscountText.Text = "نسبة الخصم:";
-            lblDiscountText.TextAlign = ContentAlignment.MiddleLeft;
-            lblDiscountText.Dock = DockStyle.Fill;
-
-            // cmbDiscountPercent
-            cmbDiscountPercent.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbDiscountPercent.Items.AddRange(new object[] { "0%", "5%", "10%", "15%", "20%", "25%", "50%" });
-            cmbDiscountPercent.Location = new Point(3, 38);
-            cmbDiscountPercent.Name = "cmbDiscountPercent";
-            cmbDiscountPercent.Size = new Size(100, 23);
-            cmbDiscountPercent.TabIndex = 1;
-
+            // 
             // lblTotalText
-            lblTotalText.Text = "الصافي النهائي:";
-            lblTotalText.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            lblTotalText.TextAlign = ContentAlignment.MiddleLeft;
-            lblTotalText.Dock = DockStyle.Fill;
+            // 
+            lblTotalText.Dock = System.Windows.Forms.DockStyle.Fill;
+            lblTotalText.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            lblTotalText.Location = new System.Drawing.Point(218, 70);
+            lblTotalText.Name = "lblTotalText";
+            lblTotalText.Size = new System.Drawing.Size(209, 50);
+            lblTotalText.TabIndex = 3;
+            lblTotalText.Text = "الاجمالي";
+            lblTotalText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
+            // 
             // lblTotalPrice
-            lblTotalPrice.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
-            lblTotalPrice.ForeColor = Color.FromArgb(230, 25, 70);
+            // 
+            lblTotalPrice.Dock = System.Windows.Forms.DockStyle.Fill;
+            lblTotalPrice.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
+            lblTotalPrice.ForeColor = System.Drawing.Color.FromArgb(230, 25, 70);
+            lblTotalPrice.Location = new System.Drawing.Point(3, 70);
+            lblTotalPrice.Name = "lblTotalPrice";
+            lblTotalPrice.Size = new System.Drawing.Size(209, 50);
+            lblTotalPrice.TabIndex = 4;
             lblTotalPrice.Text = "0.00 د.ل";
-            lblTotalPrice.TextAlign = ContentAlignment.MiddleRight;
-            lblTotalPrice.Dock = DockStyle.Fill;
+            lblTotalPrice.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 
+            // 
             // btnSave
-            btnSave.BackColor = Color.FromArgb(230, 25, 70);
-            btnSave.Cursor = Cursors.Hand;
-            btnSave.Dock = DockStyle.Bottom;
+            // 
+            btnSave.BackColor = System.Drawing.Color.FromArgb(230, 25, 70);
+            btnSave.Cursor = System.Windows.Forms.Cursors.Hand;
+            btnSave.Dock = System.Windows.Forms.DockStyle.Bottom;
             btnSave.FlatAppearance.BorderSize = 0;
-            btnSave.FlatStyle = FlatStyle.Flat;
-            btnSave.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            btnSave.ForeColor = Color.White;
-            btnSave.Location = new Point(0, 140);
+            btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnSave.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            btnSave.ForeColor = System.Drawing.Color.White;
+            btnSave.Location = new System.Drawing.Point(0, 140);
             btnSave.Name = "btnSave";
-            btnSave.Size = new Size(330, 60);
+            btnSave.Size = new System.Drawing.Size(430, 60);
             btnSave.TabIndex = 2;
             btnSave.Text = "تأكيد وحفظ الحجز";
+            btnSave.UseVisualStyleBackColor = false;
 
+            // 
             // dgvCart
+            // 
             dgvCart.AllowUserToAddRows = false;
             dgvCart.AllowUserToDeleteRows = false;
-            dgvCart.BackgroundColor = Color.White;
-            dgvCart.BorderStyle = BorderStyle.None;
-            dgvCart.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvCart.Columns.AddRange(new DataGridViewColumn[] { IDCol, NameCol, PriceCol, DeleteCol });
-            dgvCart.Dock = DockStyle.Fill;
-            dgvCart.Location = new Point(10, 120);
+            dgvCart.BackgroundColor = System.Drawing.Color.White;
+            dgvCart.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            dgvCart.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            // إضافة الأعمدة النظيفة فقط هنا
+            dgvCart.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+                IDCol, NameCol, PriceCol, QuantityCol, LineTotalCol, TypeCol, DeleteCol
+            });
+            dgvCart.Dock = System.Windows.Forms.DockStyle.Fill;
+            dgvCart.Location = new System.Drawing.Point(10, 120);
             dgvCart.Name = "dgvCart";
-            dgvCart.ReadOnly = true;
             dgvCart.RowHeadersVisible = false;
-            dgvCart.RowTemplate.Height = 35;
-            dgvCart.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvCart.Size = new Size(330, 370);
+            dgvCart.RowTemplate.Height = 40;
+            dgvCart.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+            dgvCart.Size = new System.Drawing.Size(430, 370);
+            dgvCart.TabIndex = 0;
 
-            // --- إعدادات الأعمدة (هنا يكمن الحل) ---
-
+            // 
             // IDCol
-            IDCol.Name = "IDCol"; // إعطاء اسم برمجي للعمود
+            // 
+            IDCol.Name = "IDCol";
             IDCol.Visible = false;
 
+            // 
             // NameCol
+            // 
+            NameCol.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            NameCol.HeaderText = "الصنف/الخدمة";
             NameCol.Name = "NameCol";
-            NameCol.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            NameCol.HeaderText = "الخدمة";
+            NameCol.ReadOnly = true;
 
+            // 
             // PriceCol
-            PriceCol.Name = "PriceCol";
+            // 
             PriceCol.HeaderText = "السعر";
-            PriceCol.Width = 80;
+            PriceCol.Name = "PriceCol";
+            PriceCol.ReadOnly = true;
+            PriceCol.Width = 70;
 
+            // 
+            // QuantityCol (العمود الذكي الوحيد)
+            // 
+            QuantityCol.HeaderText = "الكمية";
+            QuantityCol.Name = "QuantityCol";
+            QuantityCol.DefaultCellStyle.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            QuantityCol.Width = 60;
+
+            // 
+            // LineTotalCol
+            // 
+            LineTotalCol.HeaderText = "الإجمالي";
+            LineTotalCol.Name = "LineTotalCol";
+            LineTotalCol.ReadOnly = true;
+            LineTotalCol.Width = 85;
+
+            // 
+            // TypeCol
+            // 
+            TypeCol.Name = "TypeCol";
+            TypeCol.Visible = false;
+
+            // 
             // DeleteCol
-            DeleteCol.Name = "DeleteCol"; // إعطاء اسم برمجي لزر الحذف ليتعرف عليه الـ Logic
+            // 
             DeleteCol.HeaderText = "";
+            DeleteCol.Name = "DeleteCol";
             DeleteCol.Text = "❌";
             DeleteCol.UseColumnTextForButtonValue = true;
             DeleteCol.Width = 40;
 
+            // 
             // UC_CartSummary
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.White;
+            // 
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            BackColor = System.Drawing.Color.White;
             Controls.Add(dgvCart);
             Controls.Add(pnlFooter);
             Controls.Add(pnlHeader);
             Name = "UC_CartSummary";
-            Padding = new Padding(10);
-            RightToLeft = RightToLeft.Yes;
-            Size = new Size(350, 700);
-
+            Padding = new System.Windows.Forms.Padding(10);
+            RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            Size = new System.Drawing.Size(450, 700);
             pnlHeader.ResumeLayout(false);
             pnlHeader.PerformLayout();
             pnlComboBorder.ResumeLayout(false);
             pnlFooter.ResumeLayout(false);
             pnlSummary.ResumeLayout(false);
-            pnlSummary.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvCart).EndInit();
             ResumeLayout(false);
         }
@@ -245,18 +286,19 @@
         private FontAwesome.Sharp.IconButton btnAddCustomer;
         private System.Windows.Forms.Panel pnlFooter;
         private System.Windows.Forms.TableLayoutPanel pnlSummary;
-        private System.Windows.Forms.Label lblSubTotalText;
-        private System.Windows.Forms.Label lblSubTotalValue;
-        private System.Windows.Forms.Label lblDiscountText;
-        private System.Windows.Forms.ComboBox cmbDiscountPercent;
         private System.Windows.Forms.Label lblTotalPrice;
         private System.Windows.Forms.Label lblTotalText;
         private System.Windows.Forms.Button btnSave;
         public System.Windows.Forms.DataGridView dgvCart;
+
+        // قائمة المتغيرات النهائية النظيفة
         private System.Windows.Forms.DataGridViewTextBoxColumn IDCol;
         private System.Windows.Forms.DataGridViewTextBoxColumn NameCol;
         private System.Windows.Forms.DataGridViewTextBoxColumn PriceCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn QuantityCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn LineTotalCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn TypeCol;
         private System.Windows.Forms.DataGridViewButtonColumn DeleteCol;
-        private MaterialSearchableCombo cmbCustomers;
+        private beautyCenterSystem.MaterialSearchableCombo cmbCustomers;
     }
 }

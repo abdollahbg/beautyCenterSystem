@@ -53,6 +53,8 @@ namespace beautyCenterSystem
             // 4. زر المواد والمخزون
             btnMaterials.Visible = PermissionManager.Can("AccessPurchases");
 
+            btnEmployees.Visible = PermissionManager.Can("AccessEmployees");
+
 
             // ملحوظة: أزرار العميلات والمواعيد والخدمات تترك مرئية للموظفين (Staff) عادةً
             btnCustomers.Visible = true;
@@ -315,6 +317,12 @@ namespace beautyCenterSystem
 
             // عرض الرسالة في MessageBox مع أيقونة المعلومات
             MessageBox.Show(fullMessage, "حول نظام الصنوان", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private async void  btnEmployees_Click(object sender, EventArgs e)
+        {
+            if (await ShowScreen(new UC_Employees()))
+                HighlightButton(sender);
         }
     }
 }

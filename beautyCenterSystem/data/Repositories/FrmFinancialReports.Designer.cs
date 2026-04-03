@@ -64,6 +64,12 @@
             dgvSafesBalances = new DataGridView();
             tpDailyClosing = new TabPage();
             dgvDailyClosing = new DataGridView();
+            tpEmployeeExpenses = new TabPage();
+            dgvEmployeeExpenses = new DataGridView();
+            tpCafeteriaRevenues = new TabPage();
+            dgvCafeteriaRevenues = new DataGridView();
+            tpEmployeeDetails = new TabPage();
+            dgvEmployeeDetails = new DataGridView();
             materialTabSelector1 = new MaterialSkin.Controls.MaterialTabSelector();
             panel1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
@@ -89,6 +95,12 @@
             ((System.ComponentModel.ISupportInitialize)dgvSafesBalances).BeginInit();
             tpDailyClosing.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvDailyClosing).BeginInit();
+            tpEmployeeExpenses.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvEmployeeExpenses).BeginInit();
+            tpCafeteriaRevenues.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvCafeteriaRevenues).BeginInit();
+            tpEmployeeDetails.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvEmployeeDetails).BeginInit();
             SuspendLayout();
             // 
             // panel1
@@ -452,6 +464,9 @@
             tabcontrol.Controls.Add(tpPurchases);
             tabcontrol.Controls.Add(tpSafes);
             tabcontrol.Controls.Add(tpDailyClosing);
+            tabcontrol.Controls.Add(tpEmployeeExpenses);
+            tabcontrol.Controls.Add(tpCafeteriaRevenues);
+            tabcontrol.Controls.Add(tpEmployeeDetails);
             tabcontrol.Depth = 0;
             tabcontrol.Dock = DockStyle.Fill;
             tabcontrol.Location = new Point(0, 48);
@@ -573,6 +588,72 @@
             dgvDailyClosing.Size = new Size(1156, 200);
             dgvDailyClosing.TabIndex = 0;
             // 
+            // tpEmployeeExpenses
+            // 
+            tpEmployeeExpenses.BackColor = Color.White;
+            tpEmployeeExpenses.Controls.Add(dgvEmployeeExpenses);
+            tpEmployeeExpenses.Location = new Point(4, 24);
+            tpEmployeeExpenses.Name = "tpEmployeeExpenses";
+            tpEmployeeExpenses.Padding = new Padding(10);
+            tpEmployeeExpenses.Size = new Size(1176, 220);
+            tpEmployeeExpenses.TabIndex = 5;
+            tpEmployeeExpenses.Text = "مصروفات الموظفات";
+            // 
+            // dgvEmployeeExpenses
+            // 
+            dgvEmployeeExpenses.BackgroundColor = Color.White;
+            dgvEmployeeExpenses.BorderStyle = BorderStyle.None;
+            dgvEmployeeExpenses.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvEmployeeExpenses.Dock = DockStyle.Fill;
+            dgvEmployeeExpenses.Location = new Point(10, 10);
+            dgvEmployeeExpenses.Name = "dgvEmployeeExpenses";
+            dgvEmployeeExpenses.Size = new Size(1156, 200);
+            dgvEmployeeExpenses.TabIndex = 0;
+            // 
+            // tpCafeteriaRevenues
+            // 
+            tpCafeteriaRevenues.BackColor = Color.White;
+            tpCafeteriaRevenues.Controls.Add(dgvCafeteriaRevenues);
+            tpCafeteriaRevenues.Location = new Point(4, 24);
+            tpCafeteriaRevenues.Name = "tpCafeteriaRevenues";
+            tpCafeteriaRevenues.Padding = new Padding(10);
+            tpCafeteriaRevenues.Size = new Size(1176, 220);
+            tpCafeteriaRevenues.TabIndex = 6;
+            tpCafeteriaRevenues.Text = "إيرادات الكافيتيريا";
+            // 
+            // dgvCafeteriaRevenues
+            // 
+            dgvCafeteriaRevenues.BackgroundColor = Color.White;
+            dgvCafeteriaRevenues.BorderStyle = BorderStyle.None;
+            dgvCafeteriaRevenues.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvCafeteriaRevenues.Dock = DockStyle.Fill;
+            dgvCafeteriaRevenues.Location = new Point(10, 10);
+            dgvCafeteriaRevenues.Name = "dgvCafeteriaRevenues";
+            dgvCafeteriaRevenues.Size = new Size(1156, 200);
+            dgvCafeteriaRevenues.TabIndex = 0;
+            // 
+            // tpEmployeeDetails
+            // 
+            tpEmployeeDetails.BackColor = Color.White;
+            tpEmployeeDetails.Controls.Add(dgvEmployeeDetails);
+            tpEmployeeDetails.Location = new Point(4, 24);
+            tpEmployeeDetails.Name = "tpEmployeeDetails";
+            tpEmployeeDetails.Padding = new Padding(10);
+            tpEmployeeDetails.Size = new Size(1176, 220);
+            tpEmployeeDetails.TabIndex = 7;
+            tpEmployeeDetails.Text = "أداء الموظفات";
+            // 
+            // dgvEmployeeDetails
+            // 
+            dgvEmployeeDetails.BackgroundColor = Color.White;
+            dgvEmployeeDetails.BorderStyle = BorderStyle.None;
+            dgvEmployeeDetails.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvEmployeeDetails.Dock = DockStyle.Fill;
+            dgvEmployeeDetails.Location = new Point(10, 10);
+            dgvEmployeeDetails.Name = "dgvEmployeeDetails";
+            dgvEmployeeDetails.Size = new Size(1156, 200);
+            dgvEmployeeDetails.TabIndex = 0;
+            // 
             // materialTabSelector1
             // 
             materialTabSelector1.BaseTabControl = tabcontrol;
@@ -626,6 +707,12 @@
             ((System.ComponentModel.ISupportInitialize)dgvSafesBalances).EndInit();
             tpDailyClosing.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvDailyClosing).EndInit();
+            tpEmployeeExpenses.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvEmployeeExpenses).EndInit();
+            tpCafeteriaRevenues.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvCafeteriaRevenues).EndInit();
+            tpEmployeeDetails.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvEmployeeDetails).EndInit();
             ResumeLayout(false);
         }
 
@@ -651,24 +738,8 @@
         private System.Windows.Forms.Label lblTotalExpenses;
         private System.Windows.Forms.SplitContainer splitMain;
 
-        // التغييرات البرمجية المطلوبة للـ MaterialSkin والتبويبات الجديدة
+        // التغييرات البرمجية المطلوبة للـ MaterialSkin والتبويبات القديمة والجديدة
         private MaterialSkin.Controls.MaterialTabSelector materialTabSelector1;
-        private MaterialSkin.Controls.MaterialTabControl tabcontrol;
-
-        private System.Windows.Forms.TabPage tpSales;
-        private System.Windows.Forms.DataGridView dgvSalesDetails;
-
-        private System.Windows.Forms.TabPage tpExpenses;
-        private System.Windows.Forms.DataGridView dgvExpensesDetails;
-
-        private System.Windows.Forms.TabPage tpPurchases;
-        private System.Windows.Forms.DataGridView dgvPurchasesDetails;
-
-        private System.Windows.Forms.TabPage tpSafes;
-        private System.Windows.Forms.DataGridView dgvSafesBalances;
-
-        private System.Windows.Forms.TabPage tpDailyClosing;
-        private System.Windows.Forms.DataGridView dgvDailyClosing;
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.DataGridView dgvRoomsSummary;
@@ -679,5 +750,22 @@
         private MaterialSkin.Controls.MaterialButton btnRefresh;
 
         private System.Windows.Forms.Label label4;
+        private MaterialSkin.Controls.MaterialTabControl tabcontrol;
+        private TabPage tpSales;
+        private DataGridView dgvSalesDetails;
+        private TabPage tpExpenses;
+        private DataGridView dgvExpensesDetails;
+        private TabPage tpPurchases;
+        private DataGridView dgvPurchasesDetails;
+        private TabPage tpSafes;
+        private DataGridView dgvSafesBalances;
+        private TabPage tpDailyClosing;
+        private DataGridView dgvDailyClosing;
+        private TabPage tpEmployeeExpenses;
+        private DataGridView dgvEmployeeExpenses;
+        private TabPage tpCafeteriaRevenues;
+        private DataGridView dgvCafeteriaRevenues;
+        private TabPage tpEmployeeDetails;
+        private DataGridView dgvEmployeeDetails;
     }
 }

@@ -3,20 +3,24 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Data;
 using System.Linq;
-using BeautyCenterSystem.Data.Repositories;
+using beautyCenterSystem.Data;
 using BeautyCenterSystem.Data;
-using BeautyCenterSystem.Models; // تأكد من وجود الموديلات هنا
 
 namespace beautyCenterSystem.Data.Repositories
 {
-    public class RoomRepository : BaseRepository
+    public class RoomRepository
     {
-        public RoomRepository(DbConnectionFactory dbFactory) : base(dbFactory) { }
+        private readonly DbConnectionFactory _dbFactory;
+
+        public RoomRepository(DbConnectionFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
 
         public async Task<IEnumerable<Room>> GetAllAsync()
         {
             using var db = _dbFactory.CreateConnection();
-            // الـ * ستجلب الـ IconPath تلقائياً الآن
+            // الـ * ستجلب IsCaffeteria تلقائياً الآن من الجدول
             string sql = "SELECT * FROM Rooms WHERE IsActive = 1 ORDER BY RoomName";
             return await db.QueryAsync<Room>(sql);
         }
@@ -24,9 +28,8 @@ namespace beautyCenterSystem.Data.Repositories
         public async Task<bool> AddAsync(Room room)
         {
             using var db = _dbFactory.CreateConnection();
-            // أضفنا IconPath لعملية الإدخال
-            string sql = @"INSERT INTO Rooms (RoomName, IconPath, IsActive) 
-                           VALUES (@RoomName, @IconPath, 1)";
+            string sql = @"INSERT INTO Rooms (RoomName, IconPath, IsActive, IsCaffeteria) 
+                           VALUES (@RoomName, @IconPath, 1, @IsCaffeteria)";
             int rows = await db.ExecuteAsync(sql, room);
             return rows > 0;
         }
@@ -34,10 +37,10 @@ namespace beautyCenterSystem.Data.Repositories
         public async Task<bool> UpdateAsync(Room room)
         {
             using var db = _dbFactory.CreateConnection();
-            // أضفنا تحديث الـ IconPath هنا
             string sql = @"UPDATE Rooms 
                            SET RoomName = @RoomName, 
-                               IconPath = @IconPath 
+                               IconPath = @IconPath,
+                               IsCaffeteria = @IsCaffeteria
                            WHERE RoomID = @RoomID";
             int rows = await db.ExecuteAsync(sql, room);
             return rows > 0;
@@ -46,7 +49,6 @@ namespace beautyCenterSystem.Data.Repositories
         public async Task<bool> DeleteAsync(int roomId)
         {
             using var db = _dbFactory.CreateConnection();
-            // إيقاف الغرفة بدلاً من مسحها نهائياً
             string sql = "UPDATE Rooms SET IsActive = 0 WHERE RoomID = @Id";
             int rows = await db.ExecuteAsync(sql, new { Id = roomId });
             return rows > 0;

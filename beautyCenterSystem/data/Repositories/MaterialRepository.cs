@@ -3,7 +3,9 @@ using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using System.Linq;
+using beautyCenterSystem.Data;
 using BeautyCenterSystem.Data;
+using BeautyCenterSystem.Models; // تأكد من وجود الموديل
 
 namespace beautyCenterSystem.Data.Repositories
 {
@@ -16,8 +18,7 @@ namespace beautyCenterSystem.Data.Repositories
             _dbFactory = dbFactory;
         }
 
-        // 1. جلب كل المواد النشطة (سواء كانت متوفرة أو غير متوفرة)
-        // لا تجلب المواد التي تم عمل حذف ناعم لها (IsActive = 0)
+        // 1. جلب كل المواد
         public async Task<IEnumerable<Material>> GetAllAsync()
         {
             using (var conn = _dbFactory.CreateConnection())
@@ -27,12 +28,17 @@ namespace beautyCenterSystem.Data.Repositories
             }
         }
 
-        // 2. جلب المواد المتاحة والنشطة فقط (لاستخدامها في شاشات البيع أو الصرف)
-        public async Task<IEnumerable<Material>> GetAvailableAsync()
+        // 2. جلب مواد الكافيتيريا فقط
+        public async Task<IEnumerable<Material>> GetCaffeteriaMenuAsync()
         {
             using (var conn = _dbFactory.CreateConnection())
             {
-                string sql = "SELECT * FROM Materials WHERE IsAvailable = 1 AND IsActive = 1 ORDER BY MaterialName";
+                string sql = @"SELECT * FROM Materials 
+                               WHERE IsCaffeteriaItem = 1 
+                               AND IsAvailable = 1 
+                               AND IsActive = 1 
+                               AND StockQuantity > 0 
+                               ORDER BY MaterialName";
                 return await conn.QueryAsync<Material>(sql);
             }
         }
@@ -42,48 +48,78 @@ namespace beautyCenterSystem.Data.Repositories
         {
             using (var conn = _dbFactory.CreateConnection())
             {
-                // نضمن إضافة IsActive كـ 1 افتراضياً
-                string sql = @"INSERT INTO Materials (MaterialName, IsAvailable, IsActive) 
-                             VALUES (@MaterialName, @IsAvailable, 1)";
+                string sql = @"INSERT INTO Materials (MaterialName, IsAvailable, IsActive, SalePrice, StockQuantity, IsCaffeteriaItem) 
+                             VALUES (@MaterialName, @IsAvailable, 1, @SalePrice, @StockQuantity, @IsCaffeteriaItem)";
                 int rows = await conn.ExecuteAsync(sql, material);
                 return rows > 0;
             }
         }
 
-        // 4. تحديث مادة (تعديل الاسم أو حالة التوفر)
+        // 4. تحديث مادة بالكامل
         public async Task<bool> UpdateAsync(Material material)
         {
             using (var conn = _dbFactory.CreateConnection())
             {
                 string sql = @"UPDATE Materials 
                              SET MaterialName = @MaterialName, 
-                                 IsAvailable = @IsAvailable 
+                                 IsAvailable = @IsAvailable,
+                                 SalePrice = @SalePrice,
+                                 StockQuantity = @StockQuantity,
+                                 IsCaffeteriaItem = @IsCaffeteriaItem
                              WHERE MaterialID = @MaterialID";
                 int rows = await conn.ExecuteAsync(sql, material);
                 return rows > 0;
             }
         }
 
-        // 5. الحذف الناعم (Soft Delete)
-        // يحل مشكلة الـ Conflict مع جداول المشتريات
+        // 5. تحديث المخزون عند البيع
+        public async Task<bool> DecreaseStockAsync(int materialId, int quantity)
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                string sql = @"UPDATE Materials 
+                               SET StockQuantity = StockQuantity - @quantity 
+                               WHERE MaterialID = @materialId AND StockQuantity >= @quantity";
+                int rows = await conn.ExecuteAsync(sql, new { materialId, quantity });
+                return rows > 0;
+            }
+        }
+
+        // 6. الحذف الناعم
         public async Task<bool> DeleteAsync(int id)
         {
             using (var conn = _dbFactory.CreateConnection())
             {
-                // نقوم فقط بتعطيل العنصر لكي لا يظهر في النظام مجدداً
                 string sql = "UPDATE Materials SET IsActive = 0 WHERE MaterialID = @id";
                 int rows = await conn.ExecuteAsync(sql, new { id });
                 return rows > 0;
             }
         }
 
-        // 6. جلب المواد التي نفدت من المخزن ولكنها لا تزال "نشطة" في النظام
-        public async Task<IEnumerable<Material>> GetOutOfStockMaterialsAsync()
+        // 7. جلب مادة واحدة بواسطة المعرف (هذه هي الدالة التي كانت ناقصة وتسببت في الخطأ)
+        public async Task<Material> GetByIdAsync(int id)
         {
             using (var conn = _dbFactory.CreateConnection())
             {
-                string sql = "SELECT * FROM Materials WHERE IsAvailable = 0 AND IsActive = 1";
-                return await conn.QueryAsync<Material>(sql);
+                string sql = "SELECT * FROM Materials WHERE MaterialID = @id AND IsActive = 1";
+                return await conn.QueryFirstOrDefaultAsync<Material>(sql, new { id });
+            }
+        }
+
+        public async Task<IEnumerable<Material>> GetOutOfStockMaterialsAsync()
+        {
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                // قمنا بإزالة شرط IsCaffeteriaItem لجلب جميع المواد 
+                // التي تتبع نظام المخزن (صالون + كافيتيريا)
+                string query = @"SELECT * FROM Materials 
+                         WHERE IsActive = 1 
+                         AND (
+                             (StockQuantity IS NOT NULL AND StockQuantity < 5) 
+                             OR IsAvailable = 0
+                         )";
+
+                return await connection.QueryAsync<Material>(query);
             }
         }
     }

@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using beautyCenterSystem.viewsmodels;
 
-namespace beautyCenterSystem
+public class Appointment
 {
-    public class Appointment
-    {
-        public int AppointmentID { get; set; }
-        public int CustomerID { get; set; }
-        public string CustomerName { get; set; } // للعرض
-        public DateTime AppointmentDate { get; set; }
-        public string Status { get; set; } // يمكن تحويله لـ Enum عند القراءة
-        public int CreatedBy { get; set; }
-        public decimal TotalPrice { get; set; }
+    public int AppointmentID { get; set; }
+    public int CustomerID { get; set; }
+    public string CustomerName { get; set; }
+    public DateTime AppointmentDate { get; set; }
+    public decimal TotalPrice { get; set; }
+    public string Status { get; set; } = "Pending";
+    public int CreatedBy { get; set; }
 
-        // قائمة الخدمات المرتبطة بهذا الحجز
-        public List<Service> SelectedServices { get; set; } = new List<Service>();
-    }
+    // التعديل هنا: غير List<Service> إلى القائمة الجديدة
+    public List<AppointmentDetailDto> SelectedServices { get; set; } = new List<AppointmentDetailDto>();
 }
