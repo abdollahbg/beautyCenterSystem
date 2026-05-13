@@ -5,23 +5,25 @@ namespace beautyCenterSystem.viewsmodels
     public class AppointmentDetailDto
     {
         // 1. المعرفات (IDs)
-        public int? ServiceID { get; set; }   // يقبل Null إذا كان العنصر "مادة"
-        public int? MaterialID { get; set; }  // يقبل Null إذا كان العنصر "خدمة"
-        public int? EmployeeID { get; set; }  // رقم الموظفة للعمولة
+        public int DetailID { get; set; }      // مهم جداً للتحكم في حالة الخدمة (Start/Complete)
+        public int? ServiceID { get; set; }
+        public int? MaterialID { get; set; }
+        public int? EmployeeID { get; set; }
 
-        // 2. بيانات العرض (للجداول والطباعة)
-        public string Name { get; set; }          // اسم الخدمة أو المادة
-        public string EmployeeName { get; set; }  // اسم الموظفة (للعرض)
-
-        // --- الإضافة الجديدة هنا ---
-        public string RoomName { get; set; }      // اسم الغرفة الذي سيظهر كـ "نوع الخدمة" في الفاتورة
-        // ---------------------------
+        // 2. بيانات العرض
+        public string Name { get; set; }
+        public string EmployeeName { get; set; }
+        public string RoomName { get; set; }
 
         // 3. البيانات المالية والكميات
-        public int Quantity { get; set; }         // الكمية (مهمة للكافيتيريا)
-        public decimal Price { get; set; }        // السعر وقت البيع
-
-        // 4. الحقول المالية الإضافية
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
         public decimal CommissionAmount { get; set; }
+
+        // --- التعديلات الجديدة للحالة والتوقيت ---
+        public string Status { get; set; } = "Pending"; // (Pending, InProgress, Completed, Canceled)
+        public DateTime? ActualStartTime { get; set; }  // وقت بدء الخدمة فعلياً
+        public DateTime? ActualEndTime { get; set; }    // وقت انتهاء الخدمة فعلياً
+        // ------------------------------------------
     }
 }

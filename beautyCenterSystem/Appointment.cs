@@ -1,4 +1,6 @@
-﻿using beautyCenterSystem.viewsmodels;
+﻿using System;
+using System.Collections.Generic;
+using beautyCenterSystem.viewsmodels;
 
 public class Appointment
 {
@@ -10,6 +12,10 @@ public class Appointment
     public string Status { get; set; } = "Pending";
     public int CreatedBy { get; set; }
 
-    // التعديل هنا: غير List<Service> إلى القائمة الجديدة
+    // --- التعديلات الجديدة لتوقيت العميل داخل المركز ---
+    public DateTime? ArrivalTime { get; set; }  // وقت وصول العميلة للمركز
+    public DateTime? FinishTime { get; set; }   // وقت انتهاء كل الخدمات (قبل الدفع)
+    // --------------------------------------------------
+
     public List<AppointmentDetailDto> SelectedServices { get; set; } = new List<AppointmentDetailDto>();
 }

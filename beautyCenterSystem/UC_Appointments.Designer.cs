@@ -37,7 +37,6 @@
             tableLayoutPanel1 = new TableLayoutPanel();
             btnAddAppointment = new FontAwesome.Sharp.IconButton();
             btnEditAppointment = new FontAwesome.Sharp.IconButton();
-            btnStartService = new FontAwesome.Sharp.IconButton();
             btnPrintInvoice = new FontAwesome.Sharp.IconButton();
             btnCompleteAndPay = new FontAwesome.Sharp.IconButton();
             btnCancelAppointment = new FontAwesome.Sharp.IconButton();
@@ -167,19 +166,17 @@
             // tableLayoutPanel1
             // 
             tableLayoutPanel1.BackColor = Color.WhiteSmoke;
-            tableLayoutPanel1.ColumnCount = 6;
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66667F));
+            tableLayoutPanel1.ColumnCount = 5;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
             tableLayoutPanel1.Controls.Add(btnAddAppointment, 0, 0);
             tableLayoutPanel1.Controls.Add(btnEditAppointment, 1, 0);
-            tableLayoutPanel1.Controls.Add(btnStartService, 2, 0);
-            tableLayoutPanel1.Controls.Add(btnPrintInvoice, 3, 0);
-            tableLayoutPanel1.Controls.Add(btnCompleteAndPay, 4, 0);
-            tableLayoutPanel1.Controls.Add(btnCancelAppointment, 5, 0);
+            tableLayoutPanel1.Controls.Add(btnPrintInvoice, 2, 0);
+            tableLayoutPanel1.Controls.Add(btnCompleteAndPay, 3, 0);
+            tableLayoutPanel1.Controls.Add(btnCancelAppointment, 4, 0);
             tableLayoutPanel1.Dock = DockStyle.Bottom;
             tableLayoutPanel1.Location = new Point(0, 600);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -201,9 +198,9 @@
             btnAddAppointment.IconColor = Color.Black;
             btnAddAppointment.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnAddAppointment.IconSize = 40;
-            btnAddAppointment.Location = new Point(831, 13);
+            btnAddAppointment.Location = new Point(793, 13);
             btnAddAppointment.Name = "btnAddAppointment";
-            btnAddAppointment.Size = new Size(156, 74);
+            btnAddAppointment.Size = new Size(184, 74);
             btnAddAppointment.TabIndex = 1;
             btnAddAppointment.Text = "حجز جديد";
             btnAddAppointment.TextImageRelation = TextImageRelation.TextBeforeImage;
@@ -221,34 +218,14 @@
             btnEditAppointment.IconColor = Color.Black;
             btnEditAppointment.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnEditAppointment.IconSize = 40;
-            btnEditAppointment.Location = new Point(668, 13);
+            btnEditAppointment.Location = new Point(598, 13);
             btnEditAppointment.Name = "btnEditAppointment";
-            btnEditAppointment.Size = new Size(157, 74);
+            btnEditAppointment.Size = new Size(189, 74);
             btnEditAppointment.TabIndex = 4;
             btnEditAppointment.Text = "تعديل الحجز";
             btnEditAppointment.TextImageRelation = TextImageRelation.TextBeforeImage;
             btnEditAppointment.UseVisualStyleBackColor = true;
             btnEditAppointment.Click += btnEditAppointment_Click;
-            // 
-            // btnStartService
-            // 
-            btnStartService.Cursor = Cursors.Hand;
-            btnStartService.Dock = DockStyle.Fill;
-            btnStartService.FlatAppearance.BorderSize = 0;
-            btnStartService.FlatStyle = FlatStyle.Flat;
-            btnStartService.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnStartService.IconChar = FontAwesome.Sharp.IconChar.Play;
-            btnStartService.IconColor = Color.Black;
-            btnStartService.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnStartService.IconSize = 40;
-            btnStartService.Location = new Point(505, 13);
-            btnStartService.Name = "btnStartService";
-            btnStartService.Size = new Size(157, 74);
-            btnStartService.TabIndex = 2;
-            btnStartService.Text = "بدء الخدمة";
-            btnStartService.TextImageRelation = TextImageRelation.TextBeforeImage;
-            btnStartService.UseVisualStyleBackColor = true;
-            btnStartService.Click += btnStartService_Click;
             // 
             // btnPrintInvoice
             // 
@@ -261,14 +238,14 @@
             btnPrintInvoice.IconColor = Color.Black;
             btnPrintInvoice.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnPrintInvoice.IconSize = 40;
-            btnPrintInvoice.Location = new Point(342, 13);
+            btnPrintInvoice.Location = new Point(402, 13);
             btnPrintInvoice.Name = "btnPrintInvoice";
-            btnPrintInvoice.Size = new Size(157, 74);
+            btnPrintInvoice.Size = new Size(190, 74);
             btnPrintInvoice.TabIndex = 6;
             btnPrintInvoice.Text = "طباعة فاتورة";
             btnPrintInvoice.TextImageRelation = TextImageRelation.TextBeforeImage;
             btnPrintInvoice.UseVisualStyleBackColor = true;
-            btnPrintInvoice.Click += new System.EventHandler(this.btnPrintInvoice_Click);
+            btnPrintInvoice.Click += btnPrintInvoice_Click;
             // 
             // btnCompleteAndPay
             // 
@@ -281,9 +258,9 @@
             btnCompleteAndPay.IconColor = Color.Black;
             btnCompleteAndPay.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnCompleteAndPay.IconSize = 40;
-            btnCompleteAndPay.Location = new Point(179, 13);
+            btnCompleteAndPay.Location = new Point(207, 13);
             btnCompleteAndPay.Name = "btnCompleteAndPay";
-            btnCompleteAndPay.Size = new Size(157, 74);
+            btnCompleteAndPay.Size = new Size(189, 74);
             btnCompleteAndPay.TabIndex = 3;
             btnCompleteAndPay.Text = "انهاء ودفع";
             btnCompleteAndPay.TextImageRelation = TextImageRelation.TextBeforeImage;
@@ -303,7 +280,7 @@
             btnCancelAppointment.IconSize = 40;
             btnCancelAppointment.Location = new Point(13, 13);
             btnCancelAppointment.Name = "btnCancelAppointment";
-            btnCancelAppointment.Size = new Size(160, 74);
+            btnCancelAppointment.Size = new Size(188, 74);
             btnCancelAppointment.TabIndex = 5;
             btnCancelAppointment.Text = "الغاء حجز";
             btnCancelAppointment.TextImageRelation = TextImageRelation.TextBeforeImage;
@@ -399,8 +376,7 @@
         private FontAwesome.Sharp.IconButton btnCancelAppointment;
         private FontAwesome.Sharp.IconButton btnEditAppointment;
         private FontAwesome.Sharp.IconButton btnCompleteAndPay;
-        private FontAwesome.Sharp.IconButton btnPrintInvoice; // الزر الجديد
-        private FontAwesome.Sharp.IconButton btnStartService;
+        private FontAwesome.Sharp.IconButton btnPrintInvoice;
         private FontAwesome.Sharp.IconButton btnAddAppointment;
         private Panel panel1;
         private SplitContainer splitContainer1;

@@ -16,7 +16,35 @@ namespace beautyCenterSystem.Data.Repositories
     {
         public AppointmentRepository(DbConnectionFactory dbFactory) : base(dbFactory) { }
 
-        // 1. إضافة حجز جديد - تم إضافة دعم EmployeeID
+        // --------------------------------------------------------
+        // دوال التحكم في حالة الخدمات (الجديدة)
+        // --------------------------------------------------------
+
+        public async Task<bool> StartServiceAsync(int detailId, int appointmentId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            var parameters = new { DetailID = detailId, AppointmentID = appointmentId };
+
+            // استدعاء الـ Stored Procedure
+            await db.ExecuteAsync("sp_StartService", parameters, commandType: CommandType.StoredProcedure);
+            return true;
+        }
+
+        public async Task<bool> CompleteServiceAsync(int detailId, int appointmentId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            var parameters = new { DetailID = detailId, AppointmentID = appointmentId };
+
+            // استدعاء الـ Stored Procedure
+            await db.ExecuteAsync("sp_CompleteService", parameters, commandType: CommandType.StoredProcedure);
+            return true;
+        }
+
+        // --------------------------------------------------------
+        // العمليات الأساسية للحجز
+        // --------------------------------------------------------
+
+        // 1. إضافة حجز جديد
         public async Task<bool> CreateAsync(Appointment appointment)
         {
             using var db = _dbFactory.CreateConnection();
@@ -25,27 +53,30 @@ namespace beautyCenterSystem.Data.Repositories
 
             try
             {
+                // الإجمالي يتم حسابه تلقائياً عبر الـ Trigger لاحقاً، لذلك نمرر 0 مبدئياً
                 string sqlApp = @"INSERT INTO Appointments (CustomerID, AppointmentDate, TotalPrice, Status, CreatedBy) 
-                                  VALUES (@CustomerID, @AppointmentDate, @TotalPrice, @Status, @CreatedBy);
+                                  VALUES (@CustomerID, @AppointmentDate, 0, @Status, @CreatedBy);
                                   SELECT CAST(SCOPE_IDENTITY() as int);";
 
                 int appId = await db.QuerySingleAsync<int>(sqlApp, appointment, transaction);
 
-                // تم إضافة EmployeeID هنا
-                string sqlDetails = @"INSERT INTO AppointmentDetails (AppointmentID, ServiceID, MaterialID, Quantity, PriceAtSale, EmployeeID) 
-                                      VALUES (@AppId, @SId, @MId, @Qty, @Price, @EId)";
+                string sqlDetails = @"INSERT INTO AppointmentDetails (AppointmentID, ServiceID, MaterialID, Quantity, PriceAtSale, EmployeeID, Status) 
+                                      VALUES (@AppId, @SId, @MId, @Qty, @Price, @EId, 'Pending')";
 
-                foreach (var item in appointment.SelectedServices)
+                if (appointment.SelectedServices != null)
                 {
-                    await db.ExecuteAsync(sqlDetails, new
+                    foreach (var item in appointment.SelectedServices)
                     {
-                        AppId = appId,
-                        SId = item.ServiceID,
-                        MId = item.MaterialID,
-                        Qty = item.Quantity,
-                        Price = item.Price,
-                        EId = item.EmployeeID // مرسل من كائن الخدمة المختارة
-                    }, transaction);
+                        await db.ExecuteAsync(sqlDetails, new
+                        {
+                            AppId = appId,
+                            SId = item.ServiceID,
+                            MId = item.MaterialID,
+                            Qty = item.Quantity,
+                            Price = item.Price,
+                            EId = item.EmployeeID
+                        }, transaction);
+                    }
                 }
 
                 transaction.Commit();
@@ -82,7 +113,7 @@ namespace beautyCenterSystem.Data.Repositories
             return result ?? Enumerable.Empty<Appointment>();
         }
 
-        // 3. تغيير حالة الحجز
+        // 3. تغيير حالة الحجز العامة
         public async Task<bool> UpdateStatusAsync(int appointmentId, string newStatus)
         {
             using var db = _dbFactory.CreateConnection();
@@ -91,32 +122,35 @@ namespace beautyCenterSystem.Data.Repositories
             return rows > 0;
         }
 
-        // 4. جلب تفاصيل حجز معين - تم إضافة EmployeeID كقيمة رقمية فقط دون Join للاسم لكي لا يظهر في جدول العرض
+        // 4. جلب تفاصيل حجز معين - تم إضافة DetailID والحالات والأوقات
         public async Task<IEnumerable<AppointmentDetailDto>> GetAppointmentServicesAsync(int appId)
         {
             using var db = _dbFactory.CreateConnection();
 
-            // التحسين هنا في COALESCE لجلب اسم الغرفة أو كلمة كافيتيريا
             string sql = @"SELECT 
-                        AD.ServiceID, 
-                        AD.MaterialID, 
-                        AD.EmployeeID, 
-                        AD.Quantity,           -- جلب الكمية المخزنة
-                        AD.PriceAtSale AS Price,
-                        COALESCE(S.ServiceName, M.MaterialName) AS Name,
-                        -- إذا كانت خدمة يجلب اسم غرفتها، وإذا كانت مادة (كافيتيريا) يكتب 'كافيتيريا'
-                        CASE 
-                            WHEN AD.ServiceID IS NOT NULL THEN R.RoomName 
-                            WHEN AD.MaterialID IS NOT NULL THEN N'كافيتيريا'
-                            ELSE N'-' 
-                        END AS RoomName,
-                        E.EmployeeName
-                    FROM AppointmentDetails AD 
-                    LEFT JOIN Services S ON AD.ServiceID = S.ServiceID 
-                    LEFT JOIN Materials M ON AD.MaterialID = M.MaterialID
-                    LEFT JOIN Rooms R ON S.RoomID = R.RoomID 
-                    LEFT JOIN Employees E ON AD.EmployeeID = E.EmployeeID
-                    WHERE AD.AppointmentID = @AppId";
+                             AD.DetailID,              -- مهم لأزرار البدء والإنهاء
+                             AD.ServiceID, 
+                             AD.MaterialID, 
+                             AD.EmployeeID, 
+                             AD.Quantity,            
+                             AD.PriceAtSale AS Price,
+                             AD.CommissionAmount,
+                             AD.Status,                -- حالة الخدمة الفردية
+                             AD.ActualStartTime,       -- وقت البدء الفعلي
+                             AD.ActualEndTime,         -- وقت الانتهاء الفعلي
+                             COALESCE(S.ServiceName, M.MaterialName) AS Name,
+                             CASE 
+                                 WHEN AD.ServiceID IS NOT NULL THEN R.RoomName 
+                                 WHEN AD.MaterialID IS NOT NULL THEN N'كافيتيريا'
+                                 ELSE N'-' 
+                             END AS RoomName,
+                             E.EmployeeName
+                         FROM AppointmentDetails AD 
+                         LEFT JOIN Services S ON AD.ServiceID = S.ServiceID 
+                         LEFT JOIN Materials M ON AD.MaterialID = M.MaterialID
+                         LEFT JOIN Rooms R ON S.RoomID = R.RoomID 
+                         LEFT JOIN Employees E ON AD.EmployeeID = E.EmployeeID
+                         WHERE AD.AppointmentID = @AppId";
 
             return await db.QueryAsync<AppointmentDetailDto>(sql, new { AppId = appId });
         }
@@ -164,41 +198,49 @@ namespace beautyCenterSystem.Data.Repositories
             return conflictingService;
         }
 
-        // 6. تحديث الحجز - دعم EmployeeID عند إعادة الإدخال
+        // 6. تحديث الحجز 
         public async Task<bool> UpdateAsync(Appointment appointment)
         {
             using var db = _dbFactory.CreateConnection();
-            db.Open();
+            await ((SqlConnection)db).OpenAsync(); // تم التعديل إلى اتصال غير متزامن
             using var transaction = db.BeginTransaction();
 
             try
             {
+                // لا نحدث TotalPrice يدوياً هنا، الـ Trigger سيتولى الأمر بمجرد الإدراج
                 string sqlUpdateApp = @"UPDATE Appointments SET 
                                         AppointmentDate = @AppointmentDate, 
-                                        TotalPrice = @TotalPrice,
                                         CustomerID = @CustomerID
                                         WHERE AppointmentID = @AppointmentID";
 
                 await db.ExecuteAsync(sqlUpdateApp, appointment, transaction);
 
-                string sqlDeleteDetails = "DELETE FROM AppointmentDetails WHERE AppointmentID = @AppointmentID";
+                // ملاحظة هامة: الحذف والإضافة يفضل ألا يمس الخدمات التي بدأت بالفعل.
+                // تم تعديل الاستعلام لحذف الخدمات المعلقة (Pending) فقط لتجنب ضياع أوقات الخدمات المكتملة.
+                string sqlDeleteDetails = "DELETE FROM AppointmentDetails WHERE AppointmentID = @AppointmentID AND Status = 'Pending'";
                 await db.ExecuteAsync(sqlDeleteDetails, new { AppointmentID = appointment.AppointmentID }, transaction);
 
-                // دعم العمود الجديد هنا
-                string sqlInsertDetails = @"INSERT INTO AppointmentDetails (AppointmentID, ServiceID, MaterialID, Quantity, PriceAtSale, EmployeeID) 
-                                            VALUES (@AppId, @SId, @MId, @Qty, @Price, @EId)";
+                string sqlInsertDetails = @"INSERT INTO AppointmentDetails (AppointmentID, ServiceID, MaterialID, Quantity, PriceAtSale, EmployeeID, Status) 
+                                            VALUES (@AppId, @SId, @MId, @Qty, @Price, @EId, 'Pending')";
 
-                foreach (var item in appointment.SelectedServices)
+                if (appointment.SelectedServices != null)
                 {
-                    await db.ExecuteAsync(sqlInsertDetails, new
+                    foreach (var item in appointment.SelectedServices)
                     {
-                        AppId = appointment.AppointmentID,
-                        SId = item.ServiceID,
-                        MId = item.MaterialID,
-                        Qty = item.Quantity,
-                        Price = item.Price,
-                        EId = item.EmployeeID
-                    }, transaction);
+                        // لتجنب تكرار إدخال خدمات تم إنهاؤها أو بدأت، نقوم بإدخال الخدمات المعلقة فقط أو المضافة حديثاً
+                        if (item.Status == "Pending" || string.IsNullOrEmpty(item.Status))
+                        {
+                            await db.ExecuteAsync(sqlInsertDetails, new
+                            {
+                                AppId = appointment.AppointmentID,
+                                SId = item.ServiceID,
+                                MId = item.MaterialID,
+                                Qty = item.Quantity,
+                                Price = item.Price,
+                                EId = item.EmployeeID
+                            }, transaction);
+                        }
+                    }
                 }
 
                 transaction.Commit();
@@ -211,11 +253,12 @@ namespace beautyCenterSystem.Data.Repositories
             }
         }
 
-        // 7. إتمام العملية مالياً (لم يتم تغيير المنطق لأنه يدعم EmployeeID بالفعل في كودك الأصلي)
+        // 7. إتمام العملية مالياً
         public async Task<bool> CompleteAndPayAsync(int appId, decimal amountSystem, decimal amountPaid, decimal discount, string method, int userId)
         {
             using var db = _dbFactory.CreateConnection();
-            if (db.State != ConnectionState.Open) db.Open();
+            if (db.State != ConnectionState.Open)
+                await ((SqlConnection)db).OpenAsync(); // تم التعديل إلى اتصال غير متزامن
 
             using var transaction = db.BeginTransaction();
 
@@ -278,7 +321,7 @@ namespace beautyCenterSystem.Data.Repositories
             }
         }
 
-        // 8. إنشاء حجز وجلب المعرف - دعم EmployeeID
+        // 8. إنشاء حجز وجلب المعرف
         public async Task<int> CreateAndGetIdAsync(Appointment appointment)
         {
             using var db = _dbFactory.CreateConnection();
@@ -288,13 +331,13 @@ namespace beautyCenterSystem.Data.Repositories
             try
             {
                 string sqlApp = @"INSERT INTO Appointments (CustomerID, AppointmentDate, TotalPrice, Status, CreatedBy) 
-                                  VALUES (@CustomerID, @AppointmentDate, @TotalPrice, @Status, @CreatedBy);
+                                  VALUES (@CustomerID, @AppointmentDate, 0, @Status, @CreatedBy);
                                   SELECT CAST(SCOPE_IDENTITY() as int);";
 
                 int appId = await db.QuerySingleAsync<int>(sqlApp, appointment, transaction);
 
-                string sqlDetails = @"INSERT INTO AppointmentDetails (AppointmentID, ServiceID, MaterialID, Quantity, PriceAtSale, EmployeeID) 
-                                      VALUES (@AppId, @SId, @MId, @Qty, @Price, @EId)";
+                string sqlDetails = @"INSERT INTO AppointmentDetails (AppointmentID, ServiceID, MaterialID, Quantity, PriceAtSale, EmployeeID, Status) 
+                                      VALUES (@AppId, @SId, @MId, @Qty, @Price, @EId, 'Pending')";
 
                 if (appointment.SelectedServices != null)
                 {
@@ -325,9 +368,9 @@ namespace beautyCenterSystem.Data.Repositories
         // 9. الإحصائيات (KPIs)
         public async Task<(int completed, string topService, int avgTime)> GetTodayDashboardKPIsAsync()
         {
-            using (var conn = _dbFactory.CreateConnection())
-            {
-                string sql = @"
+            using var db = _dbFactory.CreateConnection();
+
+            string sql = @"
             SELECT COUNT(*) FROM Appointments WHERE Status = 'Completed' AND CAST(AppointmentDate AS DATE) = CAST(GETDATE() AS DATE);
 
             SELECT TOP 1 S.ServiceName
@@ -343,37 +386,38 @@ namespace beautyCenterSystem.Data.Repositories
             JOIN Appointments A ON AD.AppointmentID = A.AppointmentID
             WHERE A.Status = 'Completed' AND CAST(A.AppointmentDate AS DATE) = CAST(GETDATE() AS DATE) AND AD.ServiceID IS NOT NULL;";
 
-                using (var multi = await conn.QueryMultipleAsync(sql))
-                {
-                    var completed = await multi.ReadFirstAsync<int>();
-                    var topService = await multi.ReadFirstOrDefaultAsync<string>() ?? "لا يوجد";
-                    var avgTime = await multi.ReadFirstAsync<int>();
-                    return (completed, topService, avgTime);
-                }
-            }
+            using var multi = await db.QueryMultipleAsync(sql);
+
+            var completed = await multi.ReadFirstAsync<int>();
+            var topService = await multi.ReadFirstOrDefaultAsync<string>() ?? "لا يوجد";
+            var avgTime = await multi.ReadFirstAsync<int>();
+
+            return (completed, topService, avgTime);
         }
 
-        // 10. حالة الغرف
+        // 10. حالة الغرف - تم تحديثها لجلب الخدمة "قيد التنفيذ" فعلياً للحصول على دقة أعلى
         public async Task<IEnumerable<dynamic>> GetRoomsStatusAsync()
         {
-            using (var conn = _dbFactory.CreateConnection())
-            {
-                string sql = @"
+            using var db = _dbFactory.CreateConnection();
+
+            string sql = @"
             SELECT 
                 R.RoomID, 
                 R.RoomName,
                 ActiveApp.AppointmentStatus,
+                ActiveApp.DetailStatus,
                 ActiveApp.CustomerName,
                 ActiveApp.ServiceName,
-                ActiveApp.StartTime,
+                ActiveApp.ActualStartTime AS StartTime,
                 ActiveApp.DurationMinutes
             FROM Rooms R
             OUTER APPLY (
                 SELECT TOP 1 
-                    A.Status as AppointmentStatus, 
+                    A.Status as AppointmentStatus,
+                    AD.Status as DetailStatus,
                     C.CustomerName, 
                     S.ServiceName, 
-                    A.AppointmentDate as StartTime, 
+                    AD.ActualStartTime, 
                     S.DurationMinutes
                 FROM AppointmentDetails AD
                 JOIN Appointments A ON AD.AppointmentID = A.AppointmentID
@@ -381,14 +425,13 @@ namespace beautyCenterSystem.Data.Repositories
                 JOIN Customers C ON A.CustomerID = C.CustomerID
                 WHERE S.RoomID = R.RoomID 
                 AND AD.ServiceID IS NOT NULL
-                AND A.Status NOT IN ('Pending', 'Cancelled')
+                AND AD.Status = 'InProgress' -- دقة أعلى: الغرفة مشغولة فقط إذا كانت الخدمة قيد التنفيذ
                 AND CAST(A.AppointmentDate AS DATE) = CAST(GETDATE() AS DATE)
-                ORDER BY A.AppointmentDate DESC 
+                ORDER BY AD.ActualStartTime DESC 
             ) AS ActiveApp
             WHERE R.IsActive = 1 AND R.IsCaffeteria = 0";
 
-                return await conn.QueryAsync(sql);
-            }
+            return await db.QueryAsync(sql);
         }
     }
 }

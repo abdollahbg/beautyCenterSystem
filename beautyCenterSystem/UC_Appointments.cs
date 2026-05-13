@@ -1,17 +1,15 @@
-﻿using beautyCenterSystem.data.Repositories;
-using beautyCenterSystem.Data.Repositories;
+﻿using beautyCenterSystem.Data.Repositories;
 using BeautyCenterSystem.Data;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BeautyCenterSystem.Models;
+using beautyCenterSystem.data.Repositories;
 
 namespace beautyCenterSystem
 {
@@ -24,32 +22,58 @@ namespace beautyCenterSystem
         {
             InitializeComponent();
             _appointmentRepo = new AppointmentRepository(new DbConnectionFactory());
+
+            // ربط أحداث جدول التفاصيل برمجياً
+            dgvDetails.CellFormatting += dgvDetails_CellFormatting;
+            dgvDetails.CellContentClick += dgvDetails_CellContentClick;
         }
 
         private async Task LoadAppointments()
         {
             try
             {
-                dgvDetails.DataSource = null;
-                DateTime selectedDate = dtpFilterDate.Value.Date;
+                int? selectedAppId = null;
+                // تأكد من وجود أعمدة ومن وجود صف محدد لحفظ التحديد
+                if (dgvAppointments.Columns.Contains("AppointmentID") && dgvAppointments.CurrentRow != null)
+                {
+                    var cellValue = dgvAppointments.CurrentRow.Cells["AppointmentID"].Value;
+                    if (cellValue != null) selectedAppId = Convert.ToInt32(cellValue);
+                }
 
+                DateTime selectedDate = dtpFilterDate.Value.Date;
                 var appointments = await _appointmentRepo.GetByDateAsync(selectedDate);
                 _allDayAppointments = appointments.ToList();
 
                 dgvAppointments.DataSource = null;
                 dgvAppointments.DataSource = _allDayAppointments;
-
                 FormatGrid();
 
                 if (_allDayAppointments.Count > 0)
                 {
-                    dgvAppointments.ClearSelection();
-                    dgvAppointments.Rows[0].Selected = true;
+                    // البحث عن الصف السابق بأمان
+                    DataGridViewRow rowToSelect = null;
+                    if (selectedAppId.HasValue)
+                    {
+                        rowToSelect = dgvAppointments.Rows
+                            .Cast<DataGridViewRow>()
+                            .FirstOrDefault(r => r.Cells["AppointmentID"].Value != null &&
+                                                 Convert.ToInt32(r.Cells["AppointmentID"].Value) == selectedAppId);
+                    }
 
-                    int firstAppId = Convert.ToInt32(dgvAppointments.Rows[0].Cells["AppointmentID"].Value);
-                    var services = await _appointmentRepo.GetAppointmentServicesAsync(firstAppId);
-                    dgvDetails.DataSource = services.ToList();
-                    FormatDetailsGrid();
+                    if (rowToSelect == null) rowToSelect = dgvAppointments.Rows[0];
+
+                    dgvAppointments.ClearSelection();
+                    rowToSelect.Selected = true;
+
+                    // تأكد من وجود خلية ظاهرة قبل التحديد
+                    if (dgvAppointments.FirstDisplayedCell != null)
+                    {
+                        dgvAppointments.CurrentCell = rowToSelect.Cells[dgvAppointments.FirstDisplayedCell.ColumnIndex];
+                    }
+
+                    // تحميل التفاصيل باستخدام الدالة المساعدة
+                    int currentAppId = Convert.ToInt32(rowToSelect.Cells["AppointmentID"].Value);
+                    await RefreshDetails(currentAppId);
                 }
                 else
                 {
@@ -58,174 +82,259 @@ namespace beautyCenterSystem
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"حدث خطأ أثناء تحميل المواعيد: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Console.WriteLine(ex.Message);
             }
+        }
+
+        // دالة مساعدة لتحديث التفاصيل لتجنب التكرار
+        private async Task RefreshDetails(int appId)
+        {
+            var services = await _appointmentRepo.GetAppointmentServicesAsync(appId);
+            dgvDetails.DataSource = services.ToList();
+            FormatDetailsGrid();
         }
 
         private void FormatGrid()
         {
-            if (dgvAppointments.Columns.Count > 0)
+            if (dgvAppointments.Columns.Count == 0) return;
+
+            // 1. إخفاء الأعمدة التقنية
+            string[] hiddenCols = { "AppointmentID", "CustomerID", "CreatedBy", "SelectedServices", "Notes" };
+            foreach (var col in hiddenCols)
             {
-                string[] hiddenCols = { "AppointmentID", "CustomerID", "CreatedBy", "SelectedServices" };
-                foreach (var col in hiddenCols)
-                {
-                    if (dgvAppointments.Columns.Contains(col))
-                        dgvAppointments.Columns[col].Visible = false;
-                }
+                if (dgvAppointments.Columns.Contains(col))
+                    dgvAppointments.Columns[col].Visible = false;
+            }
 
-                if (dgvAppointments.Columns.Contains("AppointmentDate"))
-                {
-                    dgvAppointments.Columns["AppointmentDate"].HeaderText = "الوقت";
-                    dgvAppointments.Columns["AppointmentDate"].DefaultCellStyle.Format = "hh:mm tt";
-                    dgvAppointments.Columns["AppointmentDate"].Width = 100;
-                }
+            // 2. تعريب وتنسيق الأعمدة الأساسية
+            if (dgvAppointments.Columns.Contains("AppointmentDate"))
+            {
+                dgvAppointments.Columns["AppointmentDate"].HeaderText = "التاريخ";
+                dgvAppointments.Columns["AppointmentDate"].DefaultCellStyle.Format = "yyyy/MM/dd";
+                dgvAppointments.Columns["AppointmentDate"].Width = 85;
+            }
 
-                if (dgvAppointments.Columns.Contains("CustomerName"))
-                {
-                    dgvAppointments.Columns["CustomerName"].HeaderText = "اسم العميلة";
-                    dgvAppointments.Columns["CustomerName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                }
+            if (dgvAppointments.Columns.Contains("ArrivalTime"))
+            {
+                dgvAppointments.Columns["ArrivalTime"].HeaderText = "من";
+                dgvAppointments.Columns["ArrivalTime"].DefaultCellStyle.Format = "hh:mm tt";
+                dgvAppointments.Columns["ArrivalTime"].Width = 75;
+            }
 
-                if (dgvAppointments.Columns.Contains("TotalPrice"))
-                {
-                    dgvAppointments.Columns["TotalPrice"].HeaderText = "الإجمالي";
-                    dgvAppointments.Columns["TotalPrice"].Width = 90;
-                }
+            if (dgvAppointments.Columns.Contains("FinishTime"))
+            {
+                dgvAppointments.Columns["FinishTime"].HeaderText = "إلى";
+                dgvAppointments.Columns["FinishTime"].DefaultCellStyle.Format = "hh:mm tt";
+                dgvAppointments.Columns["FinishTime"].Width = 75;
+            }
 
-                if (dgvAppointments.Columns.Contains("Status"))
-                {
-                    dgvAppointments.Columns["Status"].HeaderText = "الحالة";
-                    dgvAppointments.Columns["Status"].Width = 100;
-                }
+            if (dgvAppointments.Columns.Contains("CustomerName"))
+            {
+                dgvAppointments.Columns["CustomerName"].HeaderText = "اسم العميلة";
+                dgvAppointments.Columns["CustomerName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                dgvAppointments.Columns["CustomerName"].MinimumWidth = 120;
+            }
+
+            if (dgvAppointments.Columns.Contains("TotalPrice"))
+            {
+                dgvAppointments.Columns["TotalPrice"].HeaderText = "الإجمالي";
+                dgvAppointments.Columns["TotalPrice"].Width = 80;
+                dgvAppointments.Columns["TotalPrice"].DefaultCellStyle.Format = "N2";
+            }
+
+            if (dgvAppointments.Columns.Contains("Status"))
+            {
+                dgvAppointments.Columns["Status"].HeaderText = "الحالة";
+                dgvAppointments.Columns["Status"].Width = 90;
             }
 
             dgvAppointments.ReadOnly = true;
-
-            foreach (DataGridViewRow row in dgvAppointments.Rows)
-            {
-                if (row.Cells["Status"].Value == null) continue;
-                string status = row.Cells["Status"].Value.ToString();
-
-                if (status == "InProgress")
-                {
-                    row.DefaultCellStyle.BackColor = Color.LightGoldenrodYellow;
-                    row.DefaultCellStyle.ForeColor = Color.Black;
-                }
-                else if (status == "Completed")
-                {
-                    row.DefaultCellStyle.BackColor = Color.LightGreen;
-                }
-                else if (status == "Cancelled")
-                {
-                    row.DefaultCellStyle.ForeColor = Color.Gray;
-                    row.DefaultCellStyle.SelectionBackColor = Color.Gray;
-                    row.DefaultCellStyle.Font = new Font(dgvAppointments.Font, FontStyle.Strikeout);
-                }
-            }
+            // ملاحظة: يفضل تلوين الصفوف في حدث CellFormatting لضمان عدم حدوث Exception
         }
 
         private void FormatDetailsGrid()
         {
-            if (dgvDetails.Columns.Count > 0)
+            if (dgvDetails.Columns.Count == 0) return;
+
+            // 1. إدارة عمود الأزرار (إضافته في النهاية)
+            if (!dgvDetails.Columns.Contains("ActionBtn"))
             {
-                // تم إضافة الموظفين والعمولة لقائمة الإخفاء هنا
-                string[] hiddenCols = {
-                    "ServiceID",
-                    "MaterialID",
-                    "AppointmentID",
-                    "DetailID",
-                    "EmployeeID",        // جديد
-                    "EmployeeName",      // جديد
-                    "CommissionAmount"    // جديد
-                    
-                };
+                DataGridViewButtonColumn btnCol = new DataGridViewButtonColumn();
+                btnCol.Name = "ActionBtn";
+                btnCol.HeaderText = "إجراء";
+                btnCol.FlatStyle = FlatStyle.Flat;
+                btnCol.Width = 80;
+                dgvDetails.Columns.Add(btnCol); // إضافة في النهاية
+            }
+            else
+            {
+                // التأكد من بقائه في الأخير حتى بعد تحديث الـ DataSource
+                dgvDetails.Columns["ActionBtn"].DisplayIndex = dgvDetails.Columns.Count - 1;
+            }
 
-                foreach (var col in hiddenCols)
-                {
-                    if (dgvDetails.Columns.Contains(col))
-                        dgvDetails.Columns[col].Visible = false;
-                }
+            // 2. إخفاء الأعمدة التي تسبب زحاماً
+            string[] hiddenCols = { "ServiceID", "MaterialID", "AppointmentID", "DetailID", "EmployeeID", "CommissionAmount", "IsMaterial" };
+            foreach (var col in hiddenCols)
+            {
+                if (dgvDetails.Columns.Contains(col))
+                    dgvDetails.Columns[col].Visible = false;
+            }
+            if (dgvDetails.Columns.Contains("RoomName"))
+            {
+                dgvDetails.Columns["RoomName"].HeaderText = "الغرفة";
+            }
 
-                if (dgvDetails.Columns.Contains("Name"))
-                {
-                    dgvDetails.Columns["Name"].HeaderText = "الصنف / الخدمة";
-                    dgvDetails.Columns["Name"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                }
-                if (dgvDetails.Columns.Contains("RoomName"))
-                {
-                    dgvDetails.Columns["RoomName"].HeaderText = "اسم الغرفة";
-                    dgvDetails.Columns["RoomName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                }
+            if (dgvDetails.Columns.Contains("Quantity"))
+            {
+                dgvDetails.Columns["Quantity"].HeaderText = "الكمية";
+                dgvDetails.Columns["Quantity"].Width = 50;
+            }
 
-                if (dgvDetails.Columns.Contains("Quantity"))
-                {
-                    dgvDetails.Columns["Quantity"].HeaderText = "العدد";
-                    dgvDetails.Columns["Quantity"].Width = 60;
-                    dgvDetails.Columns["Quantity"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                }
+            if (dgvDetails.Columns.Contains("Price"))
+            {
+                dgvDetails.Columns["Price"].HeaderText = "السعر";
+                dgvDetails.Columns["Price"].DefaultCellStyle.Format = "N2";
+                dgvDetails.Columns["Price"].Width = 70;
+            }
 
-                if (dgvDetails.Columns.Contains("Price"))
-                {
-                    dgvDetails.Columns["Price"].HeaderText = "السعر";
-                    dgvDetails.Columns["Price"].Width = 80;
-                    dgvDetails.Columns["Price"].DefaultCellStyle.Format = "N2";
-                }
+            // 3. تعريب وتعديل عرض الأعمدة
+            if (dgvDetails.Columns.Contains("Name"))
+            {
+                dgvDetails.Columns["Name"].HeaderText = "الخدمة/المنتج";
+                dgvDetails.Columns["Name"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            }
+
+            if (dgvDetails.Columns.Contains("EmployeeName"))
+            {
+                dgvDetails.Columns["EmployeeName"].HeaderText = "الموظفة";
+                dgvDetails.Columns["EmployeeName"].Width = 100;
+            }
+
+            if (dgvDetails.Columns.Contains("ActualStartTime"))
+            {
+                dgvDetails.Columns["ActualStartTime"].HeaderText = "بدء";
+                dgvDetails.Columns["ActualStartTime"].DefaultCellStyle.Format = "hh:mm tt";
+                dgvDetails.Columns["ActualStartTime"].Width = 70;
+            }
+
+            if (dgvDetails.Columns.Contains("ActualEndTime"))
+            {
+                dgvDetails.Columns["ActualEndTime"].HeaderText = "نهاية";
+                dgvDetails.Columns["ActualEndTime"].DefaultCellStyle.Format = "hh:mm tt";
+                dgvDetails.Columns["ActualEndTime"].Width = 70;
+            }
+
+            if (dgvDetails.Columns.Contains("Status"))
+            {
+                dgvDetails.Columns["Status"].HeaderText = "الحالة";
+                dgvDetails.Columns["Status"].Width = 85;
             }
 
             dgvDetails.ReadOnly = true;
-            dgvDetails.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            if (dgvDetails.Columns.Contains("ActionBtn"))
+                dgvDetails.Columns["ActionBtn"].ReadOnly = false;
+        }
+
+        private void dgvDetails_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (dgvDetails.Columns[e.ColumnIndex].Name == "ActionBtn" && e.RowIndex >= 0)
+            {
+                var row = dgvDetails.Rows[e.RowIndex];
+                string status = row.Cells["Status"].Value?.ToString() ?? "Pending";
+
+                bool isMaterial = dgvDetails.Columns.Contains("MaterialID") &&
+                                  row.Cells["MaterialID"].Value != null &&
+                                  row.Cells["MaterialID"].Value != DBNull.Value &&
+                                  row.Cells["MaterialID"].Value.ToString() != "0";
+
+                DataGridViewButtonCell cell = (DataGridViewButtonCell)row.Cells["ActionBtn"];
+
+                if (status == "Pending")
+                {
+                    e.Value = isMaterial ? "تم التسليم" : "ابدأ";
+                    cell.Style.BackColor = isMaterial ? Color.DodgerBlue : Color.MediumSeaGreen;
+                    cell.Style.ForeColor = Color.White;
+                }
+                else if (status == "InProgress")
+                {
+                    e.Value = "إنهاء";
+                    cell.Style.BackColor = Color.Orange;
+                    cell.Style.ForeColor = Color.White;
+                }
+                else if (status == "Completed" || status == "Canceled")
+                {
+                    e.Value = status == "Completed" ? "مكتمل" : "ملغي";
+                    cell.Style.BackColor = Color.LightGray;
+                    cell.Style.ForeColor = Color.DarkGray;
+                }
+            }
+        }
+
+        private async void dgvDetails_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dgvAppointments.CurrentRow == null) return;
+
+            if (e.RowIndex >= 0 && dgvDetails.Columns[e.ColumnIndex].Name == "ActionBtn")
+            {
+                var row = dgvDetails.Rows[e.RowIndex];
+                string status = row.Cells["Status"].Value?.ToString() ?? "Pending";
+
+                if (status == "Completed" || status == "Canceled") return;
+
+                try
+                {
+                    int detailId = Convert.ToInt32(row.Cells["DetailID"].Value);
+                    int appointmentId = Convert.ToInt32(dgvAppointments.CurrentRow.Cells["AppointmentID"].Value);
+
+                    bool isMaterial = dgvDetails.Columns.Contains("MaterialID") &&
+                                      row.Cells["MaterialID"].Value != null &&
+                                      row.Cells["MaterialID"].Value != DBNull.Value &&
+                                      row.Cells["MaterialID"].Value.ToString() != "0";
+
+                    if (status == "Pending")
+                    {
+                        if (isMaterial)
+                            await _appointmentRepo.CompleteServiceAsync(detailId, appointmentId);
+                        else
+                            await _appointmentRepo.StartServiceAsync(detailId, appointmentId);
+                    }
+                    else if (status == "InProgress")
+                    {
+                        await _appointmentRepo.CompleteServiceAsync(detailId, appointmentId);
+                    }
+
+                    await LoadAppointments();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"حدث خطأ أثناء تنفيذ العملية: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         private async void dgvAppointments_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvAppointments.CurrentRow != null && dgvAppointments.CurrentRow.Index >= 0)
+            if (dgvAppointments.CurrentRow != null && dgvAppointments.CurrentRow.Index >= 0 && dgvAppointments.Focused)
             {
                 try
                 {
                     int appId = Convert.ToInt32(dgvAppointments.CurrentRow.Cells["AppointmentID"].Value);
-                    var services = await _appointmentRepo.GetAppointmentServicesAsync(appId);
-                    dgvDetails.DataSource = services.ToList();
-                    FormatDetailsGrid();
+                    await RefreshDetails(appId);
                 }
                 catch
                 {
                     dgvDetails.DataSource = null;
                 }
             }
-            else
-            {
-                dgvDetails.DataSource = null;
-            }
         }
 
         private async void UC_Appointments_Load(object sender, EventArgs e)
         {
-            FormatGrid();
+            ApplyButtonStyles();
             await LoadAppointments();
-
-            if (this.IsHandleCreated)
-            {
-                ApplyButtonStyles();
-            }
-            else
-            {
-                this.HandleCreated += (s, ev) => ApplyButtonStyles();
-            }
         }
 
         private void ApplyButtonStyles()
-        {
-            if (this.InvokeRequired)
-            {
-                this.BeginInvoke((MethodInvoker)delegate { InternalStyleLogic(); });
-            }
-            else
-            {
-                InternalStyleLogic();
-            }
-        }
-
-        private void InternalStyleLogic()
         {
             btnRefresh.Size = new Size(76, 67);
             btnRefresh.ForeColor = AppTheme.Charcoal;
@@ -392,6 +501,12 @@ namespace beautyCenterSystem
                     return;
                 }
 
+                if (currentStatus != "Finished")
+                {
+                    var confirm = MessageBox.Show("انتباه: لا تزال هناك خدمات قيد التنفيذ أو قيد الانتظار في هذا الحجز! هل تريد إجبار إنهاء الحجز والانتقال للدفع؟", "تأكيد الدفع المبكر", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (confirm == DialogResult.No) return;
+                }
+
                 using (var payForm = new CheckoutForm(customerName, totalAmount))
                 {
                     if (payForm.ShowDialog() == DialogResult.OK)
@@ -412,27 +527,24 @@ namespace beautyCenterSystem
 
                                 ReceiptPrinter printer = new ReceiptPrinter
                                 {
-                                    CenterName = settings.CenterName ?? "صالون التجميل الراقي",
+                                    CenterName = settings.CenterName ?? "صالون التجميل",
                                     Phone = settings.Phone ?? "",
-                                    Policy = settings.Note ?? "الرجاء مراجعة الفاتورة قبل المغادرة.",
+                                    Policy = settings.Note ?? "شكراً لزيارتكم.",
                                     Logo = settings.GetLogoImage(),
                                     FacebookHandle = settings.Facebook,
                                     InstagramHandle = settings.Instagram,
                                     WhatsAppHandle = settings.WhatsApp,
-
                                     InvoiceNumber = appId,
                                     CustomerName = customerName,
                                     TotalAmount = totalAmount,
                                     Discount = payForm.Discount,
                                     NetAmount = payForm.AmountPaid,
                                     CashierName = CurrentSession.Username,
-
-                                    // التعديل هنا لتمرير الغرفة والكمية
                                     Items = services.Select(s => new InvoiceItem
                                     {
                                         ServiceName = s.Name,
-                                        RoomName = s.RoomName, // تأكد أن خاصية اسم الغرفة في قاعدة البيانات تسمى RoomName
-                                        Quantity = s.Quantity > 0 ? s.Quantity : 1, // إذا كانت القيمة 0 نضع 1 كافتراضي
+                                        RoomName = s.RoomName,
+                                        Quantity = s.Quantity > 0 ? s.Quantity : 1,
                                         Price = s.Price
                                     }).ToList()
                                 };
@@ -462,11 +574,9 @@ namespace beautyCenterSystem
             try
             {
                 int appId = Convert.ToInt32(dgvAppointments.CurrentRow.Cells["AppointmentID"].Value);
-
                 var settingsRepo = new SettingsRepository(new DbConnectionFactory());
                 var settings = await settingsRepo.GetSettingsAsync();
                 var services = await _appointmentRepo.GetAppointmentServicesAsync(appId);
-
                 var row = dgvAppointments.CurrentRow;
 
                 ReceiptPrinter printer = new ReceiptPrinter
@@ -474,12 +584,10 @@ namespace beautyCenterSystem
                     CenterName = settings.CenterName,
                     Phone = settings.Phone,
                     Logo = settings.GetLogoImage(),
-                    Policy = settings.Note + "\n \n طباعه فقط",
-
+                    Policy = settings.Note + "\n(نسخة طباعة فقط)",
                     FacebookHandle = settings.Facebook,
                     InstagramHandle = settings.Instagram,
                     WhatsAppHandle = settings.WhatsApp,
-
                     InvoiceNumber = appId,
                     CustomerName = row.Cells["CustomerName"].Value.ToString(),
                     TotalAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value),
@@ -488,8 +596,8 @@ namespace beautyCenterSystem
                     Items = services.Select(s => new InvoiceItem
                     {
                         ServiceName = s.Name,
-                        RoomName = s.RoomName, // جلب اسم الغرفة (النوع)
-                        Quantity = s.Quantity > 0 ? s.Quantity : 1, // جلب الكمية
+                        RoomName = s.RoomName,
+                        Quantity = s.Quantity > 0 ? s.Quantity : 1,
                         Price = s.Price
                     }).ToList()
                 };
