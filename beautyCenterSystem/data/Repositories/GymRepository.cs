@@ -56,11 +56,30 @@ namespace beautyCenterSystem.Data.Repositories
         }
 
         // --- Customer Subscriptions ---
-        public async Task<IEnumerable<GymSubscriptionStatus>> GetAllCustomerSubscriptionsAsync()
+        // --- Customer Subscriptions ---
+
+        // 1. تعديل الدالة لتقبل التواريخ كبارامترات اختيارية
+        public async Task<IEnumerable<GymSubscriptionStatus>> GetAllCustomerSubscriptionsAsync(DateTime? fromDate = null, DateTime? toDate = null)
         {
             using var db = _dbFactory.CreateConnection();
-            string sql = "SELECT * FROM vw_GymSubscriptionsStatus";
-            return await db.QueryAsync<GymSubscriptionStatus>(sql);
+
+            // بناء الاستعلام الأساسي من الـ View
+            string sql = "SELECT * FROM vw_GymSubscriptionsStatus WHERE 1=1";
+
+            // إضافة شرط التاريخ فقط في حال تمريره (الفلترة بناءً على تاريخ بداية الاشتراك StartDate)
+            if (fromDate.HasValue)
+            {
+                sql += " AND StartDate >= @FromDate";
+            }
+            if (toDate.HasValue)
+            {
+                sql += " AND StartDate <= @ToDate";
+            }
+
+            // ترتيب النتائج من الأحدث إلى الأقدم
+            sql += " ORDER BY StartDate DESC";
+
+            return await db.QueryAsync<GymSubscriptionStatus>(sql, new { FromDate = fromDate, ToDate = toDate });
         }
 
         public async Task<bool> RegisterCustomerSubscriptionAsync(CustomerGymSubscription subscription, string paymentMethod)

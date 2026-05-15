@@ -21,8 +21,14 @@ namespace beautyCenterSystem
         private void InitializeComponent()
         {
             pnlHeader = new Panel();
+            txtBoxsearch = new MaterialTextBox2();
             btnOpenGate = new Button();
             lblTitle = new Label();
+            lblFrom = new Label();
+            dtpFrom = new DateTimePicker();
+            lblTo = new Label();
+            dtpTo = new DateTimePicker();
+            btnFilter = new Button();
             tabControlGym = new TabControl();
             tabActive = new TabPage();
             dgvActive = new DataGridView();
@@ -35,13 +41,10 @@ namespace beautyCenterSystem
             dgvExpired = new DataGridView();
             tabPackages = new TabPage();
             dgvPackages = new DataGridView();
-            txtPackageName = new MaterialTextBox();
-            txtDurationDays = new MaterialTextBox();
-            txtPrice = new MaterialTextBox();
-            txtTotalSessions = new MaterialTextBox();
-            chkIsSessionBased = new CheckBox();
-            btnSavePackage = new Button();
+            btnAddNewPackage = new Button();
+            btnEditPackage = new Button();
             btnDeletePackage = new Button();
+
             pnlHeader.SuspendLayout();
             tabControlGym.SuspendLayout();
             tabActive.SuspendLayout();
@@ -56,13 +59,51 @@ namespace beautyCenterSystem
             // 
             // pnlHeader
             // 
+            pnlHeader.Controls.Add(btnFilter);
+            pnlHeader.Controls.Add(dtpTo);
+            pnlHeader.Controls.Add(lblTo);
+            pnlHeader.Controls.Add(dtpFrom);
+            pnlHeader.Controls.Add(lblFrom);
+            pnlHeader.Controls.Add(txtBoxsearch);
             pnlHeader.Controls.Add(btnOpenGate);
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Dock = DockStyle.Top;
             pnlHeader.Location = new Point(0, 0);
             pnlHeader.Name = "pnlHeader";
-            pnlHeader.Size = new Size(800, 70);
+            pnlHeader.Size = new Size(800, 120);
             pnlHeader.TabIndex = 1;
+            // 
+            // txtBoxsearch
+            // 
+            txtBoxsearch.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtBoxsearch.AnimateReadOnly = false;
+            txtBoxsearch.AutoCompleteMode = AutoCompleteMode.None;
+            txtBoxsearch.AutoCompleteSource = AutoCompleteSource.None;
+            txtBoxsearch.BackgroundImageLayout = ImageLayout.None;
+            txtBoxsearch.CharacterCasing = CharacterCasing.Normal;
+            txtBoxsearch.Depth = 0;
+            txtBoxsearch.Font = new Font("Roboto", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
+            txtBoxsearch.HideSelection = true;
+            txtBoxsearch.Hint = "البحث";
+            txtBoxsearch.LeadingIcon = null;
+            txtBoxsearch.Location = new Point(207, 3);
+            txtBoxsearch.MaxLength = 32767;
+            txtBoxsearch.MouseState = MaterialSkin.MouseState.OUT;
+            txtBoxsearch.Name = "txtBoxsearch";
+            txtBoxsearch.PasswordChar = '\0';
+            txtBoxsearch.PrefixSuffixText = null;
+            txtBoxsearch.ReadOnly = false;
+            txtBoxsearch.RightToLeft = RightToLeft.No;
+            txtBoxsearch.SelectedText = "";
+            txtBoxsearch.SelectionLength = 0;
+            txtBoxsearch.SelectionStart = 0;
+            txtBoxsearch.ShortcutsEnabled = true;
+            txtBoxsearch.Size = new Size(397, 48);
+            txtBoxsearch.TabIndex = 2;
+            txtBoxsearch.TabStop = false;
+            txtBoxsearch.TextAlign = HorizontalAlignment.Left;
+            txtBoxsearch.TrailingIcon = null;
+            txtBoxsearch.UseSystemPasswordChar = false;
             // 
             // btnOpenGate
             // 
@@ -75,13 +116,63 @@ namespace beautyCenterSystem
             // 
             // lblTitle
             // 
+            lblTitle.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblTitle.AutoSize = true;
-            lblTitle.Location = new Point(20, 20);
+            lblTitle.Location = new Point(659, 24);
             lblTitle.Name = "lblTitle";
             lblTitle.Size = new Size(117, 15);
             lblTitle.TabIndex = 1;
             lblTitle.Tag = "Header";
             lblTitle.Text = "إدارة الجيم والاشتراكات";
+            // 
+            // lblFrom
+            // 
+            lblFrom.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblFrom.AutoSize = true;
+            lblFrom.Location = new Point(560, 75);
+            lblFrom.Name = "lblFrom";
+            lblFrom.Size = new Size(54, 15);
+            lblFrom.TabIndex = 3;
+            lblFrom.Text = "من تاريخ:";
+            // 
+            // dtpFrom
+            // 
+            dtpFrom.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            dtpFrom.Format = DateTimePickerFormat.Short;
+            dtpFrom.Location = new Point(410, 70);
+            dtpFrom.Name = "dtpFrom";
+            dtpFrom.Size = new Size(140, 23);
+            dtpFrom.TabIndex = 4;
+            dtpFrom.Value = System.DateTime.Now.AddMonths(-3);
+            // 
+            // lblTo
+            // 
+            lblTo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblTo.AutoSize = true;
+            lblTo.Location = new Point(340, 75);
+            lblTo.Name = "lblTo";
+            lblTo.Size = new Size(57, 15);
+            lblTo.TabIndex = 5;
+            lblTo.Text = "إلى تاريخ:";
+            // 
+            // dtpTo
+            // 
+            dtpTo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            dtpTo.Format = DateTimePickerFormat.Short;
+            dtpTo.Location = new Point(190, 70);
+            dtpTo.Name = "dtpTo";
+            dtpTo.Size = new Size(140, 23);
+            dtpTo.TabIndex = 6;
+            dtpTo.Value = System.DateTime.Now;
+            // 
+            // btnFilter
+            // 
+            btnFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnFilter.Location = new Point(70, 65);
+            btnFilter.Name = "btnFilter";
+            btnFilter.Size = new Size(100, 35);
+            btnFilter.TabIndex = 7;
+            btnFilter.Text = "تصفية";
             // 
             // tabControlGym
             // 
@@ -90,10 +181,12 @@ namespace beautyCenterSystem
             tabControlGym.Controls.Add(tabExpired);
             tabControlGym.Controls.Add(tabPackages);
             tabControlGym.Dock = DockStyle.Fill;
-            tabControlGym.Location = new Point(0, 70);
+            tabControlGym.Location = new Point(0, 120);
             tabControlGym.Name = "tabControlGym";
+            tabControlGym.RightToLeft = RightToLeft.Yes;
+            tabControlGym.RightToLeftLayout = true;
             tabControlGym.SelectedIndex = 0;
-            tabControlGym.Size = new Size(800, 530);
+            tabControlGym.Size = new Size(800, 480);
             tabControlGym.TabIndex = 0;
             // 
             // tabActive
@@ -104,7 +197,7 @@ namespace beautyCenterSystem
             tabActive.Location = new Point(4, 24);
             tabActive.Name = "tabActive";
             tabActive.Padding = new Padding(10);
-            tabActive.Size = new Size(792, 502);
+            tabActive.Size = new Size(792, 452);
             tabActive.TabIndex = 0;
             tabActive.Text = "الاشتراكات السارية";
             // 
@@ -114,12 +207,12 @@ namespace beautyCenterSystem
             dgvActive.Location = new Point(10, 10);
             dgvActive.Name = "dgvActive";
             dgvActive.ReadOnly = true;
-            dgvActive.Size = new Size(772, 400);
+            dgvActive.Size = new Size(772, 380);
             dgvActive.TabIndex = 0;
             // 
             // btnNewSubscription
             // 
-            btnNewSubscription.Location = new Point(10, 420);
+            btnNewSubscription.Location = new Point(10, 400);
             btnNewSubscription.Name = "btnNewSubscription";
             btnNewSubscription.Size = new Size(150, 40);
             btnNewSubscription.TabIndex = 1;
@@ -127,7 +220,7 @@ namespace beautyCenterSystem
             // 
             // btnCheckIn
             // 
-            btnCheckIn.Location = new Point(180, 420);
+            btnCheckIn.Location = new Point(180, 400);
             btnCheckIn.Name = "btnCheckIn";
             btnCheckIn.Size = new Size(150, 40);
             btnCheckIn.TabIndex = 2;
@@ -140,7 +233,7 @@ namespace beautyCenterSystem
             tabNearExpiry.Location = new Point(4, 24);
             tabNearExpiry.Name = "tabNearExpiry";
             tabNearExpiry.Padding = new Padding(10);
-            tabNearExpiry.Size = new Size(792, 502);
+            tabNearExpiry.Size = new Size(792, 452);
             tabNearExpiry.TabIndex = 1;
             tabNearExpiry.Text = "قرب الانتهاء";
             // 
@@ -150,12 +243,12 @@ namespace beautyCenterSystem
             dgvNearExpiry.Location = new Point(10, 10);
             dgvNearExpiry.Name = "dgvNearExpiry";
             dgvNearExpiry.ReadOnly = true;
-            dgvNearExpiry.Size = new Size(772, 400);
+            dgvNearExpiry.Size = new Size(772, 380);
             dgvNearExpiry.TabIndex = 0;
             // 
             // btnRenew
             // 
-            btnRenew.Location = new Point(10, 420);
+            btnRenew.Location = new Point(10, 400);
             btnRenew.Name = "btnRenew";
             btnRenew.Size = new Size(150, 40);
             btnRenew.TabIndex = 1;
@@ -167,7 +260,7 @@ namespace beautyCenterSystem
             tabExpired.Location = new Point(4, 24);
             tabExpired.Name = "tabExpired";
             tabExpired.Padding = new Padding(10);
-            tabExpired.Size = new Size(792, 502);
+            tabExpired.Size = new Size(792, 452);
             tabExpired.TabIndex = 2;
             tabExpired.Text = "المنتهية";
             // 
@@ -177,23 +270,19 @@ namespace beautyCenterSystem
             dgvExpired.Location = new Point(10, 10);
             dgvExpired.Name = "dgvExpired";
             dgvExpired.ReadOnly = true;
-            dgvExpired.Size = new Size(772, 482);
+            dgvExpired.Size = new Size(772, 432);
             dgvExpired.TabIndex = 0;
             // 
             // tabPackages
             // 
             tabPackages.Controls.Add(dgvPackages);
-            tabPackages.Controls.Add(txtPackageName);
-            tabPackages.Controls.Add(txtDurationDays);
-            tabPackages.Controls.Add(txtPrice);
-            tabPackages.Controls.Add(txtTotalSessions);
-            tabPackages.Controls.Add(chkIsSessionBased);
-            tabPackages.Controls.Add(btnSavePackage);
+            tabPackages.Controls.Add(btnAddNewPackage);
+            tabPackages.Controls.Add(btnEditPackage);
             tabPackages.Controls.Add(btnDeletePackage);
             tabPackages.Location = new Point(4, 24);
             tabPackages.Name = "tabPackages";
             tabPackages.Padding = new Padding(10);
-            tabPackages.Size = new Size(792, 502);
+            tabPackages.Size = new Size(792, 452);
             tabPackages.TabIndex = 3;
             tabPackages.Text = "إعدادات الباقات";
             // 
@@ -206,102 +295,29 @@ namespace beautyCenterSystem
             dgvPackages.Size = new Size(772, 300);
             dgvPackages.TabIndex = 0;
             // 
-            // txtPackageName
+            // btnAddNewPackage
             // 
-            txtPackageName.AnimateReadOnly = false;
-            txtPackageName.BorderStyle = BorderStyle.None;
-            txtPackageName.Depth = 0;
-            txtPackageName.Font = new Font("IRANYekanMobileFN", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            txtPackageName.Hint = "اسم الباقة";
-            txtPackageName.LeadingIcon = null;
-            txtPackageName.Location = new Point(10, 320);
-            txtPackageName.MaxLength = 50;
-            txtPackageName.MouseState = MaterialSkin.MouseState.OUT;
-            txtPackageName.Multiline = false;
-            txtPackageName.Name = "txtPackageName";
-            txtPackageName.Size = new Size(200, 50);
-            txtPackageName.TabIndex = 1;
-            txtPackageName.Text = "";
-            txtPackageName.TrailingIcon = null;
+            btnAddNewPackage.Location = new Point(10, 320);
+            btnAddNewPackage.Name = "btnAddNewPackage";
+            btnAddNewPackage.Size = new Size(150, 40);
+            btnAddNewPackage.TabIndex = 1;
+            btnAddNewPackage.Text = "إضافة باقة";
             // 
-            // txtDurationDays
+            // btnEditPackage
             // 
-            txtDurationDays.AnimateReadOnly = false;
-            txtDurationDays.BorderStyle = BorderStyle.None;
-            txtDurationDays.Depth = 0;
-            txtDurationDays.Font = new Font("IRANYekanMobileFN", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            txtDurationDays.Hint = "المدة (بالأيام)";
-            txtDurationDays.LeadingIcon = null;
-            txtDurationDays.Location = new Point(220, 320);
-            txtDurationDays.MaxLength = 50;
-            txtDurationDays.MouseState = MaterialSkin.MouseState.OUT;
-            txtDurationDays.Multiline = false;
-            txtDurationDays.Name = "txtDurationDays";
-            txtDurationDays.Size = new Size(150, 50);
-            txtDurationDays.TabIndex = 2;
-            txtDurationDays.Text = "";
-            txtDurationDays.TrailingIcon = null;
-            // 
-            // txtPrice
-            // 
-            txtPrice.AnimateReadOnly = false;
-            txtPrice.BorderStyle = BorderStyle.None;
-            txtPrice.Depth = 0;
-            txtPrice.Font = new Font("IRANYekanMobileFN", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            txtPrice.Hint = "السعر";
-            txtPrice.LeadingIcon = null;
-            txtPrice.Location = new Point(380, 320);
-            txtPrice.MaxLength = 50;
-            txtPrice.MouseState = MaterialSkin.MouseState.OUT;
-            txtPrice.Multiline = false;
-            txtPrice.Name = "txtPrice";
-            txtPrice.Size = new Size(150, 50);
-            txtPrice.TabIndex = 3;
-            txtPrice.Text = "";
-            txtPrice.TrailingIcon = null;
-            // 
-            // txtTotalSessions
-            // 
-            txtTotalSessions.AnimateReadOnly = false;
-            txtTotalSessions.BorderStyle = BorderStyle.None;
-            txtTotalSessions.Depth = 0;
-            txtTotalSessions.Enabled = false;
-            txtTotalSessions.Font = new Font("IRANYekanMobileFN", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            txtTotalSessions.Hint = "عدد الحصص";
-            txtTotalSessions.LeadingIcon = null;
-            txtTotalSessions.Location = new Point(220, 380);
-            txtTotalSessions.MaxLength = 50;
-            txtTotalSessions.MouseState = MaterialSkin.MouseState.OUT;
-            txtTotalSessions.Multiline = false;
-            txtTotalSessions.Name = "txtTotalSessions";
-            txtTotalSessions.Size = new Size(150, 50);
-            txtTotalSessions.TabIndex = 4;
-            txtTotalSessions.Text = "";
-            txtTotalSessions.TrailingIcon = null;
-            // 
-            // chkIsSessionBased
-            // 
-            chkIsSessionBased.AutoSize = true;
-            chkIsSessionBased.Location = new Point(10, 390);
-            chkIsSessionBased.Name = "chkIsSessionBased";
-            chkIsSessionBased.Size = new Size(100, 19);
-            chkIsSessionBased.TabIndex = 5;
-            chkIsSessionBased.Text = "باقة بالحصص؟";
-            // 
-            // btnSavePackage
-            // 
-            btnSavePackage.Location = new Point(10, 450);
-            btnSavePackage.Name = "btnSavePackage";
-            btnSavePackage.Size = new Size(150, 40);
-            btnSavePackage.TabIndex = 6;
-            btnSavePackage.Text = "حفظ الباقة";
+            btnEditPackage.Enabled = false;
+            btnEditPackage.Location = new Point(180, 320);
+            btnEditPackage.Name = "btnEditPackage";
+            btnEditPackage.Size = new Size(150, 40);
+            btnEditPackage.TabIndex = 2;
+            btnEditPackage.Text = "تعديل الباقة";
             // 
             // btnDeletePackage
             // 
-            btnDeletePackage.Location = new Point(180, 450);
+            btnDeletePackage.Location = new Point(350, 320);
             btnDeletePackage.Name = "btnDeletePackage";
             btnDeletePackage.Size = new Size(150, 40);
-            btnDeletePackage.TabIndex = 7;
+            btnDeletePackage.TabIndex = 3;
             btnDeletePackage.Text = "حذف الباقة";
             // 
             // UC_GymManagement
@@ -321,7 +337,6 @@ namespace beautyCenterSystem
             tabExpired.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvExpired).EndInit();
             tabPackages.ResumeLayout(false);
-            tabPackages.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvPackages).EndInit();
             ResumeLayout(false);
         }
@@ -329,6 +344,12 @@ namespace beautyCenterSystem
         private Panel pnlHeader;
         private Label lblTitle;
         private Button btnOpenGate;
+
+        private Label lblFrom;
+        private DateTimePicker dtpFrom;
+        private Label lblTo;
+        private DateTimePicker dtpTo;
+        private Button btnFilter;
 
         private TabControl tabControlGym;
         private TabPage tabActive;
@@ -346,12 +367,9 @@ namespace beautyCenterSystem
         private DataGridView dgvExpired;
 
         private DataGridView dgvPackages;
-        private MaterialTextBox txtPackageName;
-        private MaterialTextBox txtDurationDays;
-        private MaterialTextBox txtPrice;
-        private MaterialTextBox txtTotalSessions;
-        private CheckBox chkIsSessionBased;
-        private Button btnSavePackage;
+        private Button btnAddNewPackage;
+        private Button btnEditPackage;
         private Button btnDeletePackage;
+        private MaterialTextBox2 txtBoxsearch;
     }
 }

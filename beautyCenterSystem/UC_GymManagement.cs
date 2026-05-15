@@ -1,9 +1,8 @@
-using BeautyCenterSystem.Data;
 using beautyCenterSystem.Data.Repositories;
+using BeautyCenterSystem.Data;
+using System.Data;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,6 +13,10 @@ namespace beautyCenterSystem
     {
         private readonly GymRepository _gymRepo;
 
+        // متغيرات لتخزين البيانات محلياً لتسريع عملية البحث الفوري
+        private List<GymSubscriptionStatus> _allSubscriptions = new List<GymSubscriptionStatus>();
+        private List<GymSubscriptionType> _allPackages = new List<GymSubscriptionType>();
+
         public UC_GymManagement()
         {
             InitializeComponent();
@@ -22,42 +25,88 @@ namespace beautyCenterSystem
             // Hook up events
             btnNewSubscription.Click += BtnNewSubscription_Click;
             btnCheckIn.Click += BtnCheckIn_Click;
-            btnSavePackage.Click += BtnSavePackage_Click;
+            btnAddNewPackage.Click += BtnAddNewPackage_Click;
+            btnEditPackage.Click += BtnEditPackage_Click;
             btnDeletePackage.Click += BtnDeletePackage_Click;
-            chkIsSessionBased.CheckedChanged += ChkIsSessionBased_CheckedChanged;
+            dgvPackages.SelectionChanged += DgvPackages_SelectionChanged;
+
+            // أحداث الفلترة والبحث الجديدة
+            btnFilter.Click += BtnFilter_Click;
+            txtBoxsearch.TextChanged += TxtBoxsearch_TextChanged;
         }
 
         protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
             AppTheme.Apply(this);
-            await LoadAllDataAsync();
+            // جلب البيانات لأول مرة بناءً على التواريخ الافتراضية في الديزاينر (آخر 3 شهور)
+            await LoadAllDataAsync(dtpFrom.Value, dtpTo.Value);
         }
 
-        private async Task LoadAllDataAsync()
+        // دالة الزر المسؤولة عن تصفية التواريخ
+        private async void BtnFilter_Click(object sender, EventArgs e)
+        {
+            await LoadAllDataAsync(dtpFrom.Value, dtpTo.Value);
+        }
+
+        // حدث البحث الفوري أثناء الكتابة
+        private void TxtBoxsearch_TextChanged(object sender, EventArgs e)
+        {
+            BindGrids(txtBoxsearch.Text);
+        }
+
+        // تحديث الدالة لتقبل التواريخ كمعاملات
+        private async Task LoadAllDataAsync(DateTime? fromDate = null, DateTime? toDate = null)
         {
             try
             {
-                // 1. Load Customer Subscriptions
-                var allSubscriptions = await _gymRepo.GetAllCustomerSubscriptionsAsync();
+                // 1. جلب الاشتراكات من قاعدة البيانات مع تطبيق الفلترة بالتاريخ
+                var subscriptions = await _gymRepo.GetAllCustomerSubscriptionsAsync(fromDate, toDate);
+                _allSubscriptions = subscriptions.ToList();
 
-                dgvActive.DataSource = allSubscriptions.Where(s => s.SubscriptionStatus == "ساري" || s.SubscriptionStatus == "حصص قاربت للنفاد").ToList();
-                dgvNearExpiry.DataSource = allSubscriptions.Where(s => s.SubscriptionStatus == "قرب الانتهاء").ToList();
-                dgvExpired.DataSource = allSubscriptions.Where(s => s.SubscriptionStatus == "منتهي" || s.SubscriptionStatus == "انتهت الحصص").ToList();
-
-                FormatSubscriptionsGrid(dgvActive);
-                FormatSubscriptionsGrid(dgvNearExpiry);
-                FormatSubscriptionsGrid(dgvExpired);
-
-                // 2. Load Packages
+                // 2. جلب الباقات (لا تحتاج فلترة بالتاريخ عادة)
                 var packages = await _gymRepo.GetAllSubscriptionTypesAsync();
-                dgvPackages.DataSource = packages.ToList();
-                FormatPackagesGrid();
+                _allPackages = packages.ToList();
+
+                // 3. عرض البيانات في الجداول بناءً على نص البحث الحالي (إن وجد)
+                BindGrids(txtBoxsearch.Text);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"خطأ في جلب البيانات: {ex.Message}");
             }
+        }
+
+        // دالة مساعدة لتوزيع البيانات على الجداول وتطبيق البحث الفوري
+        private void BindGrids(string searchTerm)
+        {
+            string term = searchTerm?.Trim().ToLower() ?? "";
+
+            // فلترة الاشتراكات بناءً على نص البحث (بحث برقم الهاتف، أو اسم العميلة، أو الباقة)
+            var filteredSubs = _allSubscriptions.Where(s =>
+                string.IsNullOrEmpty(term) ||
+                (s.CustomerName != null && s.CustomerName.ToLower().Contains(term)) ||
+                (s.Phone != null && s.Phone.ToLower().Contains(term)) ||
+                (s.SubscriptionType != null && s.SubscriptionType.ToLower().Contains(term))
+            ).ToList();
+
+            // توزيع الاشتراكات المفلترة على الجداول الثلاثة
+            dgvActive.DataSource = filteredSubs.Where(s => s.SubscriptionStatus == "ساري" || s.SubscriptionStatus == "حصص قاربت للنفاد" || s.SubscriptionStatus == "قرب الانتهاء").ToList();
+            dgvNearExpiry.DataSource = filteredSubs.Where(s => s.SubscriptionStatus == "قرب الانتهاء").ToList();
+            dgvExpired.DataSource = filteredSubs.Where(s => s.SubscriptionStatus == "منتهي" || s.SubscriptionStatus == "انتهت الحصص").ToList();
+
+            FormatSubscriptionsGrid(dgvActive);
+            FormatSubscriptionsGrid(dgvNearExpiry);
+            FormatSubscriptionsGrid(dgvExpired);
+
+            // فلترة الباقات بناءً على نص البحث
+            var filteredPkgs = _allPackages.Where(p =>
+                string.IsNullOrEmpty(term) ||
+                (p.TypeName != null && p.TypeName.ToLower().Contains(term))
+            ).ToList();
+
+            dgvPackages.DataSource = filteredPkgs;
+            FormatPackagesGrid();
         }
 
         private void FormatSubscriptionsGrid(DataGridView dgv)
@@ -91,62 +140,37 @@ namespace beautyCenterSystem
             }
         }
 
-        private void ChkIsSessionBased_CheckedChanged(object sender, EventArgs e)
+        private void DgvPackages_SelectionChanged(object sender, EventArgs e)
         {
-            txtTotalSessions.Enabled = chkIsSessionBased.Checked;
-            if (!chkIsSessionBased.Checked)
-                txtTotalSessions.Text = "0";
+            btnEditPackage.Enabled = dgvPackages.CurrentRow != null && dgvPackages.CurrentRow.Selected;
         }
 
-        private async void BtnSavePackage_Click(object sender, EventArgs e)
+        private async void BtnAddNewPackage_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtPackageName.Text) || string.IsNullOrWhiteSpace(txtPrice.Text) || string.IsNullOrWhiteSpace(txtDurationDays.Text))
+            using (var form = new AddPackageForm())
             {
-                MessageBox.Show("الرجاء إدخال بيانات الباقة الأساسية (الاسم، المدة، السعر).");
-                return;
-            }
-
-            try
-            {
-                var package = new GymSubscriptionType
+                if (form.ShowDialog() == DialogResult.OK)
                 {
-                    TypeName = txtPackageName.Text.Trim(),
-                    DurationDays = int.Parse(txtDurationDays.Text),
-                    Price = decimal.Parse(txtPrice.Text),
-                    IsSessionBased = chkIsSessionBased.Checked,
-                    TotalSessions = chkIsSessionBased.Checked ? int.Parse(txtTotalSessions.Text) : 0,
-                    IsActive = true
-                };
-
-                bool saved = false;
-
-                // If editing existing, would check ID. Here we assume Add new
-                if (dgvPackages.CurrentRow != null && dgvPackages.CurrentRow.Selected)
-                {
-                    var selected = dgvPackages.CurrentRow.DataBoundItem as GymSubscriptionType;
-                    package.TypeID = selected.TypeID;
-                    saved = await _gymRepo.UpdateSubscriptionTypeAsync(package);
-                }
-                else
-                {
-                    saved = await _gymRepo.AddSubscriptionTypeAsync(package);
-                }
-
-                if (saved)
-                {
-                    MessageBox.Show("تم حفظ الباقة بنجاح.");
-                    txtPackageName.Clear();
-                    txtDurationDays.Clear();
-                    txtPrice.Clear();
-                    txtTotalSessions.Clear();
-                    chkIsSessionBased.Checked = false;
-                    dgvPackages.ClearSelection();
-                    await LoadAllDataAsync();
+                    await LoadAllDataAsync(dtpFrom.Value, dtpTo.Value);
                 }
             }
-            catch (Exception ex)
+        }
+
+        private async void BtnEditPackage_Click(object sender, EventArgs e)
+        {
+            if (dgvPackages.CurrentRow != null && dgvPackages.CurrentRow.Selected)
             {
-                MessageBox.Show($"خطأ في حفظ الباقة: {ex.Message}");
+                var package = dgvPackages.CurrentRow.DataBoundItem as GymSubscriptionType;
+                if (package != null)
+                {
+                    using (var form = new EditPackageForm(package))
+                    {
+                        if (form.ShowDialog() == DialogResult.OK)
+                        {
+                            await LoadAllDataAsync(dtpFrom.Value, dtpTo.Value);
+                        }
+                    }
+                }
             }
         }
 
@@ -166,7 +190,7 @@ namespace beautyCenterSystem
                             if (deleted)
                             {
                                 MessageBox.Show("تم الحذف بنجاح.");
-                                await LoadAllDataAsync();
+                                await LoadAllDataAsync(dtpFrom.Value, dtpTo.Value);
                             }
                         }
                         catch (Exception ex)
@@ -190,7 +214,7 @@ namespace beautyCenterSystem
                 if (result == DialogResult.OK)
                 {
                     // Refresh main grids after a successful registration
-                    await LoadAllDataAsync();
+                    await LoadAllDataAsync(dtpFrom.Value, dtpTo.Value);
                 }
             }
         }
@@ -211,7 +235,7 @@ namespace beautyCenterSystem
                             if (checkedIn)
                             {
                                 MessageBox.Show("تم تسجيل الحضور وخصم حصة بنجاح.");
-                                await LoadAllDataAsync();
+                                await LoadAllDataAsync(dtpFrom.Value, dtpTo.Value);
                             }
                         }
                         catch (Exception ex)
