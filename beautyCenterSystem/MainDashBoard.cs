@@ -319,9 +319,15 @@ namespace beautyCenterSystem
             MessageBox.Show(fullMessage, "حول نظام الصنوان", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private async void  btnEmployees_Click(object sender, EventArgs e)
+        private async void btnEmployees_Click(object sender, EventArgs e)
         {
             if (await ShowScreen(new UC_Employees()))
+                HighlightButton(sender);
+        }
+
+        private async void btnGym_Click(object sender, EventArgs e)
+        {
+            if (await ShowScreen(new UC_GymManagement()))
                 HighlightButton(sender);
         }
     }

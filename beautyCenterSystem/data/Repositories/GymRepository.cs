@@ -1,0 +1,144 @@
+using Dapper;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Data;
+using System;
+using BeautyCenterSystem.Data;
+
+namespace beautyCenterSystem.Data.Repositories
+{
+    public class GymRepository
+    {
+        private readonly DbConnectionFactory _dbFactory;
+
+        public GymRepository(DbConnectionFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
+        // --- Subscription Types ---
+        public async Task<IEnumerable<GymSubscriptionType>> GetAllSubscriptionTypesAsync()
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = "SELECT * FROM GymSubscriptionTypes WHERE IsActive = 1";
+            return await db.QueryAsync<GymSubscriptionType>(sql);
+        }
+
+        public async Task<bool> AddSubscriptionTypeAsync(GymSubscriptionType type)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"INSERT INTO GymSubscriptionTypes (TypeName, DurationDays, Price, IsActive, IsSessionBased, TotalSessions) 
+                           VALUES (@TypeName, @DurationDays, @Price, 1, @IsSessionBased, @TotalSessions)";
+            int rows = await db.ExecuteAsync(sql, type);
+            return rows > 0;
+        }
+
+        public async Task<bool> UpdateSubscriptionTypeAsync(GymSubscriptionType type)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"UPDATE GymSubscriptionTypes 
+                           SET TypeName = @TypeName, 
+                               DurationDays = @DurationDays,
+                               Price = @Price,
+                               IsSessionBased = @IsSessionBased,
+                               TotalSessions = @TotalSessions
+                           WHERE TypeID = @TypeID";
+            int rows = await db.ExecuteAsync(sql, type);
+            return rows > 0;
+        }
+
+        public async Task<bool> DeleteSubscriptionTypeAsync(int typeId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = "UPDATE GymSubscriptionTypes SET IsActive = 0 WHERE TypeID = @Id";
+            int rows = await db.ExecuteAsync(sql, new { Id = typeId });
+            return rows > 0;
+        }
+
+        // --- Customer Subscriptions ---
+        public async Task<IEnumerable<GymSubscriptionStatus>> GetAllCustomerSubscriptionsAsync()
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = "SELECT * FROM vw_GymSubscriptionsStatus";
+            return await db.QueryAsync<GymSubscriptionStatus>(sql);
+        }
+
+        public async Task<bool> RegisterCustomerSubscriptionAsync(CustomerGymSubscription subscription, string paymentMethod)
+        {
+            using var db = _dbFactory.CreateConnection();
+            db.Open();
+            using var transaction = db.BeginTransaction();
+
+            try
+            {
+                // 1. Get SafeID from PaymentMapping
+                string safeSql = "SELECT SafeID FROM PaymentMapping WHERE MethodName = @MethodName";
+                int? safeId = await db.QueryFirstOrDefaultAsync<int?>(safeSql, new { MethodName = paymentMethod }, transaction);
+
+                if (!safeId.HasValue)
+                {
+                    throw new Exception("لم يتم العثور على الخزنة المرتبطة بطريقة الدفع");
+                }
+                
+                subscription.SafeID = safeId.Value;
+
+                // 2. Insert Customer Subscription
+                string insertSql = @"
+                    INSERT INTO CustomerGymSubscriptions 
+                    (CustomerID, TypeID, StartDate, EndDate, PaidAmount, SafeID, IssuedBy, Notes, CreatedAt, SessionsRemaining, IsActive)
+                    VALUES 
+                    (@CustomerID, @TypeID, @StartDate, @EndDate, @PaidAmount, @SafeID, @IssuedBy, @Notes, GETDATE(), @SessionsRemaining, 1)";
+                
+                await db.ExecuteAsync(insertSql, subscription, transaction);
+
+                // 3. Update Safe Balance
+                string updateSafeSql = "UPDATE Safes SET Balance = Balance + @Amount WHERE SafeID = @SafeID";
+                await db.ExecuteAsync(updateSafeSql, new { Amount = subscription.PaidAmount, SafeID = safeId.Value }, transaction);
+
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+        // --- Attendance ---
+        public async Task<bool> CheckInSessionAsync(int subscriptionId, string note = "")
+        {
+            using var db = _dbFactory.CreateConnection();
+            db.Open();
+            using var transaction = db.BeginTransaction();
+
+            try
+            {
+                // Check remaining sessions
+                string checkSql = "SELECT SessionsRemaining, IsActive FROM CustomerGymSubscriptions WHERE SubscriptionID = @Id";
+                var sub = await db.QueryFirstOrDefaultAsync<CustomerGymSubscription>(checkSql, new { Id = subscriptionId }, transaction);
+
+                if (sub == null || !sub.IsActive || sub.SessionsRemaining <= 0)
+                {
+                    throw new Exception("لا يمكن تسجيل الحضور: الاشتراك منتهي أو لا يوجد حصص متبقية.");
+                }
+
+                // Decrement sessions
+                string updateSubSql = "UPDATE CustomerGymSubscriptions SET SessionsRemaining = SessionsRemaining - 1 WHERE SubscriptionID = @Id";
+                await db.ExecuteAsync(updateSubSql, new { Id = subscriptionId }, transaction);
+
+                // Log attendance
+                string insertAttSql = "INSERT INTO GymAttendance (SubscriptionID, CheckInTime, Note) VALUES (@Id, GETDATE(), @Note)";
+                await db.ExecuteAsync(insertAttSql, new { Id = subscriptionId, Note = note }, transaction);
+
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+    }
+}

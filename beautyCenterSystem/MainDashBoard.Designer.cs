@@ -138,6 +138,7 @@
             btnGym.TextAlign = ContentAlignment.MiddleRight;
             btnGym.TextImageRelation = TextImageRelation.ImageBeforeText;
             btnGym.UseVisualStyleBackColor = true;
+            btnGym.Click += btnGym_Click;
             // 
             // btnEmployees
             // 
