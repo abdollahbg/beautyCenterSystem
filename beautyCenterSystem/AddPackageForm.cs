@@ -6,7 +6,7 @@ using MaterialSkin.Controls;
 
 namespace beautyCenterSystem
 {
-    public partial class AddPackageForm : MaterialForm
+    public partial class AddPackageForm : Form
     {
         private readonly GymRepository _gymRepo;
 
