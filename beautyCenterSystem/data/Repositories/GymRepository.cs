@@ -124,6 +124,42 @@ namespace beautyCenterSystem.Data.Repositories
             }
         }
 
+        // --- Gym Income Report ---
+        public async Task<decimal> GetTotalGymIncomeAsync(DateTime fromDate, DateTime toDate)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"SELECT ISNULL(SUM(PaidAmount), 0) 
+                           FROM CustomerGymSubscriptions 
+                           WHERE IsActive = 1 
+                             AND CreatedAt >= @FromDate 
+                             AND CreatedAt <= @ToDate";
+            return await db.ExecuteScalarAsync<decimal>(sql, new { FromDate = fromDate, ToDate = toDate });
+        }
+
+        public async Task<IEnumerable<dynamic>> GetGymIncomeDetailsAsync(DateTime fromDate, DateTime toDate)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"SELECT 
+                               GS.SubscriptionID,
+                               C.CustomerName,
+                               C.Phone,
+                               ST.TypeName AS SubscriptionType,
+                               GS.StartDate,
+                               GS.EndDate,
+                               GS.PaidAmount,
+                               S.SafeName,
+                               GS.CreatedAt
+                           FROM CustomerGymSubscriptions GS
+                           JOIN Customers C ON GS.CustomerID = C.CustomerID
+                           JOIN GymSubscriptionTypes ST ON GS.TypeID = ST.TypeID
+                           LEFT JOIN Safes S ON GS.SafeID = S.SafeID
+                           WHERE GS.IsActive = 1
+                             AND GS.CreatedAt >= @FromDate
+                             AND GS.CreatedAt <= @ToDate
+                           ORDER BY GS.CreatedAt DESC";
+            return await db.QueryAsync(sql, new { FromDate = fromDate, ToDate = toDate });
+        }
+
         // --- Attendance ---
         public async Task<bool> CheckInSessionAsync(int subscriptionId, string note = "")
         {

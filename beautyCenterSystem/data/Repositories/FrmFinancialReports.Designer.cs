@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem.data.Repositories
+namespace beautyCenterSystem.data.Repositories
 {
     partial class FrmFinancialReports
     {
@@ -32,6 +32,7 @@
             label4 = new Label();
             btnRefresh = new MaterialSkin.Controls.MaterialButton();
             btnPrint = new MaterialSkin.Controls.MaterialButton();
+            btnGymIncome = new System.Windows.Forms.Button();
             label2 = new Label();
             label1 = new Label();
             dtpTo = new DateTimePicker();
@@ -108,6 +109,7 @@
             panel1.BackColor = Color.White;
             panel1.Controls.Add(label4);
             panel1.Controls.Add(btnRefresh);
+            panel1.Controls.Add(btnGymIncome);
             panel1.Controls.Add(btnPrint);
             panel1.Controls.Add(label2);
             panel1.Controls.Add(label1);
@@ -171,6 +173,16 @@
             btnPrint.UseAccentColor = false;
             btnPrint.UseVisualStyleBackColor = true;
             btnPrint.Click += btnPrint_Click;
+            // 
+            // btnGymIncome
+            // 
+            btnGymIncome.Location = new Point(280, 22);
+            btnGymIncome.Name = "btnGymIncome";
+            btnGymIncome.Size = new Size(120, 36);
+            btnGymIncome.TabIndex = 8;
+            btnGymIncome.Text = "\u062F\u062E\u0644 \u0627\u0644\u062C\u064A\u0645";
+            btnGymIncome.UseVisualStyleBackColor = true;
+            btnGymIncome.Click += btnGymIncome_Click;
             // 
             // label2
             // 
@@ -747,6 +759,7 @@
 
         // تحويل الأزرار إلى MaterialButton مع الإبقاء على نفس الأسماء
         private MaterialSkin.Controls.MaterialButton btnPrint;
+        private System.Windows.Forms.Button btnGymIncome;
         private MaterialSkin.Controls.MaterialButton btnRefresh;
 
         private System.Windows.Forms.Label label4;

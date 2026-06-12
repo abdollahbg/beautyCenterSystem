@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -254,6 +254,14 @@ namespace beautyCenterSystem.data.Repositories
             btnRefresh.Enabled = false;
             await RefreshDashboardData();
             btnRefresh.Enabled = true;
+        }
+
+        private void btnGymIncome_Click(object sender, EventArgs e)
+        {
+            using (var gymReport = new frmGymIncomeReport())
+            {
+                gymReport.ShowDialog();
+            }
         }
 
         private async void btnPrint_Click(object sender, EventArgs e)

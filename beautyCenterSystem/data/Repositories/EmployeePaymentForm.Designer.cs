@@ -20,7 +20,6 @@
             PnlHeader = new Panel();
             label1 = new Label();
             lblEmployee = new Label();
-            cmbEmployee = new MaterialSkin.Controls.MaterialComboBox();
             lblTotalEarned = new Label();
             txtTotalEarned = new MaterialSkin.Controls.MaterialTextBox2();
             lblTotalPaid = new Label();
@@ -35,6 +34,7 @@
             txtNotes = new MaterialSkin.Controls.MaterialTextBox2();
             btnSave = new Button();
             BtnCancel = new Button();
+            cmbEmployee = new ComboBox();
             PnlHeader.SuspendLayout();
             SuspendLayout();
             // 
@@ -66,29 +66,6 @@
             lblEmployee.Size = new Size(94, 20);
             lblEmployee.TabIndex = 1;
             lblEmployee.Text = "اسم الموظفة";
-            // 
-            // cmbEmployee
-            // 
-            cmbEmployee.AutoResize = false;
-            cmbEmployee.BackColor = Color.FromArgb(255, 255, 255);
-            cmbEmployee.Depth = 0;
-            cmbEmployee.DrawMode = DrawMode.OwnerDrawVariable;
-            cmbEmployee.DropDownHeight = 174;
-            cmbEmployee.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbEmployee.DropDownWidth = 121;
-            cmbEmployee.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
-            cmbEmployee.ForeColor = Color.FromArgb(222, 0, 0, 0);
-            cmbEmployee.FormattingEnabled = true;
-            cmbEmployee.IntegralHeight = false;
-            cmbEmployee.ItemHeight = 43;
-            cmbEmployee.Location = new Point(50, 90);
-            cmbEmployee.MaxDropDownItems = 4;
-            cmbEmployee.MouseState = MaterialSkin.MouseState.OUT;
-            cmbEmployee.Name = "cmbEmployee";
-            cmbEmployee.RightToLeft = RightToLeft.Yes;
-            cmbEmployee.Size = new Size(320, 49);
-            cmbEmployee.StartIndex = 0;
-            cmbEmployee.TabIndex = 2;
             // 
             // lblTotalEarned
             // 
@@ -349,10 +326,20 @@
             BtnCancel.UseVisualStyleBackColor = true;
             BtnCancel.Click += BtnCancel_Click;
             // 
+            // cmbEmployee
+            // 
+            cmbEmployee.Font = new Font("Segoe UI", 11F);
+            cmbEmployee.FormattingEnabled = true;
+            cmbEmployee.Location = new Point(50, 102);
+            cmbEmployee.Name = "cmbEmployee";
+            cmbEmployee.Size = new Size(320, 28);
+            cmbEmployee.TabIndex = 17;
+            // 
             // EmployeePaymentForm
             // 
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(534, 680);
+            Controls.Add(cmbEmployee);
             Controls.Add(BtnCancel);
             Controls.Add(btnSave);
             Controls.Add(txtNotes);
@@ -367,7 +354,6 @@
             Controls.Add(lblTotalPaid);
             Controls.Add(txtTotalEarned);
             Controls.Add(lblTotalEarned);
-            Controls.Add(cmbEmployee);
             Controls.Add(lblEmployee);
             Controls.Add(PnlHeader);
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -387,7 +373,6 @@
         private System.Windows.Forms.Panel PnlHeader;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lblEmployee;
-        private MaterialSkin.Controls.MaterialComboBox cmbEmployee;
         private System.Windows.Forms.Label lblTotalEarned;
         private MaterialSkin.Controls.MaterialTextBox2 txtTotalEarned;
         private System.Windows.Forms.Label lblTotalPaid;
@@ -402,5 +387,6 @@
         private MaterialSkin.Controls.MaterialTextBox2 txtNotes;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button BtnCancel;
+        private ComboBox cmbEmployee;
     }
 }
