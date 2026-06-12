@@ -119,68 +119,101 @@ namespace beautyCenterSystem
         {
             if (dgvAppointments.Columns.Count == 0) return;
 
-            if (!dgvAppointments.Columns.Contains("RowIndex"))
+            try
             {
-                DataGridViewTextBoxColumn idxCol = new DataGridViewTextBoxColumn();
-                idxCol.Name = "RowIndex";
-                idxCol.HeaderText = "#";
-                idxCol.Width = 40;
-                idxCol.ReadOnly = true;
-                dgvAppointments.Columns.Insert(0, idxCol);
-            }
+                // --- عمود الترقيم التسلسلي (#) ---
+                // يُضاف هنا مباشرةً وتُملأ قيمه فوراً قبل أي حدث آخر
+                if (!dgvAppointments.Columns.Contains("RowIndex"))
+                {
+                    var idxCol = new DataGridViewTextBoxColumn
+                    {
+                        Name = "RowIndex",
+                        HeaderText = "#",
+                        Width = 36,
+                        ReadOnly = true,
+                        SortMode = DataGridViewColumnSortMode.NotSortable
+                    };
+                    dgvAppointments.Columns.Insert(0, idxCol);
+                }
 
-            // 1. إخفاء الأعمدة التقنية
-            string[] hiddenCols = { "AppointmentID", "CustomerID", "CreatedBy", "SelectedServices", "Notes" };
-            foreach (var col in hiddenCols)
+                // ملء أرقام الترقيم فوراً بعد إضافة العمود
+                for (int i = 0; i < dgvAppointments.Rows.Count; i++)
+                    dgvAppointments.Rows[i].Cells["RowIndex"].Value = (i + 1).ToString();
+
+                // --- عمود وقت الموعد المخصص ---
+                // يعرض وقت الموعد (الساعة:الدقيقة ص/م) مستخلصاً من AppointmentDate
+                if (!dgvAppointments.Columns.Contains("AppointmentTime"))
+                {
+                    var timeCol = new DataGridViewTextBoxColumn
+                    {
+                        Name = "AppointmentTime",
+                        HeaderText = "الوقت",
+                        Width = 80,
+                        ReadOnly = true,
+                        SortMode = DataGridViewColumnSortMode.NotSortable
+                    };
+                    // أدرج بعد عمود التاريخ مباشرةً
+                    int dateIdx = dgvAppointments.Columns.Contains("AppointmentDate")
+                        ? dgvAppointments.Columns["AppointmentDate"].DisplayIndex + 1
+                        : 1;
+                    dgvAppointments.Columns.Insert(dateIdx, timeCol);
+                }
+
+                // ملء قيم وقت الموعد من حقل AppointmentDate
+                if (dgvAppointments.Columns.Contains("AppointmentTime") &&
+                    dgvAppointments.Columns.Contains("AppointmentDate"))
+                {
+                    foreach (DataGridViewRow row in dgvAppointments.Rows)
+                    {
+                        if (row.Cells["AppointmentDate"].Value is DateTime dt)
+                            row.Cells["AppointmentTime"].Value = dt.ToString("hh:mm tt");
+                    }
+                }
+
+                // 1. إخفاء الأعمدة التقنية وأعمدة النطاق الزمني غير المطلوبة
+                string[] hiddenCols = {
+                    "AppointmentID", "CustomerID", "CreatedBy", "SelectedServices", "Notes",
+                    "ArrivalTime",  // مخفي — يُغني عنه عمود "الوقت" المشتق من AppointmentDate
+                    "FinishTime"    // مخفي — غير مطلوب في عرض الجدول
+                };
+                foreach (var col in hiddenCols)
+                    if (dgvAppointments.Columns.Contains(col))
+                        dgvAppointments.Columns[col].Visible = false;
+
+                // 2. تعريب وتنسيق الأعمدة المرئية
+                if (dgvAppointments.Columns.Contains("AppointmentDate"))
+                {
+                    dgvAppointments.Columns["AppointmentDate"].HeaderText = "التاريخ";
+                    dgvAppointments.Columns["AppointmentDate"].DefaultCellStyle.Format = "yyyy/MM/dd";
+                    dgvAppointments.Columns["AppointmentDate"].Width = 95;
+                }
+
+                if (dgvAppointments.Columns.Contains("CustomerName"))
+                {
+                    dgvAppointments.Columns["CustomerName"].HeaderText = "اسم العميلة";
+                    dgvAppointments.Columns["CustomerName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                    dgvAppointments.Columns["CustomerName"].MinimumWidth = 120;
+                }
+
+                if (dgvAppointments.Columns.Contains("TotalPrice"))
+                {
+                    dgvAppointments.Columns["TotalPrice"].HeaderText = "الإجمالي";
+                    dgvAppointments.Columns["TotalPrice"].Width = 80;
+                    dgvAppointments.Columns["TotalPrice"].DefaultCellStyle.Format = "N2";
+                }
+
+                if (dgvAppointments.Columns.Contains("Status"))
+                {
+                    dgvAppointments.Columns["Status"].HeaderText = "الحالة";
+                    dgvAppointments.Columns["Status"].Width = 90;
+                }
+
+                dgvAppointments.ReadOnly = true;
+            }
+            catch (Exception ex)
             {
-                if (dgvAppointments.Columns.Contains(col))
-                    dgvAppointments.Columns[col].Visible = false;
+                Console.WriteLine($"FormatGrid error: {ex.Message}");
             }
-
-            // 2. تعريب وتنسيق الأعمدة الأساسية
-            if (dgvAppointments.Columns.Contains("AppointmentDate"))
-            {
-                dgvAppointments.Columns["AppointmentDate"].HeaderText = "التاريخ";
-                dgvAppointments.Columns["AppointmentDate"].DefaultCellStyle.Format = "yyyy/MM/dd";
-                dgvAppointments.Columns["AppointmentDate"].Width = 85;
-            }
-
-            if (dgvAppointments.Columns.Contains("ArrivalTime"))
-            {
-                dgvAppointments.Columns["ArrivalTime"].HeaderText = "من";
-                dgvAppointments.Columns["ArrivalTime"].DefaultCellStyle.Format = "hh:mm tt";
-                dgvAppointments.Columns["ArrivalTime"].Width = 75;
-            }
-
-            if (dgvAppointments.Columns.Contains("FinishTime"))
-            {
-                dgvAppointments.Columns["FinishTime"].HeaderText = "إلى";
-                dgvAppointments.Columns["FinishTime"].DefaultCellStyle.Format = "hh:mm tt";
-                dgvAppointments.Columns["FinishTime"].Width = 75;
-            }
-
-            if (dgvAppointments.Columns.Contains("CustomerName"))
-            {
-                dgvAppointments.Columns["CustomerName"].HeaderText = "اسم العميلة";
-                dgvAppointments.Columns["CustomerName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                dgvAppointments.Columns["CustomerName"].MinimumWidth = 120;
-            }
-
-            if (dgvAppointments.Columns.Contains("TotalPrice"))
-            {
-                dgvAppointments.Columns["TotalPrice"].HeaderText = "الإجمالي";
-                dgvAppointments.Columns["TotalPrice"].Width = 80;
-                dgvAppointments.Columns["TotalPrice"].DefaultCellStyle.Format = "N2";
-            }
-
-            if (dgvAppointments.Columns.Contains("Status"))
-            {
-                dgvAppointments.Columns["Status"].HeaderText = "الحالة";
-                dgvAppointments.Columns["Status"].Width = 90;
-            }
-
-            dgvAppointments.ReadOnly = true;
-            // ملاحظة: يفضل تلوين الصفوف في حدث CellFormatting لضمان عدم حدوث Exception
         }
 
         private void FormatDetailsGrid()
@@ -403,20 +436,8 @@ namespace beautyCenterSystem
 
         private void dgvAppointments_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
-            try
-            {
-                if (dgvAppointments.Columns.Contains("RowIndex"))
-                {
-                    for (int i = 0; i < dgvAppointments.Rows.Count; i++)
-                    {
-                        dgvAppointments.Rows[i].Cells["RowIndex"].Value = (i + 1).ToString();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error formatting rows: {ex.Message}");
-            }
+            // الترقيم التسلسلي يُعالج الآن مباشرةً داخل FormatGrid()
+            // بعد إنشاء عمود RowIndex، مما يضمن وجود العمود قبل ملء القيم.
         }
 
         private void ApplyButtonStyles()
