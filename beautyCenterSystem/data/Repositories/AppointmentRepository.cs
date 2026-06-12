@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using beautyCenterSystem;
 using System;
 using System.Collections.Generic;
@@ -100,16 +100,34 @@ namespace beautyCenterSystem.Data.Repositories
         }
 
         // 2. جلب مواعيد يوم معين
-        public async Task<IEnumerable<Appointment>> GetByDateAsync(DateTime date)
+        public async Task<IEnumerable<Appointment>> GetByDateAsync(DateTime date, int? roomId = null)
         {
             using var db = _dbFactory.CreateConnection();
-            string sql = @"SELECT A.*, C.CustomerName 
-                           FROM Appointments A 
-                           LEFT JOIN Customers C ON A.CustomerID = C.CustomerID 
-                           WHERE CAST(A.AppointmentDate AS DATE) = CAST(@TargetDate AS DATE)
-                           ORDER BY A.AppointmentDate ASC";
 
-            var result = await db.QueryAsync<Appointment>(sql, new { TargetDate = date });
+            // استعلام موحد بدون تجميع نصوص SQL
+            // عند اختيار غرفة: يعيد فقط الحجوزات التي تحتوي على خدمة في تلك الغرفة
+            // عند اختيار "الكل" (roomId = null أو 0): يعيد جميع حجوزات اليوم
+            const string sql = @"
+                SELECT DISTINCT
+                    A.AppointmentID,
+                    A.CustomerID,
+                    A.AppointmentDate,
+                    A.TotalPrice,
+                    A.Status,
+                    A.CreatedBy,
+                    A.ArrivalTime,
+                    A.FinishTime,
+                    C.CustomerName
+                FROM Appointments A
+                LEFT JOIN Customers C ON A.CustomerID = C.CustomerID
+                LEFT JOIN AppointmentDetails AD ON A.AppointmentID = AD.AppointmentID
+                LEFT JOIN Services S ON AD.ServiceID = S.ServiceID
+                WHERE
+                    CAST(A.AppointmentDate AS DATE) = CAST(@TargetDate AS DATE)
+                    AND (@RoomId IS NULL OR S.RoomID = @RoomId)
+                ORDER BY A.AppointmentDate ASC, A.ArrivalTime ASC";
+
+            var result = await db.QueryAsync<Appointment>(sql, new { TargetDate = date, RoomId = roomId });
             return result ?? Enumerable.Empty<Appointment>();
         }
 

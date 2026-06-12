@@ -1,4 +1,4 @@
-﻿using BeautyCenterSystem.Models;
+using BeautyCenterSystem.Models;
 using FontAwesome.Sharp;
 using System;
 using System.Collections.Generic;
@@ -44,6 +44,7 @@ namespace beautyCenterSystem
 
         public int InvoiceNumber { get; set; }
         public string CustomerName { get; set; }
+        public string AppointmentDateTime { get; set; }
         public List<InvoiceItem> Items { get; set; } = new List<InvoiceItem>();
         public decimal TotalAmount { get; set; } // إجمالي الفاتورة قبل الخصم
         public decimal Discount { get; set; }
@@ -114,6 +115,12 @@ namespace beautyCenterSystem
             y += 5;
             g.DrawString($"العميل/ة: {CustomerName}", fontHeader, Brushes.Black, new RectangleF(0, y, width, 20), formatRight);
             y += 25;
+
+            if (!string.IsNullOrEmpty(AppointmentDateTime))
+            {
+                g.DrawString($"موعد الحجز: {AppointmentDateTime}", fontSmall, Brushes.Black, new RectangleF(0, y, width, 15), formatRight);
+                y += 18;
+            }
 
             // --- جدول الخدمات (4 أعمدة) ---
             // تقسيم العرض (270): الخدمة (95) | النوع (75) | العدد (35) | السعر (65)

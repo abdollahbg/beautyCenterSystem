@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem
+namespace beautyCenterSystem
 {
     partial class UC_Appointments
     {
@@ -31,6 +31,7 @@
             flowLayoutPanel1 = new FlowLayoutPanel();
             label1 = new Label();
             dtpFilterDate = new DateTimePicker();
+            cmbFilterRoom = new System.Windows.Forms.ComboBox();
             iconPictureBox1 = new FontAwesome.Sharp.IconPictureBox();
             txtSearchCustomer = new MaterialSkin.Controls.MaterialTextBox2();
             btnRefresh = new Button();
@@ -61,6 +62,7 @@
             flowLayoutPanel1.BackColor = Color.WhiteSmoke;
             flowLayoutPanel1.Controls.Add(label1);
             flowLayoutPanel1.Controls.Add(dtpFilterDate);
+            flowLayoutPanel1.Controls.Add(cmbFilterRoom);
             flowLayoutPanel1.Controls.Add(iconPictureBox1);
             flowLayoutPanel1.Controls.Add(txtSearchCustomer);
             flowLayoutPanel1.Controls.Add(btnRefresh);
@@ -96,6 +98,19 @@
             dtpFilterDate.Size = new Size(210, 29);
             dtpFilterDate.TabIndex = 1;
             dtpFilterDate.ValueChanged += dtpFilterDate_ValueChanged;
+            // 
+            // cmbFilterRoom
+            // 
+            cmbFilterRoom.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbFilterRoom.FlatStyle = FlatStyle.Flat;
+            cmbFilterRoom.Font = new Font("Segoe UI", 12F);
+            cmbFilterRoom.FormattingEnabled = true;
+            cmbFilterRoom.Location = new Point(316, 23);
+            cmbFilterRoom.Margin = new Padding(15, 3, 15, 3);
+            cmbFilterRoom.Name = "cmbFilterRoom";
+            cmbFilterRoom.Size = new Size(215, 29);
+            cmbFilterRoom.TabIndex = 8;
+            cmbFilterRoom.SelectedIndexChanged += cmbFilterRoom_SelectedIndexChanged;
             // 
             // iconPictureBox1
             // 
@@ -370,6 +385,7 @@
         private FlowLayoutPanel flowLayoutPanel1;
         private Label label1;
         private DateTimePicker dtpFilterDate;
+        private System.Windows.Forms.ComboBox cmbFilterRoom;
         private MaterialSkin.Controls.MaterialTextBox2 txtSearchCustomer;
         private FontAwesome.Sharp.IconPictureBox iconPictureBox1;
         private TableLayoutPanel tableLayoutPanel1;

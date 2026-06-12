@@ -1,4 +1,4 @@
-﻿using beautyCenterSystem.Data.Repositories;
+using beautyCenterSystem.Data.Repositories;
 using BeautyCenterSystem.Data;
 using System;
 using System.Collections.Generic;
@@ -16,24 +16,30 @@ namespace beautyCenterSystem
     public partial class UC_Appointments : UserControl
     {
         private readonly AppointmentRepository _appointmentRepo;
+        private readonly RoomRepository _roomRepo;
         private List<Appointment> _allDayAppointments = new List<Appointment>();
+        private bool _isLoadingAppointments = false;
 
         public UC_Appointments()
         {
             InitializeComponent();
-            _appointmentRepo = new AppointmentRepository(new DbConnectionFactory());
+            var dbFactory = new DbConnectionFactory();
+            _appointmentRepo = new AppointmentRepository(dbFactory);
+            _roomRepo = new RoomRepository(dbFactory);
 
             // ربط أحداث جدول التفاصيل برمجياً
             dgvDetails.CellFormatting += dgvDetails_CellFormatting;
             dgvDetails.CellContentClick += dgvDetails_CellContentClick;
+            dgvAppointments.DataBindingComplete += dgvAppointments_DataBindingComplete;
         }
 
         private async Task LoadAppointments()
         {
+            _isLoadingAppointments = true;
             try
             {
                 int? selectedAppId = null;
-                // تأكد من وجود أعمدة ومن وجود صف محدد لحفظ التحديد
+                // حفظ الـ ID المحدد حالياً قبل تحديث البيانات
                 if (dgvAppointments.Columns.Contains("AppointmentID") && dgvAppointments.CurrentRow != null)
                 {
                     var cellValue = dgvAppointments.CurrentRow.Cells["AppointmentID"].Value;
@@ -41,10 +47,19 @@ namespace beautyCenterSystem
                 }
 
                 DateTime selectedDate = dtpFilterDate.Value.Date;
-                var appointments = await _appointmentRepo.GetByDateAsync(selectedDate);
+                int selectedRoomId = 0;
+                if (cmbFilterRoom.SelectedValue != null && int.TryParse(cmbFilterRoom.SelectedValue.ToString(), out int rid))
+                {
+                    selectedRoomId = rid;
+                }
+
+                var appointments = await _appointmentRepo.GetByDateAsync(selectedDate, selectedRoomId > 0 ? selectedRoomId : (int?)null);
                 _allDayAppointments = appointments.ToList();
 
+                // مسح الأعمدة أولاً قبل إعادة تعيين DataSource
+                // هذا يمنع تراكم الأعمدة المضافة يدوياً (RowIndex) مع الأعمدة المولَّدة تلقائياً
                 dgvAppointments.DataSource = null;
+                dgvAppointments.Columns.Clear();
                 dgvAppointments.DataSource = _allDayAppointments;
                 FormatGrid();
 
@@ -77,12 +92,18 @@ namespace beautyCenterSystem
                 }
                 else
                 {
+                    // مسح شامل لشبكة التفاصيل عند عدم وجود نتائج
                     dgvDetails.DataSource = null;
+                    dgvDetails.Columns.Clear();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                MessageBox.Show($"خطأ في تحميل المواعيد: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                _isLoadingAppointments = false;
             }
         }
 
@@ -97,6 +118,16 @@ namespace beautyCenterSystem
         private void FormatGrid()
         {
             if (dgvAppointments.Columns.Count == 0) return;
+
+            if (!dgvAppointments.Columns.Contains("RowIndex"))
+            {
+                DataGridViewTextBoxColumn idxCol = new DataGridViewTextBoxColumn();
+                idxCol.Name = "RowIndex";
+                idxCol.HeaderText = "#";
+                idxCol.Width = 40;
+                idxCol.ReadOnly = true;
+                dgvAppointments.Columns.Insert(0, idxCol);
+            }
 
             // 1. إخفاء الأعمدة التقنية
             string[] hiddenCols = { "AppointmentID", "CustomerID", "CreatedBy", "SelectedServices", "Notes" };
@@ -314,6 +345,9 @@ namespace beautyCenterSystem
 
         private async void dgvAppointments_SelectionChanged(object sender, EventArgs e)
         {
+            // لا تُفعّل هذا الحدث أثناء عملية تحميل البيانات لتجنب التعارض
+            if (_isLoadingAppointments) return;
+
             if (dgvAppointments.CurrentRow != null && dgvAppointments.CurrentRow.Index >= 0 && dgvAppointments.Focused)
             {
                 try
@@ -324,6 +358,7 @@ namespace beautyCenterSystem
                 catch
                 {
                     dgvDetails.DataSource = null;
+                    dgvDetails.Columns.Clear();
                 }
             }
         }
@@ -331,7 +366,57 @@ namespace beautyCenterSystem
         private async void UC_Appointments_Load(object sender, EventArgs e)
         {
             ApplyButtonStyles();
+            await LoadRooms();
             await LoadAppointments();
+        }
+
+        private async Task LoadRooms()
+        {
+            try
+            {
+                var rooms = (await _roomRepo.GetAllAsync()).ToList();
+                rooms.Insert(0, new beautyCenterSystem.Room { RoomID = 0, RoomName = "الكل" });
+                cmbFilterRoom.DataSource = rooms;
+                cmbFilterRoom.DisplayMember = "RoomName";
+                cmbFilterRoom.ValueMember = "RoomID";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"خطأ في تحميل الغرف: {ex.Message}");
+            }
+        }
+
+        private async void cmbFilterRoom_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (cmbFilterRoom.SelectedIndex >= 0)
+                {
+                    await LoadAppointments();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"خطأ في تصفية الغرف: {ex.Message}");
+            }
+        }
+
+        private void dgvAppointments_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            try
+            {
+                if (dgvAppointments.Columns.Contains("RowIndex"))
+                {
+                    for (int i = 0; i < dgvAppointments.Rows.Count; i++)
+                    {
+                        dgvAppointments.Rows[i].Cells["RowIndex"].Value = (i + 1).ToString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error formatting rows: {ex.Message}");
+            }
         }
 
         private void ApplyButtonStyles()
@@ -536,6 +621,7 @@ namespace beautyCenterSystem
                                     WhatsAppHandle = settings.WhatsApp,
                                     InvoiceNumber = appId,
                                     CustomerName = customerName,
+                                    AppointmentDateTime = dtpFilterDate.Value.ToString("yyyy-MM-dd hh:mm tt"),
                                     TotalAmount = totalAmount,
                                     Discount = payForm.Discount,
                                     NetAmount = payForm.AmountPaid,
@@ -590,6 +676,7 @@ namespace beautyCenterSystem
                     WhatsAppHandle = settings.WhatsApp,
                     InvoiceNumber = appId,
                     CustomerName = row.Cells["CustomerName"].Value.ToString(),
+                    AppointmentDateTime = dtpFilterDate.Value.ToString("yyyy-MM-dd hh:mm tt"),
                     TotalAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value),
                     NetAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value),
                     CashierName = CurrentSession.Username,
