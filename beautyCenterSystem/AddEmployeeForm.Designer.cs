@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem
+namespace beautyCenterSystem
 {
     partial class AddEmployeeForm
     {
@@ -26,7 +26,7 @@
             label5 = new Label();
             txtCommissionRate = new MaterialSkin.Controls.MaterialTextBox2();
             label3 = new Label();
-            cmbRooms = new MaterialSkin.Controls.MaterialComboBox();
+            cmbRooms = new System.Windows.Forms.ComboBox();
             btnSave = new Button();
             BtnCancel = new Button();
             PnlHeader.SuspendLayout();
@@ -137,25 +137,15 @@
             // 
             // cmbRooms
             // 
-            cmbRooms.AutoResize = false;
-            cmbRooms.BackColor = Color.FromArgb(255, 255, 255);
-            cmbRooms.Depth = 0;
-            cmbRooms.DrawMode = DrawMode.OwnerDrawVariable;
-            cmbRooms.DropDownHeight = 174;
             cmbRooms.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbRooms.DropDownWidth = 121;
-            cmbRooms.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
-            cmbRooms.ForeColor = Color.FromArgb(222, 0, 0, 0);
+            cmbRooms.FlatStyle = FlatStyle.Flat;
+            cmbRooms.Font = new Font("Segoe UI", 11F);
             cmbRooms.FormattingEnabled = true;
-            cmbRooms.IntegralHeight = false;
-            cmbRooms.ItemHeight = 43;
             cmbRooms.Location = new Point(51, 290);
             cmbRooms.MaxDropDownItems = 4;
-            cmbRooms.MouseState = MaterialSkin.MouseState.OUT;
             cmbRooms.Name = "cmbRooms";
             cmbRooms.RightToLeft = RightToLeft.Yes;
-            cmbRooms.Size = new Size(250, 49);
-            cmbRooms.StartIndex = 0;
+            cmbRooms.Size = new Size(250, 28);
             cmbRooms.TabIndex = 4;
             // 
             // btnSave
@@ -229,7 +219,7 @@
         private Label label5;
         private MaterialSkin.Controls.MaterialTextBox2 txtCommissionRate;
         private Label label3;
-        private MaterialSkin.Controls.MaterialComboBox cmbRooms;
+        private System.Windows.Forms.ComboBox cmbRooms;
         private Button btnSave;
         private Button BtnCancel;
     }

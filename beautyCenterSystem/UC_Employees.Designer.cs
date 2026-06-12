@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem
+namespace beautyCenterSystem
 {
     partial class UC_Employees
     {
@@ -82,7 +82,7 @@
             lblTitle.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblTitle.AutoSize = true;
             lblTitle.Depth = 0;
-            lblTitle.Font = new Font("Roboto", 24F, FontStyle.Bold, GraphicsUnit.Pixel);
+            lblTitle.Font = new Font("Segoe UI", 24F, FontStyle.Bold, GraphicsUnit.Pixel);
             lblTitle.FontType = MaterialSkin.MaterialSkinManager.fontType.H5;
             lblTitle.ForeColor = Color.White;
             lblTitle.Location = new Point(601, 16);

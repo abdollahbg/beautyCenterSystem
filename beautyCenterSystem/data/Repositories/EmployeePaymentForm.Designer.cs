@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem.data.Repositories
+namespace beautyCenterSystem.data.Repositories
 {
     partial class EmployeePaymentForm
     {
@@ -27,7 +27,7 @@
             lblRemaining = new Label();
             txtRemainingBalance = new MaterialSkin.Controls.MaterialTextBox2();
             lblTreasury = new Label();
-            cmbSafe = new MaterialSkin.Controls.MaterialComboBox();
+            cmbSafe = new System.Windows.Forms.ComboBox();
             lblAmount = new Label();
             txtAmountToPay = new MaterialSkin.Controls.MaterialTextBox2();
             lblNotes = new Label();
@@ -203,25 +203,15 @@
             // 
             // cmbSafe
             // 
-            cmbSafe.AutoResize = false;
-            cmbSafe.BackColor = Color.FromArgb(255, 255, 255);
-            cmbSafe.Depth = 0;
-            cmbSafe.DrawMode = DrawMode.OwnerDrawVariable;
-            cmbSafe.DropDownHeight = 174;
             cmbSafe.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbSafe.DropDownWidth = 121;
-            cmbSafe.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
-            cmbSafe.ForeColor = Color.FromArgb(222, 0, 0, 0);
+            cmbSafe.FlatStyle = FlatStyle.Flat;
+            cmbSafe.Font = new Font("Segoe UI", 11F);
             cmbSafe.FormattingEnabled = true;
-            cmbSafe.IntegralHeight = false;
-            cmbSafe.ItemHeight = 43;
             cmbSafe.Location = new Point(50, 370);
             cmbSafe.MaxDropDownItems = 4;
-            cmbSafe.MouseState = MaterialSkin.MouseState.OUT;
             cmbSafe.Name = "cmbSafe";
             cmbSafe.RightToLeft = RightToLeft.Yes;
-            cmbSafe.Size = new Size(320, 49);
-            cmbSafe.StartIndex = 0;
+            cmbSafe.Size = new Size(320, 28);
             cmbSafe.TabIndex = 10;
             // 
             // lblAmount
@@ -380,7 +370,7 @@
         private System.Windows.Forms.Label lblRemaining;
         private MaterialSkin.Controls.MaterialTextBox2 txtRemainingBalance;
         private System.Windows.Forms.Label lblTreasury;
-        private MaterialSkin.Controls.MaterialComboBox cmbSafe;
+        private System.Windows.Forms.ComboBox cmbSafe;
         private System.Windows.Forms.Label lblAmount;
         private MaterialSkin.Controls.MaterialTextBox2 txtAmountToPay;
         private System.Windows.Forms.Label lblNotes;

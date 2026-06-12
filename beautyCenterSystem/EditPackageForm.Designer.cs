@@ -33,7 +33,7 @@ namespace beautyCenterSystem
             this.txtPackageName.AnimateReadOnly = false;
             this.txtPackageName.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtPackageName.Depth = 0;
-            this.txtPackageName.Font = new System.Drawing.Font("Roboto", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.txtPackageName.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.txtPackageName.Hint = "اسم الباقة";
             this.txtPackageName.LeadingIcon = null;
             this.txtPackageName.Location = new System.Drawing.Point(30, 90);
@@ -51,7 +51,7 @@ namespace beautyCenterSystem
             this.txtDurationDays.AnimateReadOnly = false;
             this.txtDurationDays.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtDurationDays.Depth = 0;
-            this.txtDurationDays.Font = new System.Drawing.Font("Roboto", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.txtDurationDays.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.txtDurationDays.Hint = "المدة (بالأيام)";
             this.txtDurationDays.LeadingIcon = null;
             this.txtDurationDays.Location = new System.Drawing.Point(30, 160);
@@ -69,7 +69,7 @@ namespace beautyCenterSystem
             this.txtPrice.AnimateReadOnly = false;
             this.txtPrice.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtPrice.Depth = 0;
-            this.txtPrice.Font = new System.Drawing.Font("Roboto", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.txtPrice.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.txtPrice.Hint = "السعر";
             this.txtPrice.LeadingIcon = null;
             this.txtPrice.Location = new System.Drawing.Point(210, 160);
@@ -104,7 +104,7 @@ namespace beautyCenterSystem
             this.txtTotalSessions.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtTotalSessions.Depth = 0;
             this.txtTotalSessions.Enabled = false;
-            this.txtTotalSessions.Font = new System.Drawing.Font("Roboto", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.txtTotalSessions.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.txtTotalSessions.Hint = "إجمالي الحصص";
             this.txtTotalSessions.LeadingIcon = null;
             this.txtTotalSessions.Location = new System.Drawing.Point(210, 230);

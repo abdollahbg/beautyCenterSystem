@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem.data.Repositories
+namespace beautyCenterSystem.data.Repositories
 {
     partial class UserCreateForm
     {
@@ -38,7 +38,7 @@
             PnlHeader = new Panel();
             label1 = new Label();
             label4 = new Label();
-            cmbRole = new MaterialSkin.Controls.MaterialComboBox();
+            cmbRole = new System.Windows.Forms.ComboBox();
             PnlHeader.SuspendLayout();
             SuspendLayout();
             // 
@@ -168,26 +168,15 @@
             // 
             // cmbRole
             // 
-            cmbRole.AutoResize = false;
-            cmbRole.BackColor = Color.FromArgb(255, 255, 255);
-            cmbRole.Depth = 0;
-            cmbRole.DrawMode = DrawMode.OwnerDrawVariable;
-            cmbRole.DropDownHeight = 174;
             cmbRole.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbRole.DropDownWidth = 121;
-            cmbRole.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
-            cmbRole.ForeColor = Color.FromArgb(222, 0, 0, 0);
+            cmbRole.FlatStyle = FlatStyle.Flat;
+            cmbRole.Font = new Font("Segoe UI", 11F);
             cmbRole.FormattingEnabled = true;
-            cmbRole.Hint = "اختر الدور";
-            cmbRole.IntegralHeight = false;
-            cmbRole.ItemHeight = 43;
             cmbRole.Location = new Point(93, 291);
             cmbRole.MaxDropDownItems = 4;
-            cmbRole.MouseState = MaterialSkin.MouseState.OUT;
             cmbRole.Name = "cmbRole";
             cmbRole.RightToLeft = RightToLeft.Yes;
-            cmbRole.Size = new Size(250, 49);
-            cmbRole.StartIndex = 0;
+            cmbRole.Size = new Size(250, 28);
             cmbRole.TabIndex = 19;
             // 
             // UserCreateForm
@@ -226,7 +215,7 @@
         private MaterialSkin.Controls.MaterialTextBox2 txtUsername;
         private Panel PnlHeader;
         private Label label1;
-        private MaterialSkin.Controls.MaterialComboBox cmbRole;
+        private System.Windows.Forms.ComboBox cmbRole;
         private Label label4;
     }
 }

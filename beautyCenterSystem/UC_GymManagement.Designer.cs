@@ -82,7 +82,7 @@ namespace beautyCenterSystem
             txtBoxsearch.BackgroundImageLayout = ImageLayout.None;
             txtBoxsearch.CharacterCasing = CharacterCasing.Normal;
             txtBoxsearch.Depth = 0;
-            txtBoxsearch.Font = new Font("Roboto", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
+            txtBoxsearch.Font = new Font("Segoe UI", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
             txtBoxsearch.HideSelection = true;
             txtBoxsearch.Hint = "البحث";
             txtBoxsearch.LeadingIcon = null;
