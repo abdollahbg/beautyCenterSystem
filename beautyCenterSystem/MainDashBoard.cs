@@ -30,6 +30,7 @@ namespace beautyCenterSystem
             // إنشاء زر المدربات ديناميكياً
             btnTrainers = new FontAwesome.Sharp.IconButton();
             btnTrainers.Dock = DockStyle.Top;
+
             btnTrainers.IconChar = FontAwesome.Sharp.IconChar.Dumbbell;
             btnTrainers.IconColor = Color.Black;
             btnTrainers.IconFont = FontAwesome.Sharp.IconFont.Auto;
@@ -42,8 +43,11 @@ namespace beautyCenterSystem
             btnTrainers.Text = "المدربات";
             btnTrainers.TextAlign = ContentAlignment.MiddleRight;
             btnTrainers.TextImageRelation = TextImageRelation.TextBeforeImage;
+            btnTrainers.FlatStyle = FlatStyle.Flat;
+            btnTrainers.FlatAppearance.BorderSize = 0;
             btnTrainers.Click += btnTrainers_Click;
-            
+
+
             // إضافة الزر تحت زر الجيم (أو الموظفات)
             pnlSidebar.Controls.Add(btnTrainers);
             // ترتيبه ليظهر بشكل صحيح (Controls[0] هو الأسفل في الـ Dock=Top)
