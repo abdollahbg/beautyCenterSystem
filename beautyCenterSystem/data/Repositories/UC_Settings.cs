@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -65,9 +65,6 @@ namespace beautyCenterSystem.data.Repositories
         // 2. تنسيق الواجهة
         private void ApplyCustomStyles()
         {
-            this.picLogo.IconChar = FontAwesome.Sharp.IconChar.Image;
-            this.picLogo.IconColor = Color.Gray;
-            this.picLogo.IconSize = 100;
             this.picLogo.SizeMode = PictureBoxSizeMode.Zoom;
             this.picLogo.BackColor = Color.FromArgb(240, 240, 240);
             this.picLogo.BorderStyle = BorderStyle.FixedSingle;
@@ -168,7 +165,6 @@ namespace beautyCenterSystem.data.Repositories
         private void btnDelete_Click(object sender, EventArgs e)
         {
             picLogo.Image = null;
-            picLogo.IconChar = FontAwesome.Sharp.IconChar.Image;
             _isDataChanged = true;
         }
 

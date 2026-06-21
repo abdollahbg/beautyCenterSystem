@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             pnlTopHeader = new Panel();
-            btnDailyClose = new MaterialSkin.Controls.MaterialButton();
             lblDashboardTitle = new Label();
             tlpKPIs = new TableLayoutPanel();
             cardCompleted = new MaterialSkin.Controls.MaterialCard();
@@ -73,33 +72,12 @@
             // 
             // pnlTopHeader
             // 
-            pnlTopHeader.Controls.Add(btnDailyClose);
             pnlTopHeader.Controls.Add(lblDashboardTitle);
             pnlTopHeader.Dock = DockStyle.Top;
             pnlTopHeader.Location = new Point(0, 0);
             pnlTopHeader.Name = "pnlTopHeader";
             pnlTopHeader.Size = new Size(1184, 60);
             pnlTopHeader.TabIndex = 0;
-            // 
-            // btnDailyClose
-            // 
-            btnDailyClose.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            btnDailyClose.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
-            btnDailyClose.Depth = 0;
-            btnDailyClose.HighEmphasis = true;
-            btnDailyClose.Icon = null;
-            btnDailyClose.Location = new Point(15, 12);
-            btnDailyClose.Margin = new Padding(4, 6, 4, 6);
-            btnDailyClose.MouseState = MaterialSkin.MouseState.HOVER;
-            btnDailyClose.Name = "btnDailyClose";
-            btnDailyClose.NoAccentTextColor = Color.Empty;
-            btnDailyClose.Size = new Size(134, 36);
-            btnDailyClose.TabIndex = 1;
-            btnDailyClose.Text = "إغلاق الحساب اليومي";
-            btnDailyClose.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
-            btnDailyClose.UseAccentColor = true;
-            btnDailyClose.UseVisualStyleBackColor = true;
-            btnDailyClose.Click += btnDailyClose_Click;
             // 
             // lblDashboardTitle
             // 
@@ -467,7 +445,6 @@
 
         private System.Windows.Forms.Panel pnlTopHeader;
         private System.Windows.Forms.Label lblDashboardTitle;
-        private MaterialSkin.Controls.MaterialButton btnDailyClose;
 
         private System.Windows.Forms.TableLayoutPanel tlpKPIs;
         private MaterialSkin.Controls.MaterialCard cardCompleted;

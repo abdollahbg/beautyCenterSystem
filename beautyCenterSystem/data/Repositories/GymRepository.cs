@@ -24,27 +24,91 @@ namespace beautyCenterSystem.Data.Repositories
             return await db.QueryAsync<GymSubscriptionType>(sql);
         }
 
-        public async Task<bool> AddSubscriptionTypeAsync(GymSubscriptionType type)
+        public async Task<IEnumerable<GymPackageTrainer>> GetPackageTrainersAsync(int packageId)
         {
             using var db = _dbFactory.CreateConnection();
-            string sql = @"INSERT INTO GymSubscriptionTypes (TypeName, DurationDays, Price, IsActive, IsSessionBased, TotalSessions) 
-                           VALUES (@TypeName, @DurationDays, @Price, 1, @IsSessionBased, @TotalSessions)";
-            int rows = await db.ExecuteAsync(sql, type);
-            return rows > 0;
+            string sql = @"SELECT PT.*, T.TrainerName 
+                           FROM GymPackageTrainers PT
+                           JOIN Trainers T ON PT.TrainerID = T.TrainerID
+                           WHERE PT.PackageID = @PackageID AND T.IsActive = 1";
+            return await db.QueryAsync<GymPackageTrainer>(sql, new { PackageID = packageId });
         }
 
-        public async Task<bool> UpdateSubscriptionTypeAsync(GymSubscriptionType type)
+        public async Task<bool> AddSubscriptionTypeAsync(GymSubscriptionType type, List<GymPackageTrainer> trainers = null)
         {
             using var db = _dbFactory.CreateConnection();
-            string sql = @"UPDATE GymSubscriptionTypes 
-                           SET TypeName = @TypeName, 
-                               DurationDays = @DurationDays,
-                               Price = @Price,
-                               IsSessionBased = @IsSessionBased,
-                               TotalSessions = @TotalSessions
-                           WHERE TypeID = @TypeID";
-            int rows = await db.ExecuteAsync(sql, type);
-            return rows > 0;
+            db.Open();
+            using var transaction = db.BeginTransaction();
+            try
+            {
+                string sql = @"INSERT INTO GymSubscriptionTypes (TypeName, DurationDays, Price, IsActive, IsSessionBased, TotalSessions) 
+                               VALUES (@TypeName, @DurationDays, @Price, 1, @IsSessionBased, @TotalSessions);
+                               SELECT CAST(SCOPE_IDENTITY() as int);";
+                               
+                int newTypeId = await db.QuerySingleAsync<int>(sql, type, transaction);
+
+                if (trainers != null && trainers.Any())
+                {
+                    string trainerSql = @"INSERT INTO GymPackageTrainers (PackageID, TrainerID, BaseAmount, CommissionRate)
+                                          VALUES (@PackageID, @TrainerID, @BaseAmount, @CommissionRate)";
+                    foreach (var t in trainers)
+                    {
+                        t.PackageID = newTypeId;
+                        await db.ExecuteAsync(trainerSql, t, transaction);
+                    }
+                }
+                
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateSubscriptionTypeAsync(GymSubscriptionType type, List<GymPackageTrainer> trainers = null)
+        {
+            using var db = _dbFactory.CreateConnection();
+            db.Open();
+            using var transaction = db.BeginTransaction();
+            try
+            {
+                string sql = @"UPDATE GymSubscriptionTypes 
+                               SET TypeName = @TypeName, 
+                                   DurationDays = @DurationDays,
+                                   Price = @Price,
+                                   IsSessionBased = @IsSessionBased,
+                                   TotalSessions = @TotalSessions
+                               WHERE TypeID = @TypeID";
+                await db.ExecuteAsync(sql, type, transaction);
+
+                if (trainers != null)
+                {
+                    // حذف المدربات القديمات وإضافة الجديدات
+                    await db.ExecuteAsync("DELETE FROM GymPackageTrainers WHERE PackageID = @PackageID", new { PackageID = type.TypeID }, transaction);
+                    
+                    if (trainers.Any())
+                    {
+                        string trainerSql = @"INSERT INTO GymPackageTrainers (PackageID, TrainerID, BaseAmount, CommissionRate)
+                                              VALUES (@PackageID, @TrainerID, @BaseAmount, @CommissionRate)";
+                        foreach (var t in trainers)
+                        {
+                            t.PackageID = type.TypeID;
+                            await db.ExecuteAsync(trainerSql, t, transaction);
+                        }
+                    }
+                }
+
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
         public async Task<bool> DeleteSubscriptionTypeAsync(int typeId)
@@ -106,9 +170,27 @@ namespace beautyCenterSystem.Data.Repositories
                     INSERT INTO CustomerGymSubscriptions 
                     (CustomerID, TypeID, StartDate, EndDate, PaidAmount, SafeID, IssuedBy, Notes, CreatedAt, SessionsRemaining, IsActive)
                     VALUES 
-                    (@CustomerID, @TypeID, @StartDate, @EndDate, @PaidAmount, @SafeID, @IssuedBy, @Notes, GETDATE(), @SessionsRemaining, 1)";
+                    (@CustomerID, @TypeID, @StartDate, @EndDate, @PaidAmount, @SafeID, @IssuedBy, @Notes, GETDATE(), @SessionsRemaining, 1);
+                    SELECT CAST(SCOPE_IDENTITY() as int);";
                 
-                await db.ExecuteAsync(insertSql, subscription, transaction);
+                int newSubId = await db.ExecuteScalarAsync<int>(insertSql, subscription, transaction);
+                subscription.SubscriptionID = newSubId;
+
+                // Insert Trainers
+                if (subscription.Trainers != null && subscription.Trainers.Count > 0)
+                {
+                    string trainerSql = @"
+                        INSERT INTO GymSubscriptionTrainers 
+                        (SubscriptionID, TrainerID, BaseAmount, CommissionRate)
+                        VALUES 
+                        (@SubscriptionID, @TrainerID, @BaseAmount, @CommissionRate)";
+
+                    foreach (var trainer in subscription.Trainers)
+                    {
+                        trainer.SubscriptionID = newSubId;
+                        await db.ExecuteAsync(trainerSql, trainer, transaction);
+                    }
+                }
 
                 // 3. Update Safe Balance
                 string updateSafeSql = "UPDATE Safes SET Balance = Balance + @Amount WHERE SafeID = @SafeID";
@@ -185,6 +267,70 @@ namespace beautyCenterSystem.Data.Repositories
                 // Log attendance
                 string insertAttSql = "INSERT INTO GymAttendance (SubscriptionID, CheckInTime, Note) VALUES (@Id, GETDATE(), @Note)";
                 await db.ExecuteAsync(insertAttSql, new { Id = subscriptionId, Note = note }, transaction);
+
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+        // --- Trainer Dues ---
+        public async Task<IEnumerable<beautyCenterSystem.viewsmodels.TrainerDuesDTO>> GetUnpaidTrainerDuesAsync()
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"
+                SELECT 
+                    T.TrainerID,
+                    T.TrainerName,
+                    ISNULL(SUM(GT.BaseAmount), 0) AS TotalBaseAmount,
+                    ISNULL(SUM( (CASE WHEN GT.BaseAmount > 0 THEN GT.BaseAmount ELSE GS.PaidAmount END) * (GT.CommissionRate / 100.0) ), 0) AS TotalCommissionAmount,
+                    ISNULL(SUM( (CASE WHEN GT.BaseAmount > 0 THEN GT.BaseAmount ELSE GS.PaidAmount END) * (GT.CommissionRate / 100.0) ), 0) AS TotalDues,
+                    COUNT(GT.SubscriptionTrainerID) AS UnpaidSubscriptionsCount
+                FROM GymSubscriptionTrainers GT
+                JOIN Trainers T ON GT.TrainerID = T.TrainerID
+                JOIN CustomerGymSubscriptions GS ON GT.SubscriptionID = GS.SubscriptionID
+                WHERE GT.IsPaid = 0 AND GS.IsActive = 1
+                GROUP BY T.TrainerID, T.TrainerName
+                HAVING COUNT(GT.SubscriptionTrainerID) > 0";
+            return await db.QueryAsync<beautyCenterSystem.viewsmodels.TrainerDuesDTO>(sql);
+        }
+
+        public async Task<bool> PayTrainerDuesAsync(int trainerId, decimal totalAmount, int safeId, int userId, string userName)
+        {
+            using var db = _dbFactory.CreateConnection();
+            db.Open();
+            using var transaction = db.BeginTransaction();
+            try
+            {
+                // 1. Create Expense Transaction
+                string safeTransSql = @"
+                    INSERT INTO Expenses 
+                    (ExpenseName, Category, Amount, ExpenseDate, PaidFromSafeID, IssuedBy, Notes)
+                    VALUES 
+                    ('صرف مستحقات مدربة', 'رواتب ومستحقات', @Amount, GETDATE(), @SafeID, @UserID, @Notes)";
+                
+                await db.ExecuteAsync(safeTransSql, new 
+                { 
+                    SafeID = safeId, 
+                    Amount = totalAmount, 
+                    UserID = userId, 
+                    Notes = $"صرف مستحقات للمدربة {userName} (رقم {trainerId})"
+                }, transaction);
+
+                // 2. Deduct from Safe Balance
+                string updateSafeSql = "UPDATE Safes SET Balance = Balance - @Amount WHERE SafeID = @SafeID";
+                await db.ExecuteAsync(updateSafeSql, new { Amount = totalAmount, SafeID = safeId }, transaction);
+
+                // 3. Mark trainer dues as paid
+                string updateDuesSql = @"
+                    UPDATE GymSubscriptionTrainers 
+                    SET IsPaid = 1, PaymentDate = GETDATE()
+                    WHERE TrainerID = @TrainerID AND IsPaid = 0";
+                await db.ExecuteAsync(updateDuesSql, new { TrainerID = trainerId }, transaction);
 
                 transaction.Commit();
                 return true;

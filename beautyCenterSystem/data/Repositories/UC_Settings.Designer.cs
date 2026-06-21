@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem.data.Repositories
+namespace beautyCenterSystem.data.Repositories
 {
     partial class UC_Settings
     {
@@ -57,7 +57,7 @@
             panel3 = new Panel();
             txtCenterName = new MaterialSkin.Controls.MaterialTextBox2();
             label3 = new Label();
-            picLogo = new FontAwesome.Sharp.IconPictureBox();
+            picLogo = new System.Windows.Forms.PictureBox();
             btnSaveSettings = new Button();
             label13 = new Label();
             btnDelete = new Button();
@@ -567,10 +567,6 @@
             // 
             picLogo.BackColor = Color.Transparent;
             picLogo.ForeColor = SystemColors.ControlText;
-            picLogo.IconChar = FontAwesome.Sharp.IconChar.None;
-            picLogo.IconColor = SystemColors.ControlText;
-            picLogo.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            picLogo.IconSize = 240;
             picLogo.Location = new Point(174, 84);
             picLogo.Name = "picLogo";
             picLogo.Size = new Size(240, 240);
@@ -1101,7 +1097,7 @@
         private Button btnDelete;
         private Button btnBrowse;
         private Button btnSaveSettings;
-        private FontAwesome.Sharp.IconPictureBox picLogo;
+        private System.Windows.Forms.PictureBox picLogo;
 
         private SplitContainer splitContainerUsers;
 

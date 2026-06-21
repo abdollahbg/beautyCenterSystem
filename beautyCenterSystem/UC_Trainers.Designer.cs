@@ -1,6 +1,6 @@
 namespace beautyCenterSystem
 {
-    partial class UC_Employees
+    partial class UC_Trainers
     {
         /// <summary> 
         /// Required designer variable.
@@ -29,28 +29,27 @@ namespace beautyCenterSystem
         private void InitializeComponent()
         {
             pnlHeader = new Panel();
-            btnAddEmployee = new FontAwesome.Sharp.IconButton();
+            btnAddTrainer = new FontAwesome.Sharp.IconButton();
             lblTitle = new MaterialSkin.Controls.MaterialLabel();
             pnlActions = new Panel();
             btnPayCommission = new MaterialSkin.Controls.MaterialButton();
-            btnPaySalary = new MaterialSkin.Controls.MaterialButton();
             btnPaymentHistory = new MaterialSkin.Controls.MaterialButton();
-            btnDeactivateEmployee = new MaterialSkin.Controls.MaterialButton();
+            btnDeactivateTrainer = new MaterialSkin.Controls.MaterialButton();
             pnlMain = new Panel();
-            dgvEmployees = new DataGridView();
+            dgvTrainers = new DataGridView();
             pnlSearch = new Panel();
             txtSearch = new MaterialSkin.Controls.MaterialTextBox2();
             pnlHeader.SuspendLayout();
             pnlActions.SuspendLayout();
             pnlMain.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvEmployees).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvTrainers).BeginInit();
             pnlSearch.SuspendLayout();
             SuspendLayout();
             // 
             // pnlHeader
             // 
             pnlHeader.BackColor = Color.FromArgb(55, 71, 79);
-            pnlHeader.Controls.Add(btnAddEmployee);
+            pnlHeader.Controls.Add(btnAddTrainer);
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Dock = DockStyle.Top;
             pnlHeader.Location = new Point(0, 0);
@@ -58,26 +57,26 @@ namespace beautyCenterSystem
             pnlHeader.Size = new Size(827, 66);
             pnlHeader.TabIndex = 0;
             // 
-            // btnAddEmployee
+            // btnAddTrainer
             // 
-            btnAddEmployee.BackColor = Color.White;
-            btnAddEmployee.Cursor = Cursors.Hand;
-            btnAddEmployee.FlatAppearance.BorderSize = 0;
-            btnAddEmployee.FlatStyle = FlatStyle.Flat;
-            btnAddEmployee.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAddEmployee.ForeColor = Color.Black;
-            btnAddEmployee.IconChar = FontAwesome.Sharp.IconChar.UserPlus;
-            btnAddEmployee.IconColor = Color.Black;
-            btnAddEmployee.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnAddEmployee.IconSize = 32;
-            btnAddEmployee.ImageAlign = ContentAlignment.MiddleLeft;
-            btnAddEmployee.Location = new Point(18, 11);
-            btnAddEmployee.Name = "btnAddEmployee";
-            btnAddEmployee.Size = new Size(158, 42);
-            btnAddEmployee.TabIndex = 1;
-            btnAddEmployee.Text = "إضافة موظفة";
-            btnAddEmployee.TextImageRelation = TextImageRelation.ImageBeforeText;
-            btnAddEmployee.UseVisualStyleBackColor = false;
+            btnAddTrainer.BackColor = Color.White;
+            btnAddTrainer.Cursor = Cursors.Hand;
+            btnAddTrainer.FlatAppearance.BorderSize = 0;
+            btnAddTrainer.FlatStyle = FlatStyle.Flat;
+            btnAddTrainer.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnAddTrainer.ForeColor = Color.Black;
+            btnAddTrainer.IconChar = FontAwesome.Sharp.IconChar.UserPlus;
+            btnAddTrainer.IconColor = Color.Black;
+            btnAddTrainer.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnAddTrainer.IconSize = 32;
+            btnAddTrainer.ImageAlign = ContentAlignment.MiddleLeft;
+            btnAddTrainer.Location = new Point(18, 11);
+            btnAddTrainer.Name = "btnAddTrainer";
+            btnAddTrainer.Size = new Size(158, 42);
+            btnAddTrainer.TabIndex = 1;
+            btnAddTrainer.Text = "إضافة موظفة";
+            btnAddTrainer.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnAddTrainer.UseVisualStyleBackColor = false;
             // 
             // lblTitle
             // 
@@ -97,9 +96,8 @@ namespace beautyCenterSystem
             // pnlActions
             // 
             pnlActions.Controls.Add(btnPayCommission);
-            pnlActions.Controls.Add(btnPaySalary);
             pnlActions.Controls.Add(btnPaymentHistory);
-            pnlActions.Controls.Add(btnDeactivateEmployee);
+            pnlActions.Controls.Add(btnDeactivateTrainer);
             pnlActions.Dock = DockStyle.Bottom;
             pnlActions.Location = new Point(0, 487);
             pnlActions.Name = "pnlActions";
@@ -132,60 +130,41 @@ namespace beautyCenterSystem
             btnPaymentHistory.Depth = 0;
             btnPaymentHistory.HighEmphasis = true;
             btnPaymentHistory.Icon = null;
-            btnPaymentHistory.Location = new Point(270, 19);
+            btnPaymentHistory.Location = new Point(140, 19);
             btnPaymentHistory.Margin = new Padding(4, 6, 4, 6);
             btnPaymentHistory.MouseState = MaterialSkin.MouseState.HOVER;
             btnPaymentHistory.Name = "btnPaymentHistory";
             btnPaymentHistory.NoAccentTextColor = Color.Empty;
             btnPaymentHistory.Size = new Size(110, 36);
-            btnPaymentHistory.TabIndex = 3;
+            btnPaymentHistory.TabIndex = 2;
             btnPaymentHistory.Text = "سجل الصرف";
             btnPaymentHistory.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             btnPaymentHistory.UseAccentColor = false;
             btnPaymentHistory.UseVisualStyleBackColor = true;
             // 
-            // btnPaySalary
+            // btnDeactivateTrainer
             // 
-            btnPaySalary.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            btnPaySalary.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
-            btnPaySalary.Depth = 0;
-            btnPaySalary.HighEmphasis = true;
-            btnPaySalary.Icon = null;
-            btnPaySalary.Location = new Point(140, 19);
-            btnPaySalary.Margin = new Padding(4, 6, 4, 6);
-            btnPaySalary.MouseState = MaterialSkin.MouseState.HOVER;
-            btnPaySalary.Name = "btnPaySalary";
-            btnPaySalary.NoAccentTextColor = Color.Empty;
-            btnPaySalary.Size = new Size(110, 36);
-            btnPaySalary.TabIndex = 2;
-            btnPaySalary.Text = "صرف المرتب";
-            btnPaySalary.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
-            btnPaySalary.UseAccentColor = false;
-            btnPaySalary.UseVisualStyleBackColor = true;
-            // 
-            // btnDeactivateEmployee
-            // 
-            btnDeactivateEmployee.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnDeactivateEmployee.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            btnDeactivateEmployee.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
-            btnDeactivateEmployee.Depth = 0;
-            btnDeactivateEmployee.HighEmphasis = true;
-            btnDeactivateEmployee.Icon = null;
-            btnDeactivateEmployee.Location = new Point(715, 19);
-            btnDeactivateEmployee.Margin = new Padding(4, 6, 4, 6);
-            btnDeactivateEmployee.MouseState = MaterialSkin.MouseState.HOVER;
-            btnDeactivateEmployee.Name = "btnDeactivateEmployee";
-            btnDeactivateEmployee.NoAccentTextColor = Color.Empty;
-            btnDeactivateEmployee.Size = new Size(94, 36);
-            btnDeactivateEmployee.TabIndex = 1;
-            btnDeactivateEmployee.Text = "إيقاف الموظفة";
-            btnDeactivateEmployee.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Outlined;
-            btnDeactivateEmployee.UseAccentColor = true;
-            btnDeactivateEmployee.UseVisualStyleBackColor = true;
+            btnDeactivateTrainer.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnDeactivateTrainer.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            btnDeactivateTrainer.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
+            btnDeactivateTrainer.Depth = 0;
+            btnDeactivateTrainer.HighEmphasis = true;
+            btnDeactivateTrainer.Icon = null;
+            btnDeactivateTrainer.Location = new Point(715, 19);
+            btnDeactivateTrainer.Margin = new Padding(4, 6, 4, 6);
+            btnDeactivateTrainer.MouseState = MaterialSkin.MouseState.HOVER;
+            btnDeactivateTrainer.Name = "btnDeactivateTrainer";
+            btnDeactivateTrainer.NoAccentTextColor = Color.Empty;
+            btnDeactivateTrainer.Size = new Size(94, 36);
+            btnDeactivateTrainer.TabIndex = 1;
+            btnDeactivateTrainer.Text = "إيقاف الموظفة";
+            btnDeactivateTrainer.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Outlined;
+            btnDeactivateTrainer.UseAccentColor = true;
+            btnDeactivateTrainer.UseVisualStyleBackColor = true;
             // 
             // pnlMain
             // 
-            pnlMain.Controls.Add(dgvEmployees);
+            pnlMain.Controls.Add(dgvTrainers);
             pnlMain.Dock = DockStyle.Fill;
             pnlMain.Location = new Point(0, 150);
             pnlMain.Name = "pnlMain";
@@ -193,22 +172,22 @@ namespace beautyCenterSystem
             pnlMain.Size = new Size(827, 337);
             pnlMain.TabIndex = 2;
             // 
-            // dgvEmployees
+            // dgvTrainers
             // 
-            dgvEmployees.AllowUserToAddRows = false;
-            dgvEmployees.AllowUserToDeleteRows = false;
-            dgvEmployees.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvEmployees.BackgroundColor = Color.White;
-            dgvEmployees.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvEmployees.Dock = DockStyle.Fill;
-            dgvEmployees.Location = new Point(18, 19);
-            dgvEmployees.MultiSelect = false;
-            dgvEmployees.Name = "dgvEmployees";
-            dgvEmployees.RowHeadersWidth = 51;
-            dgvEmployees.RowTemplate.Height = 40;
-            dgvEmployees.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvEmployees.Size = new Size(791, 299);
-            dgvEmployees.TabIndex = 0;
+            dgvTrainers.AllowUserToAddRows = false;
+            dgvTrainers.AllowUserToDeleteRows = false;
+            dgvTrainers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvTrainers.BackgroundColor = Color.White;
+            dgvTrainers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvTrainers.Dock = DockStyle.Fill;
+            dgvTrainers.Location = new Point(18, 19);
+            dgvTrainers.MultiSelect = false;
+            dgvTrainers.Name = "dgvTrainers";
+            dgvTrainers.RowHeadersWidth = 51;
+            dgvTrainers.RowTemplate.Height = 40;
+            dgvTrainers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvTrainers.Size = new Size(791, 299);
+            dgvTrainers.TabIndex = 0;
             // 
             // pnlSearch
             // 
@@ -252,7 +231,7 @@ namespace beautyCenterSystem
             txtSearch.TrailingIcon = null;
             txtSearch.UseSystemPasswordChar = false;
             // 
-            // UC_Employees
+            // UC_Trainers
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -261,7 +240,7 @@ namespace beautyCenterSystem
             Controls.Add(pnlSearch);
             Controls.Add(pnlActions);
             Controls.Add(pnlHeader);
-            Name = "UC_Employees";
+            Name = "UC_Trainers";
             RightToLeft = RightToLeft.Yes;
             Size = new Size(827, 562);
             pnlHeader.ResumeLayout(false);
@@ -269,7 +248,7 @@ namespace beautyCenterSystem
             pnlActions.ResumeLayout(false);
             pnlActions.PerformLayout();
             pnlMain.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dgvEmployees).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvTrainers).EndInit();
             pnlSearch.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -278,14 +257,13 @@ namespace beautyCenterSystem
 
         private System.Windows.Forms.Panel pnlHeader;
         private MaterialSkin.Controls.MaterialLabel lblTitle;
-        private FontAwesome.Sharp.IconButton btnAddEmployee;
+        private FontAwesome.Sharp.IconButton btnAddTrainer;
         private System.Windows.Forms.Panel pnlActions;
         private MaterialSkin.Controls.MaterialButton btnPayCommission;
-        private MaterialSkin.Controls.MaterialButton btnDeactivateEmployee;
-        private MaterialSkin.Controls.MaterialButton btnPaySalary;
+        private MaterialSkin.Controls.MaterialButton btnDeactivateTrainer;
         private MaterialSkin.Controls.MaterialButton btnPaymentHistory;
         private System.Windows.Forms.Panel pnlMain;
-        private System.Windows.Forms.DataGridView dgvEmployees;
+        private System.Windows.Forms.DataGridView dgvTrainers;
         private System.Windows.Forms.Panel pnlSearch;
         private MaterialSkin.Controls.MaterialTextBox2 txtSearch;
     }

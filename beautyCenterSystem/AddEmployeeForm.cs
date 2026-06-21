@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -28,7 +28,24 @@ namespace beautyCenterSystem
         {
             AppTheme.Apply(this); // تطبيق الثيم
             PnlHeader.BackColor = AppTheme.Primary;
+            cmbEmployeeType.SelectedIndex = 0; // افتراضيا نسبة
             await LoadRoomsData();
+        }
+
+        private void cmbEmployeeType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbEmployeeType.SelectedIndex == 1) // راتب ثابت
+            {
+                txtBaseSalary.Enabled = true;
+                txtCommissionRate.Enabled = false;
+                txtCommissionRate.Text = "0";
+            }
+            else // نسبة
+            {
+                txtBaseSalary.Enabled = false;
+                txtCommissionRate.Enabled = true;
+                txtBaseSalary.Text = "0";
+            }
         }
 
         private async Task LoadRoomsData()
@@ -65,10 +82,24 @@ namespace beautyCenterSystem
                 return;
             }
 
-            if (!decimal.TryParse(txtCommissionRate.Text, out decimal rate) || rate < 0 || rate > 100)
+            decimal rate = 0;
+            if (cmbEmployeeType.SelectedIndex == 0) // نسبة
             {
-                MessageBox.Show("يرجى إدخال نسبة مئوية صحيحة بين 0 و 100.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                if (!decimal.TryParse(txtCommissionRate.Text, out rate) || rate < 0 || rate > 100)
+                {
+                    MessageBox.Show("يرجى إدخال نسبة مئوية صحيحة بين 0 و 100.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+            
+            decimal salary = 0;
+            if (cmbEmployeeType.SelectedIndex == 1) // راتب
+            {
+                if (!decimal.TryParse(txtBaseSalary.Text, out salary) || salary < 0)
+                {
+                    MessageBox.Show("يرجى إدخال راتب صحيح.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
             }
 
             // 2. تجهيز كائن الموظفة
@@ -76,6 +107,8 @@ namespace beautyCenterSystem
             {
                 EmployeeName = txtEmployeeName.Text.Trim(),
                 Phone = txtPhone.Text.Trim(),
+                EmployeeType = cmbEmployeeType.SelectedIndex == 0 ? "Commission" : "Salary",
+                BaseSalary = salary,
                 CommissionRate = rate,
                 RoomID = cmbRooms.SelectedValue != null ? (int)cmbRooms.SelectedValue : (int?)null,
                 IsActive = true // افتراضياً تكون نشطة عند الإضافة

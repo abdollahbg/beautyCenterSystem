@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem.data.Repositories
+namespace beautyCenterSystem.data.Repositories
 {
     partial class CheckoutForm
     {
@@ -217,7 +217,6 @@
         private Label label1;
         private Label label2;
         private TextBox txtTotalSystem;
-        private TextBox textBox2;
         private Label label3;
         private Label label4;
         private ComboBox cmbPaymentMethod;

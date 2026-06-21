@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -62,7 +62,7 @@ namespace beautyCenterSystem
         {
             _loadedRooms = rooms; // تخزين الغرف
             _flpRooms.SuspendLayout();
-            _flpRooms.Controls.Clear();
+            while (_flpRooms.Controls.Count > 0) { var c = _flpRooms.Controls[0]; _flpRooms.Controls.Remove(c); c.Dispose(); }
 
             if (rooms != null)
             {

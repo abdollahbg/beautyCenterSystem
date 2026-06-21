@@ -19,12 +19,10 @@ namespace beautyCenterSystem
 
         private void InitializeComponent()
         {
-            cmbCustomers = new ComboBox();
             btnNewCustomer = new Button();
             cmbSubscriptionTypes = new ComboBox();
             dtpStartDate = new DateTimePicker();
             cmbPaymentMethod = new ComboBox();
-            // تم تغيير النوع إلى TextBox العادي
             txtPaidAmount = new TextBox();
             txtNotes = new TextBox();
             btnSave = new Button();
@@ -35,21 +33,11 @@ namespace beautyCenterSystem
             lblType = new Label();
             lblStartDate = new Label();
             lblPayment = new Label();
-            lblPaidAmount = new Label(); // تمت إضافته لتعويض الـ Hint
-            lblNotes = new Label();      // تمت إضافته لتعويض الـ Hint
-
+            lblPaidAmount = new Label();
+            lblNotes = new Label();
+            cmbCustomers = new MaterialSearchableCombo();
             pnlHeader.SuspendLayout();
             SuspendLayout();
-            // 
-            // cmbCustomers
-            // 
-            cmbCustomers.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbCustomers.FormattingEnabled = true;
-            cmbCustomers.Location = new Point(122, 64);
-            cmbCustomers.Margin = new Padding(3, 2, 3, 2);
-            cmbCustomers.Name = "cmbCustomers";
-            cmbCustomers.Size = new Size(193, 23);
-            cmbCustomers.TabIndex = 2;
             // 
             // btnNewCustomer
             // 
@@ -90,15 +78,6 @@ namespace beautyCenterSystem
             cmbPaymentMethod.Size = new Size(193, 23);
             cmbPaymentMethod.TabIndex = 9;
             // 
-            // lblPaidAmount
-            // 
-            lblPaidAmount.AutoSize = true;
-            lblPaidAmount.Location = new Point(332, 219);
-            lblPaidAmount.Name = "lblPaidAmount";
-            lblPaidAmount.Size = new Size(81, 15);
-            lblPaidAmount.TabIndex = 14;
-            lblPaidAmount.Text = "المبلغ المدفوع";
-            // 
             // txtPaidAmount
             // 
             txtPaidAmount.BorderStyle = BorderStyle.FixedSingle;
@@ -109,15 +88,6 @@ namespace beautyCenterSystem
             txtPaidAmount.Name = "txtPaidAmount";
             txtPaidAmount.Size = new Size(193, 29);
             txtPaidAmount.TabIndex = 10;
-            // 
-            // lblNotes
-            // 
-            lblNotes.AutoSize = true;
-            lblNotes.Location = new Point(332, 267);
-            lblNotes.Name = "lblNotes";
-            lblNotes.Size = new Size(54, 15);
-            lblNotes.TabIndex = 15;
-            lblNotes.Text = "ملاحظات";
             // 
             // txtNotes
             // 
@@ -208,11 +178,42 @@ namespace beautyCenterSystem
             lblPayment.TabIndex = 8;
             lblPayment.Text = "طريقة الدفع";
             // 
+            // lblPaidAmount
+            // 
+            lblPaidAmount.AutoSize = true;
+            lblPaidAmount.Location = new Point(332, 219);
+            lblPaidAmount.Name = "lblPaidAmount";
+            lblPaidAmount.Size = new Size(78, 15);
+            lblPaidAmount.TabIndex = 14;
+            lblPaidAmount.Text = "المبلغ المدفوع";
+            // 
+            // lblNotes
+            // 
+            lblNotes.AutoSize = true;
+            lblNotes.Location = new Point(332, 267);
+            lblNotes.Name = "lblNotes";
+            lblNotes.Size = new Size(52, 15);
+            lblNotes.TabIndex = 15;
+            lblNotes.Text = "ملاحظات";
+            // 
+            // cmbCustomers
+            // 
+            cmbCustomers.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            cmbCustomers.AutoCompleteSource = AutoCompleteSource.ListItems;
+            cmbCustomers.BackColor = Color.White;
+            cmbCustomers.FlatStyle = FlatStyle.Flat;
+            cmbCustomers.Font = new Font("Segoe UI", 11F);
+            cmbCustomers.FormattingEnabled = true;
+            cmbCustomers.Location = new Point(122, 61);
+            cmbCustomers.Name = "cmbCustomers";
+            cmbCustomers.Size = new Size(194, 28);
+            cmbCustomers.TabIndex = 16;
+            // 
             // AddSubscriptionForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(438, 368);
+            Controls.Add(cmbCustomers);
             Controls.Add(lblNotes);
             Controls.Add(lblPaidAmount);
             Controls.Add(btnCancel);
@@ -226,23 +227,21 @@ namespace beautyCenterSystem
             Controls.Add(cmbSubscriptionTypes);
             Controls.Add(lblType);
             Controls.Add(btnNewCustomer);
-            Controls.Add(cmbCustomers);
             Controls.Add(lblCustomer);
             Controls.Add(pnlHeader);
-            FormBorderStyle = FormBorderStyle.None;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Margin = new Padding(3, 2, 3, 2);
             Name = "AddSubscriptionForm";
             RightToLeft = RightToLeft.Yes;
             RightToLeftLayout = true;
-            StartPosition = FormStartPosition.CenterParent;
-            Text = "AddSubscriptionForm";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "إضافة اشتراك جديد";
             pnlHeader.ResumeLayout(false);
             pnlHeader.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
 
-        private System.Windows.Forms.ComboBox cmbCustomers;
         private System.Windows.Forms.Button btnNewCustomer;
         private System.Windows.Forms.ComboBox cmbSubscriptionTypes;
         private System.Windows.Forms.DateTimePicker dtpStartDate;
@@ -261,5 +260,6 @@ namespace beautyCenterSystem
         // تمت إضافة تسميات لتوضيح الحقول بدلاً من خاصية Hint المفقودة في TextBox
         private System.Windows.Forms.Label lblPaidAmount;
         private System.Windows.Forms.Label lblNotes;
+        private MaterialSearchableCombo cmbCustomers;
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -14,18 +14,18 @@ namespace beautyCenterSystem
     public partial class UC_ServiceSelector : UserControl
     {
         // الأحداث للتعامل مع الإضافات
-        public event EventHandler<int> OnServiceAdded;
-        public event EventHandler<int> OnMaterialAdded;
-        public event EventHandler OnBackClicked;
+        public event EventHandler<int>? OnServiceAdded;
+        public event EventHandler<int>? OnMaterialAdded;
+        public event EventHandler? OnBackClicked;
 
-        private Panel _pnlHeader;
-        private Label _lblRoomName;
-        private Button _btnBack;
-        private FlowLayoutPanel _flpServices;
+        private Panel _pnlHeader = null!;
+        private Label _lblRoomName = null!;
+        private Button _btnBack = null!;
+        private FlowLayoutPanel _flpServices = null!;
 
         // عنصر اختيار الموظفة
-        private ComboBox _cmbEmployees;
-        private Label _lblEmployeeHint;
+        private ComboBox _cmbEmployees = null!;
+        private Label _lblEmployeeHint = null!;
 
         private string _currentMode = "Service";
         private int _currentRoomId;
@@ -190,7 +190,7 @@ namespace beautyCenterSystem
             _currentMode = "Service";
             _currentRoomId = room.RoomID;
             _lblRoomName.Text = room.RoomName;
-            _flpServices.Controls.Clear();
+            while (_flpServices.Controls.Count > 0) { var c = _flpServices.Controls[0]; _flpServices.Controls.Remove(c); c.Dispose(); }
 
             // 1. إظهار اختيار الموظفة وفلترتها فوراً بناءً على الغرفة المختارة
             _lblEmployeeHint.Visible = _cmbEmployees.Visible = true;
@@ -212,7 +212,7 @@ namespace beautyCenterSystem
         {
             _currentMode = "Material";
             _lblRoomName.Text = roomName;
-            _flpServices.Controls.Clear();
+            while (_flpServices.Controls.Count > 0) { var c = _flpServices.Controls[0]; _flpServices.Controls.Remove(c); c.Dispose(); }
 
             // في وضع المواد (الكافيتيريا)، لا نحتاج لنسبة موظفة غرفة
             _lblEmployeeHint.Visible = _cmbEmployees.Visible = false;

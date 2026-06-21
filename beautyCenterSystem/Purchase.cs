@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,13 +14,13 @@ namespace beautyCenterSystem
         public decimal UnitPrice { get; set; }
         public decimal TotalAmount { get; set; } // سيتم جلبه من قاعدة البيانات كقيمة محسوبة
         public DateTime PurchaseDate { get; set; }
-        public string SupplierName { get; set; }
+        public string SupplierName { get; set; } = string.Empty;
         public int? PaidFromSafeID { get; set; }
         public int? IssuedBy { get; set; }
 
         // خصائص إضافية للعرض
-        public string MaterialName { get; set; }
-        public string SafeName { get; set; }
-        public string IssuedByName { get; set; }
+        public string MaterialName { get; set; } = string.Empty;
+        public string SafeName { get; set; } = string.Empty;
+        public string IssuedByName { get; set; } = string.Empty;
     }
 }

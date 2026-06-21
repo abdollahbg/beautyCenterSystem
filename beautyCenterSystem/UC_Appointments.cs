@@ -498,7 +498,7 @@ namespace beautyCenterSystem
 
             var selectedRow = dgvAppointments.SelectedRows[0];
             int appointmentId = Convert.ToInt32(selectedRow.Cells["AppointmentID"].Value);
-            string currentStatus = selectedRow.Cells["Status"].Value.ToString();
+            string currentStatus = selectedRow.Cells["Status"].Value?.ToString() ?? "";
 
             if (currentStatus != "Pending")
             {
@@ -529,8 +529,8 @@ namespace beautyCenterSystem
             {
                 var selectedRow = dgvAppointments.SelectedRows[0];
                 int appId = Convert.ToInt32(selectedRow.Cells["AppointmentID"].Value);
-                string customerName = selectedRow.Cells["CustomerName"].Value.ToString();
-                string currentStatus = selectedRow.Cells["Status"].Value.ToString();
+                string customerName = selectedRow.Cells["CustomerName"].Value?.ToString() ?? "";
+                string currentStatus = selectedRow.Cells["Status"].Value?.ToString() ?? "";
 
                 if (currentStatus == "Cancelled" || currentStatus == "Completed") return;
 
@@ -557,7 +557,7 @@ namespace beautyCenterSystem
             {
                 var selectedRow = dgvAppointments.SelectedRows[0];
                 int appId = Convert.ToInt32(selectedRow.Cells["AppointmentID"].Value);
-                string status = selectedRow.Cells["Status"].Value?.ToString();
+                string status = selectedRow.Cells["Status"].Value?.ToString() ?? "";
 
                 if (status == "Cancelled")
                 {
@@ -591,9 +591,9 @@ namespace beautyCenterSystem
             {
                 var selectedRow = dgvAppointments.SelectedRows[0];
                 int appId = Convert.ToInt32(selectedRow.Cells["AppointmentID"].Value);
-                string customerName = selectedRow.Cells["CustomerName"].Value.ToString();
+                string customerName = selectedRow.Cells["CustomerName"].Value?.ToString() ?? "";
                 decimal totalAmount = Convert.ToDecimal(selectedRow.Cells["TotalPrice"].Value);
-                string currentStatus = selectedRow.Cells["Status"].Value.ToString();
+                string currentStatus = selectedRow.Cells["Status"].Value?.ToString() ?? "";
 
                 if (currentStatus == "Cancelled")
                 {
@@ -696,7 +696,7 @@ namespace beautyCenterSystem
                     InstagramHandle = settings.Instagram,
                     WhatsAppHandle = settings.WhatsApp,
                     InvoiceNumber = appId,
-                    CustomerName = row.Cells["CustomerName"].Value.ToString(),
+                    CustomerName = row.Cells["CustomerName"].Value?.ToString() ?? "",
                     AppointmentDateTime = dtpFilterDate.Value.ToString("yyyy-MM-dd hh:mm tt"),
                     TotalAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value),
                     NetAmount = Convert.ToDecimal(row.Cells["TotalPrice"].Value),

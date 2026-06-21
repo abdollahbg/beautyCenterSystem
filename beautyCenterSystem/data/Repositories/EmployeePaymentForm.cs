@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -61,6 +61,9 @@ namespace beautyCenterSystem.data.Repositories
                 cmbEmployee.DisplayMember = "EmployeeName";
                 cmbEmployee.ValueMember = "EmployeeID";
                 cmbEmployee.SelectedIndex = -1;
+                
+                // Store all employees to access their type easily
+                cmbEmployee.Tag = employees.ToList();
 
                 // تحميل قائمة الخزنات
                 var safes = await _financialRepo.GetAllSafesAsync();
@@ -88,14 +91,31 @@ namespace beautyCenterSystem.data.Repositories
         {
             try
             {
-                decimal totalEarned = await _employeeRepo.GetTotalEarnedAsync(empId);
-                decimal totalPaid = await _employeeRepo.GetTotalPaidAsync(empId);
-                decimal remaining = totalEarned - totalPaid;
+                var allEmps = cmbEmployee.Tag as List<beautyCenterSystem.Employee>;
+                var selectedEmp = allEmps?.FirstOrDefault(e => e.EmployeeID == empId);
 
-                // تحديث حقول العرض في الواجهة
-                txtTotalEarned.Text = totalEarned.ToString("N2");
-                txtTotalPaid.Text = totalPaid.ToString("N2");
-                txtRemainingBalance.Text = remaining.ToString("N2");
+                if (selectedEmp != null && selectedEmp.EmployeeType == "Salary")
+                {
+                    // Salary logic
+                    decimal baseSalary = selectedEmp.BaseSalary;
+                    decimal totalPaid = await _employeeRepo.GetTotalPaidAsync(empId); // this gets total paid forever, maybe we just show it
+                    
+                    txtTotalEarned.Text = baseSalary.ToString("N2");
+                    txtTotalPaid.Text = totalPaid.ToString("N2");
+                    txtRemainingBalance.Text = "N/A (راتب)";
+                }
+                else
+                {
+                    // Commission logic
+                    decimal totalEarned = await _employeeRepo.GetTotalEarnedAsync(empId);
+                    decimal totalPaid = await _employeeRepo.GetTotalPaidAsync(empId);
+                    decimal remaining = totalEarned - totalPaid;
+
+                    // تحديث حقول العرض في الواجهة
+                    txtTotalEarned.Text = totalEarned.ToString("N2");
+                    txtTotalPaid.Text = totalPaid.ToString("N2");
+                    txtRemainingBalance.Text = remaining.ToString("N2");
+                }
             }
             catch (Exception ex)
             {
@@ -119,13 +139,20 @@ namespace beautyCenterSystem.data.Repositories
                 return;
             }
 
-            // التحقق من أن المبلغ لا يتجاوز المستحق
-            if (decimal.TryParse(txtRemainingBalance.Text, out decimal remaining))
+            // التحقق من أن المبلغ لا يتجاوز المستحق لموظفات النسبة فقط
+            var allEmps = cmbEmployee.Tag as List<beautyCenterSystem.Employee>;
+            int eId = (int)cmbEmployee.SelectedValue;
+            var selectedEmp = allEmps?.FirstOrDefault(e => e.EmployeeID == eId);
+
+            if (selectedEmp == null || selectedEmp.EmployeeType == "Commission")
             {
-                if (amount > remaining)
+                if (decimal.TryParse(txtRemainingBalance.Text, out decimal remaining))
                 {
-                    MessageBox.Show("المبلغ المدخل يتجاوز رصيد الموظفة المتبقي!", "خطأ في المبلغ");
-                    return;
+                    if (amount > remaining)
+                    {
+                        MessageBox.Show("المبلغ المدخل يتجاوز رصيد الموظفة المتبقي!", "خطأ في المبلغ");
+                        return;
+                    }
                 }
             }
 

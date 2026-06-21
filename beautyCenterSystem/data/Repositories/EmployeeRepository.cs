@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +26,9 @@ namespace BeautyCenterSystem.Data.Repositories
             E.Phone, 
             E.CommissionRate, 
             E.RoomID, 
-            E.IsActive, -- هذا هو العمود الناقص الذي يسبب المشكلة
+            E.IsActive,
+            E.EmployeeType,
+            E.BaseSalary,
             R.RoomName 
         FROM Employees E
         LEFT JOIN Rooms R ON E.RoomID = R.RoomID
@@ -42,8 +44,8 @@ namespace BeautyCenterSystem.Data.Repositories
         {
             using var db = _dbFactory.CreateConnection();
             string sql = @"
-                INSERT INTO Employees (EmployeeName, Phone, CommissionRate, RoomID, IsActive)
-                VALUES (@EmployeeName, @Phone, @CommissionRate, @RoomID, 1);
+                INSERT INTO Employees (EmployeeName, Phone, CommissionRate, RoomID, IsActive, EmployeeType, BaseSalary)
+                VALUES (@EmployeeName, @Phone, @CommissionRate, @RoomID, 1, @EmployeeType, @BaseSalary);
                 SELECT CAST(SCOPE_IDENTITY() as int);";
 
             return await db.ExecuteScalarAsync<int>(sql, employee);
@@ -58,7 +60,9 @@ namespace BeautyCenterSystem.Data.Repositories
                 SET EmployeeName = @EmployeeName, 
                     Phone = @Phone, 
                     CommissionRate = @CommissionRate, 
-                    RoomID = @RoomID
+                    RoomID = @RoomID,
+                    EmployeeType = @EmployeeType,
+                    BaseSalary = @BaseSalary
                 WHERE EmployeeID = @EmployeeID";
 
             int rows = await db.ExecuteAsync(sql, employee);
@@ -132,8 +136,7 @@ namespace BeautyCenterSystem.Data.Repositories
             catch (Exception ex)
             {
                 trans.Rollback();
-                // يمكنك تسجيل الخطأ هنا (Logging) إذا أردت
-                throw ex;
+                throw;
             }
         }
     }

@@ -21,19 +21,19 @@ namespace beautyCenterSystem
         private void InitializeComponent()
         {
             pnlHeader = new Panel();
-            txtBoxsearch = new MaterialTextBox2();
-            btnOpenGate = new Button();
-            lblTitle = new Label();
-            lblFrom = new Label();
-            dtpFrom = new DateTimePicker();
-            lblTo = new Label();
-            dtpTo = new DateTimePicker();
             btnFilter = new Button();
+            dtpTo = new DateTimePicker();
+            lblTo = new Label();
+            dtpFrom = new DateTimePicker();
+            lblFrom = new Label();
+            txtBoxsearch = new MaterialTextBox2();
+            lblTitle = new Label();
             tabControlGym = new TabControl();
             tabActive = new TabPage();
             dgvActive = new DataGridView();
             btnNewSubscription = new Button();
             btnCheckIn = new Button();
+            btnPrintReceipt = new Button();
             tabNearExpiry = new TabPage();
             dgvNearExpiry = new DataGridView();
             btnRenew = new Button();
@@ -44,7 +44,6 @@ namespace beautyCenterSystem
             btnAddNewPackage = new Button();
             btnEditPackage = new Button();
             btnDeletePackage = new Button();
-
             pnlHeader.SuspendLayout();
             tabControlGym.SuspendLayout();
             tabActive.SuspendLayout();
@@ -65,13 +64,61 @@ namespace beautyCenterSystem
             pnlHeader.Controls.Add(dtpFrom);
             pnlHeader.Controls.Add(lblFrom);
             pnlHeader.Controls.Add(txtBoxsearch);
-            pnlHeader.Controls.Add(btnOpenGate);
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Dock = DockStyle.Top;
             pnlHeader.Location = new Point(0, 0);
             pnlHeader.Name = "pnlHeader";
             pnlHeader.Size = new Size(800, 120);
             pnlHeader.TabIndex = 1;
+            // 
+            // btnFilter
+            // 
+            btnFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnFilter.Location = new Point(70, 65);
+            btnFilter.Name = "btnFilter";
+            btnFilter.Size = new Size(100, 35);
+            btnFilter.TabIndex = 7;
+            btnFilter.Text = "تحديث";
+            // 
+            // dtpTo
+            // 
+            dtpTo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            dtpTo.Format = DateTimePickerFormat.Short;
+            dtpTo.Location = new Point(190, 70);
+            dtpTo.Name = "dtpTo";
+            dtpTo.Size = new Size(140, 23);
+            dtpTo.TabIndex = 6;
+            dtpTo.Value = new DateTime(2026, 6, 21, 2, 39, 38, 808);
+            // 
+            // lblTo
+            // 
+            lblTo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblTo.AutoSize = true;
+            lblTo.Location = new Point(340, 75);
+            lblTo.Name = "lblTo";
+            lblTo.Size = new Size(54, 15);
+            lblTo.TabIndex = 5;
+            lblTo.Text = "إلى تاريخ:";
+            // 
+            // dtpFrom
+            // 
+            dtpFrom.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            dtpFrom.Format = DateTimePickerFormat.Short;
+            dtpFrom.Location = new Point(410, 70);
+            dtpFrom.Name = "dtpFrom";
+            dtpFrom.Size = new Size(140, 23);
+            dtpFrom.TabIndex = 4;
+            dtpFrom.Value = new DateTime(2026, 3, 21, 2, 39, 38, 812);
+            // 
+            // lblFrom
+            // 
+            lblFrom.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblFrom.AutoSize = true;
+            lblFrom.Location = new Point(560, 75);
+            lblFrom.Name = "lblFrom";
+            lblFrom.Size = new Size(52, 15);
+            lblFrom.TabIndex = 3;
+            lblFrom.Text = "من تاريخ:";
             // 
             // txtBoxsearch
             // 
@@ -105,15 +152,6 @@ namespace beautyCenterSystem
             txtBoxsearch.TrailingIcon = null;
             txtBoxsearch.UseSystemPasswordChar = false;
             // 
-            // btnOpenGate
-            // 
-            btnOpenGate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnOpenGate.Location = new Point(1100, 15);
-            btnOpenGate.Name = "btnOpenGate";
-            btnOpenGate.Size = new Size(180, 40);
-            btnOpenGate.TabIndex = 0;
-            btnOpenGate.Text = "نظام بوابة الدخول";
-            // 
             // lblTitle
             // 
             lblTitle.Anchor = AnchorStyles.Top | AnchorStyles.Right;
@@ -124,55 +162,6 @@ namespace beautyCenterSystem
             lblTitle.TabIndex = 1;
             lblTitle.Tag = "Header";
             lblTitle.Text = "إدارة الجيم والاشتراكات";
-            // 
-            // lblFrom
-            // 
-            lblFrom.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            lblFrom.AutoSize = true;
-            lblFrom.Location = new Point(560, 75);
-            lblFrom.Name = "lblFrom";
-            lblFrom.Size = new Size(54, 15);
-            lblFrom.TabIndex = 3;
-            lblFrom.Text = "من تاريخ:";
-            // 
-            // dtpFrom
-            // 
-            dtpFrom.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            dtpFrom.Format = DateTimePickerFormat.Short;
-            dtpFrom.Location = new Point(410, 70);
-            dtpFrom.Name = "dtpFrom";
-            dtpFrom.Size = new Size(140, 23);
-            dtpFrom.TabIndex = 4;
-            dtpFrom.Value = System.DateTime.Now.AddMonths(-3);
-            // 
-            // lblTo
-            // 
-            lblTo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            lblTo.AutoSize = true;
-            lblTo.Location = new Point(340, 75);
-            lblTo.Name = "lblTo";
-            lblTo.Size = new Size(57, 15);
-            lblTo.TabIndex = 5;
-            lblTo.Text = "إلى تاريخ:";
-            // 
-            // dtpTo
-            // 
-            dtpTo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            dtpTo.Format = DateTimePickerFormat.Short;
-            dtpTo.Location = new Point(190, 70);
-            dtpTo.Name = "dtpTo";
-            dtpTo.Size = new Size(140, 23);
-            dtpTo.TabIndex = 6;
-            dtpTo.Value = System.DateTime.Now;
-            // 
-            // btnFilter
-            // 
-            btnFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnFilter.Location = new Point(70, 65);
-            btnFilter.Name = "btnFilter";
-            btnFilter.Size = new Size(100, 35);
-            btnFilter.TabIndex = 7;
-            btnFilter.Text = "تصفية";
             // 
             // tabControlGym
             // 
@@ -194,6 +183,7 @@ namespace beautyCenterSystem
             tabActive.Controls.Add(dgvActive);
             tabActive.Controls.Add(btnNewSubscription);
             tabActive.Controls.Add(btnCheckIn);
+            tabActive.Controls.Add(btnPrintReceipt);
             tabActive.Location = new Point(4, 24);
             tabActive.Name = "tabActive";
             tabActive.Padding = new Padding(10);
@@ -224,7 +214,17 @@ namespace beautyCenterSystem
             btnCheckIn.Name = "btnCheckIn";
             btnCheckIn.Size = new Size(150, 40);
             btnCheckIn.TabIndex = 2;
-            btnCheckIn.Text = "تسجيل حضور (حصة)";
+            btnCheckIn.Text = "تسجيل حصة";
+            btnCheckIn.UseVisualStyleBackColor = true;
+            // 
+            // btnPrintReceipt
+            // 
+            btnPrintReceipt.Location = new Point(350, 400);
+            btnPrintReceipt.Name = "btnPrintReceipt";
+            btnPrintReceipt.Size = new Size(150, 40);
+            btnPrintReceipt.TabIndex = 3;
+            btnPrintReceipt.Text = "🖨️ طباعة وصل";
+            btnPrintReceipt.UseVisualStyleBackColor = true;
             // 
             // tabNearExpiry
             // 
@@ -343,7 +343,6 @@ namespace beautyCenterSystem
 
         private Panel pnlHeader;
         private Label lblTitle;
-        private Button btnOpenGate;
 
         private Label lblFrom;
         private DateTimePicker dtpFrom;
@@ -360,6 +359,7 @@ namespace beautyCenterSystem
         private DataGridView dgvActive;
         private Button btnNewSubscription;
         private Button btnCheckIn;
+        private Button btnPrintReceipt;
 
         private DataGridView dgvNearExpiry;
         private Button btnRenew;

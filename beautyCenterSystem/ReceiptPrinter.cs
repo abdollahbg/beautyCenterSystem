@@ -11,8 +11,8 @@ namespace beautyCenterSystem
 {
     public class InvoiceItem
     {
-        public string ServiceName { get; set; }
-        public string RoomName { get; set; }  // "نوع الخدمة"
+        public string ServiceName { get; set; } = string.Empty;
+        public string RoomName { get; set; } = string.Empty;  // "نوع الخدمة"
         public int Quantity { get; set; } = 1; // "العدد" - افتراضياً 1
         public decimal Price { get; set; }     // سعر الوحدة
         public decimal Total => Quantity * Price; // الإجمالي للعنصر الواحد
@@ -23,12 +23,12 @@ namespace beautyCenterSystem
         // ================= 1. الإعدادات والبيانات =================
         public string CenterName { get; set; } = "مركز التجميل";
         public string Phone { get; set; } = "";
-        public Image Logo { get; set; } = null;
+        public Image? Logo { get; set; } = null;
         public string Policy { get; set; } = "الرجاء مراجعة الفاتورة قبل المغادرة.\nالمبالغ المدفوعة غير قابلة للاسترداد.";
 
-        public string FacebookHandle { get; set; }
-        public string InstagramHandle { get; set; }
-        public string WhatsAppHandle { get; set; }
+        public string FacebookHandle { get; set; } = string.Empty;
+        public string InstagramHandle { get; set; } = string.Empty;
+        public string WhatsAppHandle { get; set; } = string.Empty;
 
         public void SetSettings(CenterSettings settings)
         {
@@ -43,13 +43,13 @@ namespace beautyCenterSystem
         }
 
         public int InvoiceNumber { get; set; }
-        public string CustomerName { get; set; }
-        public string AppointmentDateTime { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
+        public string AppointmentDateTime { get; set; } = string.Empty;
         public List<InvoiceItem> Items { get; set; } = new List<InvoiceItem>();
         public decimal TotalAmount { get; set; } // إجمالي الفاتورة قبل الخصم
         public decimal Discount { get; set; }
         public decimal NetAmount { get; set; }
-        public string CashierName { get; set; }
+        public string CashierName { get; set; } = string.Empty;
 
         // ================= 2. وظيفة الطباعة =================
         public void PrintReceipt(bool showPreview = false)
@@ -71,9 +71,11 @@ namespace beautyCenterSystem
         }
 
         // ================= 3. محرك الرسم المحدث (4 أعمدة) =================
-        private void Pd_PrintPage(object sender, PrintPageEventArgs e)
+        private void Pd_PrintPage(object? sender, PrintPageEventArgs e)
         {
-            Graphics g = e.Graphics;
+            Graphics? g = e.Graphics;
+            if (g == null) return;
+            
             int y = 10;
             int width = 270;
 

@@ -1,6 +1,6 @@
 namespace beautyCenterSystem
 {
-    partial class AddEmployeeForm
+    partial class AddTrainerForm
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -20,12 +20,12 @@ namespace beautyCenterSystem
             PnlHeader = new Panel();
             label1 = new Label();
             label2 = new Label();
-            txtEmployeeName = new MaterialSkin.Controls.MaterialTextBox2();
+            txtTrainerName = new MaterialSkin.Controls.MaterialTextBox2();
             label4 = new Label();
             txtPhone = new MaterialSkin.Controls.MaterialTextBox2();
             
             labelType = new Label();
-            cmbEmployeeType = new System.Windows.Forms.ComboBox();
+            cmbTrainerType = new System.Windows.Forms.ComboBox();
 
             labelSalary = new Label();
             txtBaseSalary = new MaterialSkin.Controls.MaterialTextBox2();
@@ -68,20 +68,20 @@ namespace beautyCenterSystem
             label2.TabIndex = 1;
             label2.Text = "اسم الموظفة";
             // 
-            // txtEmployeeName
+            // txtTrainerName
             // 
-            txtEmployeeName.AnimateReadOnly = false;
-            txtEmployeeName.BackgroundImageLayout = ImageLayout.None;
-            txtEmployeeName.Depth = 0;
-            txtEmployeeName.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            txtEmployeeName.Location = new Point(51, 89);
-            txtEmployeeName.MaxLength = 100;
-            txtEmployeeName.MouseState = MaterialSkin.MouseState.OUT;
-            txtEmployeeName.Name = "txtEmployeeName";
-            txtEmployeeName.RightToLeft = RightToLeft.Yes;
-            txtEmployeeName.Size = new Size(250, 48);
-            txtEmployeeName.TabIndex = 1;
-            txtEmployeeName.TextAlign = HorizontalAlignment.Right;
+            txtTrainerName.AnimateReadOnly = false;
+            txtTrainerName.BackgroundImageLayout = ImageLayout.None;
+            txtTrainerName.Depth = 0;
+            txtTrainerName.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
+            txtTrainerName.Location = new Point(51, 89);
+            txtTrainerName.MaxLength = 100;
+            txtTrainerName.MouseState = MaterialSkin.MouseState.OUT;
+            txtTrainerName.Name = "txtTrainerName";
+            txtTrainerName.RightToLeft = RightToLeft.Yes;
+            txtTrainerName.Size = new Size(250, 48);
+            txtTrainerName.TabIndex = 1;
+            txtTrainerName.TextAlign = HorizontalAlignment.Right;
             // 
             // label4
             // 
@@ -117,19 +117,19 @@ namespace beautyCenterSystem
             labelType.TabIndex = 3;
             labelType.Text = "نظام العمل";
             // 
-            // cmbEmployeeType
+            // cmbTrainerType
             // 
-            cmbEmployeeType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbEmployeeType.FlatStyle = FlatStyle.Flat;
-            cmbEmployeeType.Font = new Font("Segoe UI", 11F);
-            cmbEmployeeType.FormattingEnabled = true;
-            cmbEmployeeType.Items.AddRange(new object[] { "نسبة", "راتب ثابت" });
-            cmbEmployeeType.Location = new Point(51, 230);
-            cmbEmployeeType.Name = "cmbEmployeeType";
-            cmbEmployeeType.RightToLeft = RightToLeft.Yes;
-            cmbEmployeeType.Size = new Size(250, 28);
-            cmbEmployeeType.TabIndex = 3;
-            cmbEmployeeType.SelectedIndexChanged += cmbEmployeeType_SelectedIndexChanged;
+            cmbTrainerType.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbTrainerType.FlatStyle = FlatStyle.Flat;
+            cmbTrainerType.Font = new Font("Segoe UI", 11F);
+            cmbTrainerType.FormattingEnabled = true;
+            cmbTrainerType.Items.AddRange(new object[] { "نسبة", "راتب ثابت" });
+            cmbTrainerType.Location = new Point(51, 230);
+            cmbTrainerType.Name = "cmbTrainerType";
+            cmbTrainerType.RightToLeft = RightToLeft.Yes;
+            cmbTrainerType.Size = new Size(250, 28);
+            cmbTrainerType.TabIndex = 3;
+            
             // 
             // labelSalary
             // 
@@ -223,7 +223,7 @@ namespace beautyCenterSystem
             BtnCancel.UseVisualStyleBackColor = true;
             BtnCancel.Click += BtnCancel_Click;
             // 
-            // AddEmployeeForm
+            // AddTrainerForm
             // 
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(434, 580);
@@ -235,20 +235,20 @@ namespace beautyCenterSystem
             Controls.Add(label5);
             Controls.Add(txtBaseSalary);
             Controls.Add(labelSalary);
-            Controls.Add(cmbEmployeeType);
+            Controls.Add(cmbTrainerType);
             Controls.Add(labelType);
             Controls.Add(txtPhone);
             Controls.Add(label4);
-            Controls.Add(txtEmployeeName);
+            Controls.Add(txtTrainerName);
             Controls.Add(label2);
             Controls.Add(PnlHeader);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
-            Name = "AddEmployeeForm";
+            Name = "AddTrainerForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "بيانات الموظفة";
-            Load += AddEmployeeForm_Load;
+            Load += AddTrainerForm_Load;
             PnlHeader.ResumeLayout(false);
             PnlHeader.PerformLayout();
             ResumeLayout(false);
@@ -260,11 +260,11 @@ namespace beautyCenterSystem
         private Panel PnlHeader;
         private Label label1;
         private Label label2;
-        private MaterialSkin.Controls.MaterialTextBox2 txtEmployeeName;
+        private MaterialSkin.Controls.MaterialTextBox2 txtTrainerName;
         private Label label4;
         private MaterialSkin.Controls.MaterialTextBox2 txtPhone;
         private Label labelType;
-        private System.Windows.Forms.ComboBox cmbEmployeeType;
+        private System.Windows.Forms.ComboBox cmbTrainerType;
         private Label labelSalary;
         private MaterialSkin.Controls.MaterialTextBox2 txtBaseSalary;
         private Label label5;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -64,7 +64,7 @@ namespace beautyCenterSystem
         private void SetupNewUI()
         {
             _cartSummary = new UC_CartSummary { Dock = DockStyle.Fill };
-            pnlSidebar.Controls.Clear();
+            while (pnlSidebar.Controls.Count > 0) { var c = pnlSidebar.Controls[0]; pnlSidebar.Controls.Remove(c); c.Dispose(); }
             pnlSidebar.Controls.Add(_cartSummary);
 
             _cartSummary.OnAddCustomerClicked += btnAddCustomer_Click;

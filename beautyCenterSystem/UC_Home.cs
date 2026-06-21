@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,7 +31,8 @@ namespace beautyCenterSystem
 
             // تايمر لتحديث الواجهة (الوقت المتبقي والألوان) كل دقيقة دون إعادة الاستعلام من القاعدة
             System.Windows.Forms.Timer timerUI = new System.Windows.Forms.Timer { Interval = 60000 };
-            timerUI.Tick += (s, e) => UpdateUIStatusOnly();
+            timerUI.Tick += (s, e) => { if (!this.IsDisposed && this.IsHandleCreated) UpdateUIStatusOnly(); };
+            this.Disposed += delegate { timerUI.Stop(); timerUI.Dispose(); };
             timerUI.Start();
         }
 
@@ -92,7 +93,7 @@ namespace beautyCenterSystem
 
         private void UpdateRoomCards(IEnumerable<dynamic> roomsData)
         {
-            flpRooms.Controls.Clear();
+            while (flpRooms.Controls.Count > 0) { var c = flpRooms.Controls[0]; flpRooms.Controls.Remove(c); c.Dispose(); }
             foreach (var item in roomsData)
             {
                 var card = CreateEnhancedRoomCard(item);

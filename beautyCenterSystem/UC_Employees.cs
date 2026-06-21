@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,7 +18,12 @@ namespace beautyCenterSystem
     {
         private readonly EmployeeRepository _employeeRepo;
         // قائمة نحتفظ بها محلياً لعمليات البحث السريع بدون الرجوع لقاعدة البيانات كل مرة
-        private List<EmployeeViewModel> _allEmployees;
+        private List<EmployeeViewModel> _allCommissionEmployees = new List<EmployeeViewModel>();
+        private List<EmployeeViewModel> _allSalaryEmployees = new List<EmployeeViewModel>();
+        private DataGridView dgvSalaryEmployees = new DataGridView();
+        private TabControl tcEmployees = new TabControl();
+        private TabPage tabCommission = new TabPage("موظفات النسبة");
+        private TabPage tabSalary = new TabPage("موظفات الراتب الثابت");
 
         public UC_Employees()
         {
@@ -34,6 +39,9 @@ namespace beautyCenterSystem
             this.btnAddEmployee.Click += BtnAddEmployee_Click;
             this.btnDeactivateEmployee.Click += BtnDeactivateEmployee_Click;
             this.btnPayCommission.Click += BtnPayCommission_Click;
+            this.btnPaySalary.Click += BtnPaySalary_Click;
+            this.btnPaymentHistory.Click += BtnPaymentHistory_Click;
+            this.tcEmployees.SelectedIndexChanged += TcEmployees_SelectedIndexChanged;
         }
 
         protected override async void OnLoad(EventArgs e)
@@ -44,9 +52,34 @@ namespace beautyCenterSystem
             {
                 AppTheme.Apply(this); // تطبيق ألوان الثيم
 
-                // التأكد من أن الأعمدة والبيانات يتم تحميلها بالتتابع
+                // Setup UI structure
+                tcEmployees.Dock = DockStyle.Fill;
+                tcEmployees.RightToLeftLayout = true;
+                tcEmployees.RightToLeft = RightToLeft.Yes;
+                tcEmployees.Font = new Font("Segoe UI", 12F);
+                
+                dgvEmployees.Dock = DockStyle.Fill;
+                tabCommission.Controls.Add(dgvEmployees);
+
+                dgvSalaryEmployees.Dock = DockStyle.Fill;
+                dgvSalaryEmployees.BackgroundColor = Color.White;
+                dgvSalaryEmployees.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                dgvSalaryEmployees.AllowUserToAddRows = false;
+                dgvSalaryEmployees.RightToLeft = RightToLeft.Yes;
+                dgvSalaryEmployees.CellValidating += DgvEmployees_CellValidating;
+                dgvSalaryEmployees.CellEndEdit += DgvEmployees_CellEndEdit;
+                tabSalary.Controls.Add(dgvSalaryEmployees);
+
+                tcEmployees.TabPages.Add(tabCommission);
+                tcEmployees.TabPages.Add(tabSalary);
+                
+                // Add tab control to pnlMain (will cover existing dgvEmployees location)
+                pnlMain.Controls.Clear();
+                pnlMain.Controls.Add(tcEmployees);
+
                 await SetupGridColumns();
                 await LoadEmployeesData();
+                TcEmployees_SelectedIndexChanged(null, EventArgs.Empty); // set initial button visibility
             }
             catch (Exception ex)
             {
@@ -111,6 +144,14 @@ namespace beautyCenterSystem
                 Width = 150
             };
             dgvEmployees.Columns.Add(roomColumn);
+
+            // --- Setup dgvSalaryEmployees ---
+            dgvSalaryEmployees.AutoGenerateColumns = false;
+            dgvSalaryEmployees.Columns.Clear();
+            dgvSalaryEmployees.Columns.Add(new DataGridViewTextBoxColumn { Name = "EmployeeID", DataPropertyName = "EmployeeID", Visible = false });
+            dgvSalaryEmployees.Columns.Add(new DataGridViewTextBoxColumn { Name = "EmployeeName", HeaderText = "اسم الموظفة", DataPropertyName = "EmployeeName", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            dgvSalaryEmployees.Columns.Add(new DataGridViewTextBoxColumn { Name = "Phone", HeaderText = "رقم الهاتف", DataPropertyName = "Phone", Width = 150 });
+            dgvSalaryEmployees.Columns.Add(new DataGridViewTextBoxColumn { Name = "BaseSalary", HeaderText = "الراتب الأساسي", DataPropertyName = "BaseSalary", DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" }, Width = 150 });
         }
 
         private async Task LoadEmployeesData()
@@ -119,16 +160,22 @@ namespace beautyCenterSystem
             {
                 var data = await _employeeRepo.GetAllEmployeesAsync();
 
-                _allEmployees = data.Select(d => new EmployeeViewModel
+                var allViewModels = data.Select(d => new EmployeeViewModel
                 {
                     EmployeeID = (int)d.EmployeeID,
                     EmployeeName = d.EmployeeName != null ? d.EmployeeName.ToString() : "",
                     Phone = d.Phone != null ? d.Phone.ToString() : "",
-                    CommissionRate = d.CommissionRate != null ? (decimal)d.CommissionRate : 0,
+                    CommissionRate = d.CommissionRate,
+                    EmployeeType = d.EmployeeType,
+                    BaseSalary = d.BaseSalary,
                     RoomID = d.RoomID != null ? (int)d.RoomID : (int?)null
                 }).ToList();
 
-                dgvEmployees.DataSource = _allEmployees;
+                _allCommissionEmployees = allViewModels.Where(e => e.EmployeeType == "Commission").ToList();
+                _allSalaryEmployees = allViewModels.Where(e => e.EmployeeType == "Salary").ToList();
+
+                dgvEmployees.DataSource = _allCommissionEmployees;
+                dgvSalaryEmployees.DataSource = _allSalaryEmployees;
             }
             catch (Exception ex)
             {
@@ -138,26 +185,33 @@ namespace beautyCenterSystem
 
         // --- أحداث الواجهة ---
 
-        private void TxtSearch_TextChanged(object sender, EventArgs e)
+        private void TxtSearch_TextChanged(object? sender, EventArgs e)
         {
             string query = txtSearch.Text.Trim().ToLower();
 
             if (string.IsNullOrEmpty(query))
             {
-                dgvEmployees.DataSource = _allEmployees;
+                dgvEmployees.DataSource = _allCommissionEmployees;
+                dgvSalaryEmployees.DataSource = _allSalaryEmployees;
             }
             else
             {
-                var filteredData = _allEmployees.Where(emp =>
+                var filteredComm = _allCommissionEmployees.Where(emp =>
                     (emp.EmployeeName != null && emp.EmployeeName.ToLower().Contains(query)) ||
                     (emp.Phone != null && emp.Phone.Contains(query))
                 ).ToList();
 
-                dgvEmployees.DataSource = filteredData;
+                var filteredSal = _allSalaryEmployees.Where(emp =>
+                    (emp.EmployeeName != null && emp.EmployeeName.ToLower().Contains(query)) ||
+                    (emp.Phone != null && emp.Phone.Contains(query))
+                ).ToList();
+
+                dgvEmployees.DataSource = filteredComm;
+                dgvSalaryEmployees.DataSource = filteredSal;
             }
         }
 
-        private async void BtnAddEmployee_Click(object sender, EventArgs e)
+        private async void BtnAddEmployee_Click(object? sender, EventArgs e)
         {
             using (var frmAdd = new AddEmployeeForm())
             {
@@ -173,17 +227,19 @@ namespace beautyCenterSystem
             }
         }
 
-        private void BtnPayCommission_Click(object sender, EventArgs e)
+        private void BtnPayCommission_Click(object? sender, EventArgs e)
         {
+            DataGridView activeGrid = tcEmployees.SelectedIndex == 0 ? dgvEmployees : dgvSalaryEmployees;
+
             // 1. التأكد من اختيار موظفة من الجدول
-            if (dgvEmployees.CurrentRow == null)
+            if (activeGrid.CurrentRow == null)
             {
                 MessageBox.Show("يرجى تحديد موظفة أولاً.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             // 2. الحصول على بيانات الموظفة المختارة
-            var emp = dgvEmployees.CurrentRow.DataBoundItem as EmployeeViewModel;
+            var emp = activeGrid.CurrentRow.DataBoundItem as EmployeeViewModel;
 
             if (emp != null)
             {
@@ -195,19 +251,62 @@ namespace beautyCenterSystem
                 paymentForm.ShowDialog();
 
                 // 4. بعد إغلاق شاشة الصرف، قد ترغب في تحديث بيانات الجدول الرئيسي
-                LoadEmployeesData();
+                _ = LoadEmployeesData();
             }
         }
 
-        private async void BtnDeactivateEmployee_Click(object sender, EventArgs e)
+        private void TcEmployees_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            if (dgvEmployees.CurrentRow == null)
+            if (tcEmployees.SelectedTab == tabCommission)
+            {
+                btnPayCommission.Visible = true;
+                btnPaySalary.Visible = false;
+            }
+            else
+            {
+                btnPayCommission.Visible = false;
+                btnPaySalary.Visible = true;
+            }
+        }
+
+        private void BtnPaySalary_Click(object? sender, EventArgs e)
+        {
+            if (dgvSalaryEmployees.CurrentRow == null)
             {
                 MessageBox.Show("يرجى تحديد موظفة من الجدول أولاً.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var emp = dgvEmployees.CurrentRow.DataBoundItem as EmployeeViewModel;
+            var emp = dgvSalaryEmployees.CurrentRow.DataBoundItem as EmployeeViewModel;
+            if (emp != null)
+            {
+                var paymentForm = new EmployeePaymentForm(CurrentSession.UserID);
+                paymentForm.SelectedEmployeeId = emp.EmployeeID;
+                paymentForm.ShowDialog();
+                _ = LoadEmployeesData();
+            }
+        }
+
+        private void BtnPaymentHistory_Click(object? sender, EventArgs e)
+        {
+            var type = tcEmployees.SelectedTab == tabCommission 
+                ? PaymentHistoryType.EmployeeCommission 
+                : PaymentHistoryType.EmployeeSalary;
+            var historyForm = new PaymentHistoryForm(type);
+            historyForm.ShowDialog();
+        }
+
+        private async void BtnDeactivateEmployee_Click(object? sender, EventArgs e)
+        {
+            DataGridView activeGrid = tcEmployees.SelectedIndex == 0 ? dgvEmployees : dgvSalaryEmployees;
+
+            if (activeGrid.CurrentRow == null)
+            {
+                MessageBox.Show("يرجى تحديد موظفة من الجدول أولاً.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var emp = activeGrid.CurrentRow.DataBoundItem as EmployeeViewModel;
             if (emp != null)
             {
                 var confirmResult = MessageBox.Show($"هل أنت متأكد من إيقاف الموظفة ({emp.EmployeeName})؟", "تأكيد الإيقاف", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -229,12 +328,13 @@ namespace beautyCenterSystem
 
         // --- أحداث التعديل المباشر ---
 
-        private void DgvEmployees_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+        private void DgvEmployees_CellValidating(object? sender, DataGridViewCellValidatingEventArgs e)
         {
-            if (!dgvEmployees.IsCurrentCellDirty) return;
+            DataGridView grid = sender as DataGridView;
+            if (grid == null || !grid.IsCurrentCellDirty) return;
 
-            string columnName = dgvEmployees.Columns[e.ColumnIndex].Name;
-            string newValue = e.FormattedValue.ToString().Trim();
+            string columnName = grid.Columns[e.ColumnIndex].Name;
+            string newValue = e.FormattedValue?.ToString()?.Trim() ?? "";
 
             if (columnName == "EmployeeName" && string.IsNullOrEmpty(newValue))
             {
@@ -250,11 +350,23 @@ namespace beautyCenterSystem
                     e.Cancel = true;
                 }
             }
+            
+            if (columnName == "BaseSalary")
+            {
+                if (!decimal.TryParse(newValue, out decimal salary) || salary < 0)
+                {
+                    MessageBox.Show("يرجى إدخال راتب صحيح.", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    e.Cancel = true;
+                }
+            }
         }
 
-        private async void DgvEmployees_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        private async void DgvEmployees_CellEndEdit(object? sender, DataGridViewCellEventArgs e)
         {
-            var empVm = dgvEmployees.Rows[e.RowIndex].DataBoundItem as EmployeeViewModel;
+            DataGridView grid = sender as DataGridView;
+            if (grid == null) return;
+
+            var empVm = grid.Rows[e.RowIndex].DataBoundItem as EmployeeViewModel;
             if (empVm != null)
             {
                 var employeeToUpdate = new Employee
@@ -262,6 +374,8 @@ namespace beautyCenterSystem
                     EmployeeID = empVm.EmployeeID,
                     EmployeeName = empVm.EmployeeName,
                     Phone = empVm.Phone,
+                    EmployeeType = empVm.EmployeeType,
+                    BaseSalary = empVm.BaseSalary,
                     CommissionRate = empVm.CommissionRate,
                     RoomID = empVm.RoomID
                 };
@@ -290,6 +404,8 @@ namespace beautyCenterSystem
         public string EmployeeName { get; set; }
         public string Phone { get; set; }
         public decimal CommissionRate { get; set; }
+        public string EmployeeType { get; set; }
+        public decimal BaseSalary { get; set; }
         public int? RoomID { get; set; }
     }
 }

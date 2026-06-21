@@ -32,21 +32,20 @@ namespace beautyCenterSystem
             label1 = new Label();
             dtpFilterDate = new DateTimePicker();
             cmbFilterRoom = new System.Windows.Forms.ComboBox();
-            iconPictureBox1 = new FontAwesome.Sharp.IconPictureBox();
+            iconPictureBox1 = new System.Windows.Forms.Label();
             txtSearchCustomer = new MaterialSkin.Controls.MaterialTextBox2();
             btnRefresh = new Button();
             tableLayoutPanel1 = new TableLayoutPanel();
-            btnAddAppointment = new FontAwesome.Sharp.IconButton();
-            btnEditAppointment = new FontAwesome.Sharp.IconButton();
-            btnPrintInvoice = new FontAwesome.Sharp.IconButton();
-            btnCompleteAndPay = new FontAwesome.Sharp.IconButton();
-            btnCancelAppointment = new FontAwesome.Sharp.IconButton();
+            btnAddAppointment = new System.Windows.Forms.Button();
+            btnEditAppointment = new System.Windows.Forms.Button();
+            btnPrintInvoice = new System.Windows.Forms.Button();
+            btnCompleteAndPay = new System.Windows.Forms.Button();
+            btnCancelAppointment = new System.Windows.Forms.Button();
             panel1 = new Panel();
             splitContainer1 = new SplitContainer();
             dgvDetails = new DataGridView();
             dgvAppointments = new DataGridView();
             flowLayoutPanel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)iconPictureBox1).BeginInit();
             tableLayoutPanel1.SuspendLayout();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -116,17 +115,14 @@ namespace beautyCenterSystem
             // 
             iconPictureBox1.BackColor = Color.Transparent;
             iconPictureBox1.ForeColor = Color.Gray;
-            iconPictureBox1.IconChar = FontAwesome.Sharp.IconChar.Search;
-            iconPictureBox1.IconColor = Color.Gray;
-            iconPictureBox1.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconPictureBox1.IconSize = 35;
+            iconPictureBox1.Font = new Font("Segoe UI Emoji", 16F);
+            iconPictureBox1.Text = "🔍";
             iconPictureBox1.Location = new Point(506, 23);
             iconPictureBox1.Margin = new Padding(5, 3, 15, 3);
             iconPictureBox1.Name = "iconPictureBox1";
             iconPictureBox1.Size = new Size(35, 35);
-            iconPictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
             iconPictureBox1.TabIndex = 7;
-            iconPictureBox1.TabStop = false;
+            iconPictureBox1.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // txtSearchCustomer
             // 
@@ -209,16 +205,11 @@ namespace beautyCenterSystem
             btnAddAppointment.FlatAppearance.BorderSize = 0;
             btnAddAppointment.FlatStyle = FlatStyle.Flat;
             btnAddAppointment.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnAddAppointment.IconChar = FontAwesome.Sharp.IconChar.CalendarPlus;
-            btnAddAppointment.IconColor = Color.Black;
-            btnAddAppointment.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnAddAppointment.IconSize = 40;
             btnAddAppointment.Location = new Point(793, 13);
             btnAddAppointment.Name = "btnAddAppointment";
             btnAddAppointment.Size = new Size(184, 74);
             btnAddAppointment.TabIndex = 1;
-            btnAddAppointment.Text = "حجز جديد";
-            btnAddAppointment.TextImageRelation = TextImageRelation.TextBeforeImage;
+            btnAddAppointment.Text = "➕ حجز جديد";
             btnAddAppointment.UseVisualStyleBackColor = true;
             btnAddAppointment.Click += btnAddAppointment_Click;
             // 
@@ -229,16 +220,11 @@ namespace beautyCenterSystem
             btnEditAppointment.FlatAppearance.BorderSize = 0;
             btnEditAppointment.FlatStyle = FlatStyle.Flat;
             btnEditAppointment.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnEditAppointment.IconChar = FontAwesome.Sharp.IconChar.Edit;
-            btnEditAppointment.IconColor = Color.Black;
-            btnEditAppointment.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnEditAppointment.IconSize = 40;
             btnEditAppointment.Location = new Point(598, 13);
             btnEditAppointment.Name = "btnEditAppointment";
             btnEditAppointment.Size = new Size(189, 74);
             btnEditAppointment.TabIndex = 4;
-            btnEditAppointment.Text = "تعديل الحجز";
-            btnEditAppointment.TextImageRelation = TextImageRelation.TextBeforeImage;
+            btnEditAppointment.Text = "✏️ تعديل الحجز";
             btnEditAppointment.UseVisualStyleBackColor = true;
             btnEditAppointment.Click += btnEditAppointment_Click;
             // 
@@ -249,16 +235,11 @@ namespace beautyCenterSystem
             btnPrintInvoice.FlatAppearance.BorderSize = 0;
             btnPrintInvoice.FlatStyle = FlatStyle.Flat;
             btnPrintInvoice.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnPrintInvoice.IconChar = FontAwesome.Sharp.IconChar.Print;
-            btnPrintInvoice.IconColor = Color.Black;
-            btnPrintInvoice.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnPrintInvoice.IconSize = 40;
             btnPrintInvoice.Location = new Point(402, 13);
             btnPrintInvoice.Name = "btnPrintInvoice";
             btnPrintInvoice.Size = new Size(190, 74);
             btnPrintInvoice.TabIndex = 6;
-            btnPrintInvoice.Text = "طباعة فاتورة";
-            btnPrintInvoice.TextImageRelation = TextImageRelation.TextBeforeImage;
+            btnPrintInvoice.Text = "🖨️ طباعة فاتورة";
             btnPrintInvoice.UseVisualStyleBackColor = true;
             btnPrintInvoice.Click += btnPrintInvoice_Click;
             // 
@@ -269,16 +250,11 @@ namespace beautyCenterSystem
             btnCompleteAndPay.FlatAppearance.BorderSize = 0;
             btnCompleteAndPay.FlatStyle = FlatStyle.Flat;
             btnCompleteAndPay.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnCompleteAndPay.IconChar = FontAwesome.Sharp.IconChar.CheckCircle;
-            btnCompleteAndPay.IconColor = Color.Black;
-            btnCompleteAndPay.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnCompleteAndPay.IconSize = 40;
             btnCompleteAndPay.Location = new Point(207, 13);
             btnCompleteAndPay.Name = "btnCompleteAndPay";
             btnCompleteAndPay.Size = new Size(189, 74);
             btnCompleteAndPay.TabIndex = 3;
-            btnCompleteAndPay.Text = "انهاء ودفع";
-            btnCompleteAndPay.TextImageRelation = TextImageRelation.TextBeforeImage;
+            btnCompleteAndPay.Text = "✔️ انهاء ودفع";
             btnCompleteAndPay.UseVisualStyleBackColor = true;
             btnCompleteAndPay.Click += btnCompleteAndPay_Click;
             // 
@@ -289,16 +265,11 @@ namespace beautyCenterSystem
             btnCancelAppointment.FlatAppearance.BorderSize = 0;
             btnCancelAppointment.FlatStyle = FlatStyle.Flat;
             btnCancelAppointment.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnCancelAppointment.IconChar = FontAwesome.Sharp.IconChar.CalendarMinus;
-            btnCancelAppointment.IconColor = Color.Black;
-            btnCancelAppointment.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnCancelAppointment.IconSize = 40;
             btnCancelAppointment.Location = new Point(13, 13);
             btnCancelAppointment.Name = "btnCancelAppointment";
             btnCancelAppointment.Size = new Size(188, 74);
             btnCancelAppointment.TabIndex = 5;
-            btnCancelAppointment.Text = "الغاء حجز";
-            btnCancelAppointment.TextImageRelation = TextImageRelation.TextBeforeImage;
+            btnCancelAppointment.Text = "❌ الغاء حجز";
             btnCancelAppointment.UseVisualStyleBackColor = true;
             btnCancelAppointment.Click += btnCancelAppointment_Click;
             // 
@@ -368,7 +339,7 @@ namespace beautyCenterSystem
             Load += UC_Appointments_Load;
             flowLayoutPanel1.ResumeLayout(false);
             flowLayoutPanel1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)iconPictureBox1).EndInit();
+            flowLayoutPanel1.PerformLayout();
             tableLayoutPanel1.ResumeLayout(false);
             panel1.ResumeLayout(false);
             splitContainer1.Panel1.ResumeLayout(false);
@@ -387,13 +358,13 @@ namespace beautyCenterSystem
         private DateTimePicker dtpFilterDate;
         private System.Windows.Forms.ComboBox cmbFilterRoom;
         private MaterialSkin.Controls.MaterialTextBox2 txtSearchCustomer;
-        private FontAwesome.Sharp.IconPictureBox iconPictureBox1;
+        private System.Windows.Forms.Label iconPictureBox1;
         private TableLayoutPanel tableLayoutPanel1;
-        private FontAwesome.Sharp.IconButton btnCancelAppointment;
-        private FontAwesome.Sharp.IconButton btnEditAppointment;
-        private FontAwesome.Sharp.IconButton btnCompleteAndPay;
-        private FontAwesome.Sharp.IconButton btnPrintInvoice;
-        private FontAwesome.Sharp.IconButton btnAddAppointment;
+        private System.Windows.Forms.Button btnCancelAppointment;
+        private System.Windows.Forms.Button btnEditAppointment;
+        private System.Windows.Forms.Button btnCompleteAndPay;
+        private System.Windows.Forms.Button btnPrintInvoice;
+        private System.Windows.Forms.Button btnAddAppointment;
         private Panel panel1;
         private SplitContainer splitContainer1;
         private DataGridView dgvDetails;

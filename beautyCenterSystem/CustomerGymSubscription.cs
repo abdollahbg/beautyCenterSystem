@@ -16,5 +16,6 @@ namespace beautyCenterSystem
         public DateTime CreatedAt { get; set; }
         public int SessionsRemaining { get; set; }
         public bool IsActive { get; set; }
+        public System.Collections.Generic.List<GymSubscriptionTrainer> Trainers { get; set; } = new System.Collections.Generic.List<GymSubscriptionTrainer>();
     }
 }

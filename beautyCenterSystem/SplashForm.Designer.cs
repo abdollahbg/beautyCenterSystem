@@ -15,56 +15,56 @@ namespace beautyCenterSystem
 
         private void InitializeComponent()
         {
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.lblTitle = new System.Windows.Forms.Label();
-            this.lblLoading = new System.Windows.Forms.Label();
-            this.SuspendLayout();
+            progressBar1 = new ProgressBar();
+            lblTitle = new Label();
+            lblLoading = new Label();
+            SuspendLayout();
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(50, 220);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(400, 10);
-            this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
-            this.progressBar1.TabIndex = 0;
+            progressBar1.Location = new Point(50, 220);
+            progressBar1.Name = "progressBar1";
+            progressBar1.Size = new Size(400, 10);
+            progressBar1.Style = ProgressBarStyle.Marquee;
+            progressBar1.TabIndex = 0;
             // 
             // lblTitle
             // 
-            this.lblTitle.AutoSize = true;
-            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblTitle.ForeColor = System.Drawing.Color.MediumSlateBlue;
-            this.lblTitle.Location = new System.Drawing.Point(85, 80);
-            this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(330, 45);
-            this.lblTitle.TabIndex = 1;
-            this.lblTitle.Text = "Beauty Center System";
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.MediumSlateBlue;
+            lblTitle.Location = new Point(90, 114);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(324, 30);
+            lblTitle.TabIndex = 1;
+            lblTitle.Text = "‰Ÿ«„ «·’‰Ê«‰ ··≈œ«—… „—«ﬂ“ «· Ã„Ì·";
             // 
             // lblLoading
             // 
-            this.lblLoading.AutoSize = true;
-            this.lblLoading.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblLoading.ForeColor = System.Drawing.Color.Gray;
-            this.lblLoading.Location = new System.Drawing.Point(200, 190);
-            this.lblLoading.Name = "lblLoading";
-            this.lblLoading.Size = new System.Drawing.Size(100, 19);
-            this.lblLoading.TabIndex = 2;
-            this.lblLoading.Text = "Loading...";
+            lblLoading.AutoSize = true;
+            lblLoading.Font = new Font("Segoe UI", 10F);
+            lblLoading.ForeColor = Color.Gray;
+            lblLoading.Location = new Point(200, 190);
+            lblLoading.Name = "lblLoading";
+            lblLoading.Size = new Size(67, 19);
+            lblLoading.TabIndex = 2;
+            lblLoading.Text = "Loading...";
             // 
             // SplashForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(500, 300);
-            this.Controls.Add(this.lblLoading);
-            this.Controls.Add(this.lblTitle);
-            this.Controls.Add(this.progressBar1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "SplashForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "SplashForm";
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
+            ClientSize = new Size(500, 300);
+            Controls.Add(lblLoading);
+            Controls.Add(lblTitle);
+            Controls.Add(progressBar1);
+            FormBorderStyle = FormBorderStyle.None;
+            Name = "SplashForm";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "SplashForm";
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private System.Windows.Forms.ProgressBar progressBar1;

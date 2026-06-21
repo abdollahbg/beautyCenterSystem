@@ -25,6 +25,7 @@ namespace beautyCenterSystem
             // Hook up events
             btnNewSubscription.Click += BtnNewSubscription_Click;
             btnCheckIn.Click += BtnCheckIn_Click;
+            btnPrintReceipt.Click += BtnPrintReceipt_Click;
             btnAddNewPackage.Click += BtnAddNewPackage_Click;
             btnEditPackage.Click += BtnEditPackage_Click;
             btnDeletePackage.Click += BtnDeletePackage_Click;
@@ -33,6 +34,8 @@ namespace beautyCenterSystem
             // أحداث الفلترة والبحث الجديدة
             btnFilter.Click += BtnFilter_Click;
             txtBoxsearch.TextChanged += TxtBoxsearch_TextChanged;
+
+            FixLayout();
         }
 
         protected override async void OnLoad(EventArgs e)
@@ -44,13 +47,58 @@ namespace beautyCenterSystem
         }
 
         // دالة الزر المسؤولة عن تصفية التواريخ
-        private async void BtnFilter_Click(object sender, EventArgs e)
+        private async void BtnFilter_Click(object? sender, EventArgs e)
         {
             await LoadAllDataAsync(dtpFrom.Value, dtpTo.Value);
         }
 
+        private async void BtnPrintReceipt_Click(object? sender, EventArgs e)
+        {
+            if (dgvActive.CurrentRow == null || !dgvActive.CurrentRow.Selected)
+            {
+                MessageBox.Show("الرجاء اختيار اشتراك من القائمة لطباعة واصل الاشتراك.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                var selectedSub = (GymSubscriptionStatus)dgvActive.CurrentRow.DataBoundItem;
+
+                var settingsRepo = new beautyCenterSystem.data.Repositories.SettingsRepository(new DbConnectionFactory());
+                var currentSettings = await settingsRepo.GetSettingsAsync();
+
+                var printer = new SubscriptionReceiptPrinter();
+                printer.SetSettings(currentSettings);
+
+                printer.ReceiptNumber = selectedSub.SubscriptionID;
+                printer.CustomerName = selectedSub.CustomerName;
+                printer.PackageName = selectedSub.SubscriptionType;
+                printer.SubscriptionDate = DateTime.Now.ToString("yyyy-MM-dd");
+                printer.StartDate = selectedSub.StartDate.ToString("yyyy-MM-dd");
+                printer.EndDate = selectedSub.EndDate.ToString("yyyy-MM-dd");
+                printer.AmountPaid = selectedSub.PaidAmount;
+                printer.SessionsRemaining = selectedSub.SessionsRemaining;
+                printer.IsSessionBased = selectedSub.IsSessionBased;
+                printer.CashierName = !string.IsNullOrEmpty(CurrentSession.Username) ? CurrentSession.Username : "مدير النظام";
+
+                if (currentSettings?.LogoBytes != null && currentSettings.LogoBytes.Length > 0)
+                {
+                    using (var ms = new System.IO.MemoryStream(currentSettings.LogoBytes))
+                    {
+                        printer.Logo = System.Drawing.Image.FromStream(ms);
+                    }
+                }
+
+                printer.PrintReceipt(showPreview: false);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"حدث خطأ أثناء محاولة الطباعة: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         // حدث البحث الفوري أثناء الكتابة
-        private void TxtBoxsearch_TextChanged(object sender, EventArgs e)
+        private void TxtBoxsearch_TextChanged(object? sender, EventArgs e)
         {
             BindGrids(txtBoxsearch.Text);
         }
@@ -140,12 +188,12 @@ namespace beautyCenterSystem
             }
         }
 
-        private void DgvPackages_SelectionChanged(object sender, EventArgs e)
+        private void DgvPackages_SelectionChanged(object? sender, EventArgs e)
         {
             btnEditPackage.Enabled = dgvPackages.CurrentRow != null && dgvPackages.CurrentRow.Selected;
         }
 
-        private async void BtnAddNewPackage_Click(object sender, EventArgs e)
+        private async void BtnAddNewPackage_Click(object? sender, EventArgs e)
         {
             using (var form = new AddPackageForm())
             {
@@ -156,7 +204,7 @@ namespace beautyCenterSystem
             }
         }
 
-        private async void BtnEditPackage_Click(object sender, EventArgs e)
+        private async void BtnEditPackage_Click(object? sender, EventArgs e)
         {
             if (dgvPackages.CurrentRow != null && dgvPackages.CurrentRow.Selected)
             {
@@ -174,7 +222,7 @@ namespace beautyCenterSystem
             }
         }
 
-        private async void BtnDeletePackage_Click(object sender, EventArgs e)
+        private async void BtnDeletePackage_Click(object? sender, EventArgs e)
         {
             if (dgvPackages.CurrentRow != null)
             {
@@ -206,7 +254,7 @@ namespace beautyCenterSystem
             }
         }
 
-        private async void BtnNewSubscription_Click(object sender, EventArgs e)
+        private async void BtnNewSubscription_Click(object? sender, EventArgs e)
         {
             using (var form = new AddSubscriptionForm())
             {
@@ -219,7 +267,7 @@ namespace beautyCenterSystem
             }
         }
 
-        private async void BtnCheckIn_Click(object sender, EventArgs e)
+        private async void BtnCheckIn_Click(object? sender, EventArgs e)
         {
             if (dgvActive.CurrentRow != null)
             {
@@ -254,5 +302,7 @@ namespace beautyCenterSystem
                 MessageBox.Show("الرجاء تحديد اشتراك من الجدول.");
             }
         }
+
+
     }
 }

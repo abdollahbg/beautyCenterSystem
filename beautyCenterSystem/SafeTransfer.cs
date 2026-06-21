@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,11 +14,11 @@ namespace beautyCenterSystem
         public decimal Amount { get; set; }
         public DateTime TransferDate { get; set; }
         public int? CreatedBy { get; set; }
-        public string Notes { get; set; }
+        public string Notes { get; set; } = string.Empty;
 
         // للعرض في الجداول
-        public string FromSafeName { get; set; }
-        public string ToSafeName { get; set; }
-        public string CreatedByName { get; set; }
+        public string FromSafeName { get; set; } = string.Empty;
+        public string ToSafeName { get; set; } = string.Empty;
+        public string CreatedByName { get; set; } = string.Empty;
     }
 }

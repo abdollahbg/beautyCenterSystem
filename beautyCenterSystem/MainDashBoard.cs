@@ -1,4 +1,4 @@
-﻿using beautyCenterSystem.data.Repositories;
+using beautyCenterSystem.data.Repositories;
 using BeautyCenterSystem.Data;
 using FontAwesome.Sharp;
 using System;
@@ -23,8 +23,32 @@ namespace beautyCenterSystem
             _backupRepo = new BackupRepository(new DbConnectionFactory());
         }
 
+        private FontAwesome.Sharp.IconButton btnTrainers;
+
         private void MainDashBoard_Load(object sender, EventArgs e)
         {
+            // إنشاء زر المدربات ديناميكياً
+            btnTrainers = new FontAwesome.Sharp.IconButton();
+            btnTrainers.Dock = DockStyle.Top;
+            btnTrainers.IconChar = FontAwesome.Sharp.IconChar.Dumbbell;
+            btnTrainers.IconColor = Color.Black;
+            btnTrainers.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnTrainers.IconSize = 35;
+            btnTrainers.ImageAlign = ContentAlignment.MiddleRight;
+            btnTrainers.Name = "btnTrainers";
+            btnTrainers.Padding = new Padding(0, 0, 15, 0);
+            btnTrainers.Size = new Size(200, 45);
+            btnTrainers.TabIndex = 12;
+            btnTrainers.Text = "المدربات";
+            btnTrainers.TextAlign = ContentAlignment.MiddleRight;
+            btnTrainers.TextImageRelation = TextImageRelation.TextBeforeImage;
+            btnTrainers.Click += btnTrainers_Click;
+            
+            // إضافة الزر تحت زر الجيم (أو الموظفات)
+            pnlSidebar.Controls.Add(btnTrainers);
+            // ترتيبه ليظهر بشكل صحيح (Controls[0] هو الأسفل في الـ Dock=Top)
+            pnlSidebar.Controls.SetChildIndex(btnTrainers, pnlSidebar.Controls.IndexOf(btnEmployees));
+
             // القفل والمفتاح: تطبيق الصلاحيات فور تحميل الواجهة
             ApplyPermissions();
 
@@ -54,7 +78,7 @@ namespace beautyCenterSystem
             btnMaterials.Visible = PermissionManager.Can("AccessPurchases");
 
             btnEmployees.Visible = PermissionManager.Can("AccessEmployees");
-
+            btnTrainers.Visible = PermissionManager.Can("AccessTrainers");
 
             // ملحوظة: أزرار العميلات والمواعيد والخدمات تترك مرئية للموظفين (Staff) عادةً
             btnCustomers.Visible = true;
@@ -136,6 +160,19 @@ namespace beautyCenterSystem
         {
             if (await ShowScreen(new UC_Services()))
                 HighlightButton(sender);
+        }
+
+        private async void btnTrainers_Click(object sender, EventArgs e)
+        {
+            if (PermissionManager.Can("AccessTrainers"))
+            {
+                if (await ShowScreen(new UC_Trainers()))
+                    HighlightButton(sender);
+            }
+            else
+            {
+                MessageBox.Show("عذراً، لا تملك صلاحية الوصول لقسم المدربات.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+            }
         }
 
         private async void btnRooms_Click(object sender, EventArgs e)

@@ -1,30 +1,101 @@
-using System;
-using System.Windows.Forms;
-using beautyCenterSystem.Data.Repositories;
 using BeautyCenterSystem.Data;
-using MaterialSkin.Controls;
+using beautyCenterSystem.Data.Repositories;
+using BeautyCenterSystem.Data.Repositories;
+using BeautyCenterSystem.Models;
+using beautyCenterSystem.data.Repositories;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace beautyCenterSystem
 {
     public partial class AddPackageForm : Form
     {
         private readonly GymRepository _gymRepo;
+        private readonly TrainerRepository _trainerRepo;
+        private BindingList<GymPackageTrainer> _packageTrainers;
 
         public AddPackageForm()
         {
             InitializeComponent();
+            this.FormBorderStyle = FormBorderStyle.Sizable;
+            this.Text = "إضافة باقة جديدة";
             _gymRepo = new GymRepository(new DbConnectionFactory());
+            _trainerRepo = new TrainerRepository(new DbConnectionFactory());
+            _packageTrainers = new BindingList<GymPackageTrainer>();
             
-            // Events
             chkIsSessionBased.CheckedChanged += ChkIsSessionBased_CheckedChanged;
             btnSave.Click += BtnSave_Click;
             btnCancel.Click += BtnCancel_Click;
+            btnAddTrainer.Click += BtnAddTrainer_Click;
+            this.Load += AddPackageForm_Load;
         }
 
-        protected override void OnLoad(EventArgs e)
+        private void AddPackageForm_Load(object sender, EventArgs e)
+        {
+            AppTheme.Apply(this);
+        }
+
+        protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            AppTheme.Apply(this);
+            
+            try
+            {
+                var trainers = await _trainerRepo.GetAllAsync();
+                cmbTrainers.DisplayMember = "TrainerName";
+                cmbTrainers.ValueMember = "TrainerID";
+                cmbTrainers.DataSource = trainers.ToList();
+                
+                dgvTrainers.DataSource = _packageTrainers;
+                if (dgvTrainers.Columns.Contains("PackageID")) dgvTrainers.Columns["PackageID"].Visible = false;
+                if (dgvTrainers.Columns.Contains("TrainerID")) dgvTrainers.Columns["TrainerID"].Visible = false;
+                
+                if (dgvTrainers.Columns.Contains("TrainerName")) dgvTrainers.Columns["TrainerName"].HeaderText = "اسم المدربة";
+                if (dgvTrainers.Columns.Contains("BaseAmount")) dgvTrainers.Columns["BaseAmount"].HeaderText = "حصة المدربة (إن وجدت)";
+                if (dgvTrainers.Columns.Contains("CommissionRate")) dgvTrainers.Columns["CommissionRate"].HeaderText = "النسبة %";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"خطأ في تحميل المدربات: {ex.Message}");
+            }
+        }
+
+        private void BtnAddTrainer_Click(object sender, EventArgs e)
+        {
+            if (cmbTrainers.SelectedItem == null) return;
+            
+            if (!decimal.TryParse(txtBaseAmount.Text, out decimal baseAmount))
+            {
+                MessageBox.Show("يرجى إدخال مبلغ أساسي صحيح.");
+                return;
+            }
+            if (!decimal.TryParse(txtCommissionRate.Text, out decimal commissionRate))
+            {
+                MessageBox.Show("يرجى إدخال نسبة صحيحة.");
+                return;
+            }
+
+            var selectedTrainer = (Trainer)cmbTrainers.SelectedItem;
+            
+            if (_packageTrainers.Any(t => t.TrainerID == selectedTrainer.TrainerID))
+            {
+                MessageBox.Show("المدربة مضافة مسبقاً لهذه الباقة.");
+                return;
+            }
+
+            _packageTrainers.Add(new GymPackageTrainer
+            {
+                TrainerID = selectedTrainer.TrainerID,
+                TrainerName = selectedTrainer.TrainerName,
+                BaseAmount = baseAmount,
+                CommissionRate = commissionRate
+            });
+
+            txtBaseAmount.Clear();
+            txtCommissionRate.Clear();
         }
 
         private void ChkIsSessionBased_CheckedChanged(object sender, EventArgs e)
@@ -40,7 +111,7 @@ namespace beautyCenterSystem
                 string.IsNullOrWhiteSpace(txtPrice.Text) || 
                 string.IsNullOrWhiteSpace(txtDurationDays.Text))
             {
-                MessageBox.Show("الرجاء إدخال بيانات الباقة الأساسية (الاسم، المدة، السعر).");
+                MessageBox.Show("يرجى تعبئة الحقول الأساسية (الاسم، المدة، السعر).");
                 return;
             }
 
@@ -48,26 +119,29 @@ namespace beautyCenterSystem
             {
                 var package = new GymSubscriptionType
                 {
-                    TypeName = txtPackageName.Text.Trim(),
+                    TypeName = txtPackageName.Text,
                     DurationDays = int.Parse(txtDurationDays.Text),
                     Price = decimal.Parse(txtPrice.Text),
                     IsSessionBased = chkIsSessionBased.Checked,
-                    TotalSessions = chkIsSessionBased.Checked ? int.Parse(txtTotalSessions.Text) : 0,
-                    IsActive = true
+                    TotalSessions = chkIsSessionBased.Checked && !string.IsNullOrWhiteSpace(txtTotalSessions.Text) ? int.Parse(txtTotalSessions.Text) : 0
                 };
 
-                bool saved = await _gymRepo.AddSubscriptionTypeAsync(package);
-
-                if (saved)
+                bool success = await _gymRepo.AddSubscriptionTypeAsync(package, _packageTrainers.ToList());
+                
+                if (success)
                 {
-                    MessageBox.Show("تم حفظ الباقة بنجاح.");
+                    MessageBox.Show("تمت الإضافة بنجاح!");
                     this.DialogResult = DialogResult.OK;
                     this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("حدث خطأ أثناء الحفظ.");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"خطأ في حفظ الباقة: {ex.Message}");
+                MessageBox.Show($"خطأ: {ex.Message}");
             }
         }
 
