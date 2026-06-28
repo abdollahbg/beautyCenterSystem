@@ -120,15 +120,21 @@ namespace beautyCenterSystem.Data.Repositories
         }
 
         // --- Customer Subscriptions ---
-        // --- Customer Subscriptions ---
 
         // 1. تعديل الدالة لتقبل التواريخ كبارامترات اختيارية
         public async Task<IEnumerable<GymSubscriptionStatus>> GetAllCustomerSubscriptionsAsync(DateTime? fromDate = null, DateTime? toDate = null)
         {
             using var db = _dbFactory.CreateConnection();
 
-            // بناء الاستعلام الأساسي من الـ View
-            string sql = "SELECT * FROM vw_GymSubscriptionsStatus WHERE 1=1";
+            // بناء الاستعلام الأساسي
+            string sql = @"
+                SELECT v.*, 
+                    (SELECT STRING_AGG(t.TrainerName, ' , ') 
+                     FROM GymSubscriptionTrainers st 
+                     JOIN Trainers t ON st.TrainerID = t.TrainerID 
+                     WHERE st.SubscriptionID = v.SubscriptionID) AS TrainersNames
+                FROM vw_GymSubscriptionsStatus v 
+                WHERE 1=1";
 
             // إضافة شرط التاريخ فقط في حال تمريره (الفلترة بناءً على تاريخ بداية الاشتراك StartDate)
             if (fromDate.HasValue)
@@ -144,6 +150,37 @@ namespace beautyCenterSystem.Data.Repositories
             sql += " ORDER BY StartDate DESC";
 
             return await db.QueryAsync<GymSubscriptionStatus>(sql, new { FromDate = fromDate, ToDate = toDate });
+        }
+
+        public async Task<bool> CancelSubscriptionAsync(int subscriptionId)
+        {
+            using var db = _dbFactory.CreateConnection();
+            db.Open();
+            using var transaction = db.BeginTransaction();
+            try
+            {
+                // 1. Get Subscription info
+                string getInfoSql = "SELECT SafeID, PaidAmount FROM CustomerGymSubscriptions WHERE SubscriptionID = @Id";
+                var info = await db.QueryFirstOrDefaultAsync<dynamic>(getInfoSql, new { Id = subscriptionId }, transaction);
+                
+                if (info == null) throw new Exception("الاشتراك غير موجود");
+
+                // 2. Return money to customer (Deduct from Safe)
+                string updateSafeSql = "UPDATE Safes SET Balance = Balance - @Amount WHERE SafeID = @SafeID";
+                await db.ExecuteAsync(updateSafeSql, new { Amount = info.PaidAmount, SafeID = info.SafeID }, transaction);
+
+                // 3. Mark Subscription as inactive
+                string cancelSubSql = "UPDATE CustomerGymSubscriptions SET IsActive = 0 WHERE SubscriptionID = @Id";
+                await db.ExecuteAsync(cancelSubSql, new { Id = subscriptionId }, transaction);
+                
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
         public async Task<bool> RegisterCustomerSubscriptionAsync(CustomerGymSubscription subscription, string paymentMethod)

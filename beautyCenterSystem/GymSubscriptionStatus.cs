@@ -14,5 +14,6 @@ namespace beautyCenterSystem
         public int SessionsRemaining { get; set; }
         public string SubscriptionStatus { get; set; } = string.Empty;
         public decimal PaidAmount { get; set; }
+        public string TrainersNames { get; set; } = string.Empty;
     }
 }

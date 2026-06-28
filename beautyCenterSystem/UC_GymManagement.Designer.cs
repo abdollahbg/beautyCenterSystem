@@ -34,6 +34,7 @@ namespace beautyCenterSystem
             btnNewSubscription = new Button();
             btnCheckIn = new Button();
             btnPrintReceipt = new Button();
+            btnCancelSubscription = new Button();
             tabNearExpiry = new TabPage();
             dgvNearExpiry = new DataGridView();
             btnRenew = new Button();
@@ -44,7 +45,10 @@ namespace beautyCenterSystem
             btnAddNewPackage = new Button();
             btnEditPackage = new Button();
             btnDeletePackage = new Button();
+            flpSearch = new FlowLayoutPanel();
+            cmbFilterPackage = new ComboBox();
             pnlHeader.SuspendLayout();
+            flpSearch.SuspendLayout();
             tabControlGym.SuspendLayout();
             tabActive.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvActive).BeginInit();
@@ -63,7 +67,7 @@ namespace beautyCenterSystem
             pnlHeader.Controls.Add(lblTo);
             pnlHeader.Controls.Add(dtpFrom);
             pnlHeader.Controls.Add(lblFrom);
-            pnlHeader.Controls.Add(txtBoxsearch);
+            pnlHeader.Controls.Add(flpSearch);
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Dock = DockStyle.Top;
             pnlHeader.Location = new Point(0, 0);
@@ -133,7 +137,8 @@ namespace beautyCenterSystem
             txtBoxsearch.HideSelection = true;
             txtBoxsearch.Hint = "البحث";
             txtBoxsearch.LeadingIcon = null;
-            txtBoxsearch.Location = new Point(207, 3);
+            txtBoxsearch.Location = new Point(3, 3);
+            txtBoxsearch.Margin = new Padding(3, 3, 20, 3);
             txtBoxsearch.MaxLength = 32767;
             txtBoxsearch.MouseState = MaterialSkin.MouseState.OUT;
             txtBoxsearch.Name = "txtBoxsearch";
@@ -151,6 +156,28 @@ namespace beautyCenterSystem
             txtBoxsearch.TextAlign = HorizontalAlignment.Left;
             txtBoxsearch.TrailingIcon = null;
             txtBoxsearch.UseSystemPasswordChar = false;
+            // 
+            // flpSearch
+            // 
+            flpSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            flpSearch.Controls.Add(txtBoxsearch);
+            flpSearch.Controls.Add(cmbFilterPackage);
+            flpSearch.FlowDirection = FlowDirection.RightToLeft;
+            flpSearch.Location = new Point(10, 10);
+            flpSearch.Name = "flpSearch";
+            flpSearch.Size = new Size(640, 55);
+            flpSearch.TabIndex = 8;
+            // 
+            // cmbFilterPackage
+            // 
+            cmbFilterPackage.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbFilterPackage.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Regular, GraphicsUnit.Point);
+            cmbFilterPackage.FormattingEnabled = true;
+            cmbFilterPackage.Location = new Point(410, 10);
+            cmbFilterPackage.Margin = new Padding(3, 10, 3, 3);
+            cmbFilterPackage.Name = "cmbFilterPackage";
+            cmbFilterPackage.Size = new Size(200, 32);
+            cmbFilterPackage.TabIndex = 9;
             // 
             // lblTitle
             // 
@@ -183,6 +210,7 @@ namespace beautyCenterSystem
             tabActive.Controls.Add(dgvActive);
             tabActive.Controls.Add(btnNewSubscription);
             tabActive.Controls.Add(btnCheckIn);
+            tabActive.Controls.Add(btnCancelSubscription);
             tabActive.Controls.Add(btnPrintReceipt);
             tabActive.Location = new Point(4, 24);
             tabActive.Name = "tabActive";
@@ -225,6 +253,15 @@ namespace beautyCenterSystem
             btnPrintReceipt.TabIndex = 3;
             btnPrintReceipt.Text = "🖨️ طباعة وصل";
             btnPrintReceipt.UseVisualStyleBackColor = true;
+            // 
+            // btnCancelSubscription
+            // 
+            btnCancelSubscription.Location = new Point(520, 400);
+            btnCancelSubscription.Name = "btnCancelSubscription";
+            btnCancelSubscription.Size = new Size(150, 40);
+            btnCancelSubscription.TabIndex = 4;
+            btnCancelSubscription.Text = "إلغاء الاشتراك";
+            btnCancelSubscription.UseVisualStyleBackColor = true;
             // 
             // tabNearExpiry
             // 
@@ -338,6 +375,8 @@ namespace beautyCenterSystem
             ((System.ComponentModel.ISupportInitialize)dgvExpired).EndInit();
             tabPackages.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvPackages).EndInit();
+            flpSearch.ResumeLayout(false);
+            flpSearch.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -360,6 +399,7 @@ namespace beautyCenterSystem
         private Button btnNewSubscription;
         private Button btnCheckIn;
         private Button btnPrintReceipt;
+        private Button btnCancelSubscription;
 
         private DataGridView dgvNearExpiry;
         private Button btnRenew;
@@ -371,5 +411,7 @@ namespace beautyCenterSystem
         private Button btnEditPackage;
         private Button btnDeletePackage;
         private MaterialTextBox2 txtBoxsearch;
+        private FlowLayoutPanel flpSearch;
+        private ComboBox cmbFilterPackage;
     }
 }

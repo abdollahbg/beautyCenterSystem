@@ -13,7 +13,6 @@ namespace beautyCenterSystem
     {
         private readonly GymRepository _gymRepo;
 
-        // متغيرات لتخزين البيانات محلياً لتسريع عملية البحث الفوري
         private List<GymSubscriptionStatus> _allSubscriptions = new List<GymSubscriptionStatus>();
         private List<GymSubscriptionType> _allPackages = new List<GymSubscriptionType>();
 
@@ -31,9 +30,11 @@ namespace beautyCenterSystem
             btnDeletePackage.Click += BtnDeletePackage_Click;
             dgvPackages.SelectionChanged += DgvPackages_SelectionChanged;
 
-            // أحداث الفلترة والبحث الجديدة
             btnFilter.Click += BtnFilter_Click;
             txtBoxsearch.TextChanged += TxtBoxsearch_TextChanged;
+
+            cmbFilterPackage.SelectedIndexChanged += CmbFilterPackage_SelectedIndexChanged;
+            btnCancelSubscription.Click += BtnCancelSubscription_Click;
 
             FixLayout();
         }
@@ -42,7 +43,12 @@ namespace beautyCenterSystem
         {
             base.OnLoad(e);
             AppTheme.Apply(this);
-            // جلب البيانات لأول مرة بناءً على التواريخ الافتراضية في الديزاينر (آخر 3 شهور)
+            
+            // تعيين التواريخ الافتراضية (من قبل 3 شهور إلى اليوم)
+            dtpTo.Value = DateTime.Now;
+            dtpFrom.Value = DateTime.Now.AddMonths(-3);
+
+            // جلب البيانات لأول مرة بناءً على التواريخ الافتراضية
             await LoadAllDataAsync(dtpFrom.Value, dtpTo.Value);
         }
 
@@ -115,6 +121,14 @@ namespace beautyCenterSystem
                 // 2. جلب الباقات (لا تحتاج فلترة بالتاريخ عادة)
                 var packages = await _gymRepo.GetAllSubscriptionTypesAsync();
                 _allPackages = packages.ToList();
+                
+                // Populate Filter Combobox
+                cmbFilterPackage.SelectedIndexChanged -= CmbFilterPackage_SelectedIndexChanged;
+                cmbFilterPackage.Items.Clear();
+                cmbFilterPackage.Items.Add("الكل");
+                foreach(var p in _allPackages) cmbFilterPackage.Items.Add(p.TypeName);
+                if (cmbFilterPackage.SelectedIndex == -1) cmbFilterPackage.SelectedIndex = 0;
+                cmbFilterPackage.SelectedIndexChanged += CmbFilterPackage_SelectedIndexChanged;
 
                 // 3. عرض البيانات في الجداول بناءً على نص البحث الحالي (إن وجد)
                 BindGrids(txtBoxsearch.Text);
@@ -131,11 +145,15 @@ namespace beautyCenterSystem
             string term = searchTerm?.Trim().ToLower() ?? "";
 
             // فلترة الاشتراكات بناءً على نص البحث (بحث برقم الهاتف، أو اسم العميلة، أو الباقة)
+            string selectedPackage = cmbFilterPackage.SelectedIndex > 0 ? cmbFilterPackage.SelectedItem.ToString() : null;
+
             var filteredSubs = _allSubscriptions.Where(s =>
-                string.IsNullOrEmpty(term) ||
+                (string.IsNullOrEmpty(term) ||
                 (s.CustomerName != null && s.CustomerName.ToLower().Contains(term)) ||
                 (s.Phone != null && s.Phone.ToLower().Contains(term)) ||
-                (s.SubscriptionType != null && s.SubscriptionType.ToLower().Contains(term))
+                (s.SubscriptionType != null && s.SubscriptionType.ToLower().Contains(term)))
+                &&
+                (string.IsNullOrEmpty(selectedPackage) || s.SubscriptionType == selectedPackage)
             ).ToList();
 
             // توزيع الاشتراكات المفلترة على الجداول الثلاثة
@@ -171,6 +189,44 @@ namespace beautyCenterSystem
                 dgv.Columns["SessionsRemaining"].HeaderText = "الحصص المتبقية";
                 dgv.Columns["SubscriptionStatus"].HeaderText = "الحالة";
                 dgv.Columns["PaidAmount"].HeaderText = "المبلغ المدفوع";
+                if(dgv.Columns.Contains("TrainersNames")) dgv.Columns["TrainersNames"].HeaderText = "المدربات المشرفات";
+            }
+        }
+
+        private void CmbFilterPackage_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            BindGrids(txtBoxsearch.Text);
+        }
+
+        private async void BtnCancelSubscription_Click(object sender, EventArgs e)
+        {
+            if (dgvActive.CurrentRow != null)
+            {
+                var sub = dgvActive.CurrentRow.DataBoundItem as GymSubscriptionStatus;
+                if (sub != null)
+                {
+                    var result = MessageBox.Show($"هل أنت متأكد من إلغاء اشتراك '{sub.CustomerName}'؟ سيتم إرجاع المبلغ للخزينة.", "تأكيد الإلغاء", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (result == DialogResult.Yes)
+                    {
+                        try
+                        {
+                            bool success = await _gymRepo.CancelSubscriptionAsync(sub.SubscriptionID);
+                            if (success)
+                            {
+                                MessageBox.Show("تم إلغاء الاشتراك وإرجاع المبلغ للخزينة بنجاح.", "نجاح", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                await LoadAllDataAsync(dtpFrom.Value, dtpTo.Value);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"خطأ في إلغاء الاشتراك: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("الرجاء تحديد اشتراك من الجدول.");
             }
         }
 

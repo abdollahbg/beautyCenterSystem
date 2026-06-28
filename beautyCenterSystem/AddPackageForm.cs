@@ -56,6 +56,8 @@ namespace beautyCenterSystem
                 if (dgvTrainers.Columns.Contains("TrainerName")) dgvTrainers.Columns["TrainerName"].HeaderText = "اسم المدربة";
                 if (dgvTrainers.Columns.Contains("BaseAmount")) dgvTrainers.Columns["BaseAmount"].HeaderText = "حصة المدربة (إن وجدت)";
                 if (dgvTrainers.Columns.Contains("CommissionRate")) dgvTrainers.Columns["CommissionRate"].HeaderText = "النسبة %";
+                
+                SetupTrainersContextMenu();
             }
             catch (Exception ex)
             {
@@ -96,6 +98,23 @@ namespace beautyCenterSystem
 
             txtBaseAmount.Clear();
             txtCommissionRate.Clear();
+        }
+
+        private void SetupTrainersContextMenu()
+        {
+            var menu = new ContextMenuStrip();
+            var deleteItem = new ToolStripMenuItem("حذف المدربة");
+            deleteItem.Click += (s, ev) =>
+            {
+                if (dgvTrainers.SelectedRows.Count > 0)
+                {
+                    var row = dgvTrainers.SelectedRows[0];
+                    var trainer = (GymPackageTrainer)row.DataBoundItem;
+                    _packageTrainers.Remove(trainer);
+                }
+            };
+            menu.Items.Add(deleteItem);
+            dgvTrainers.ContextMenuStrip = menu;
         }
 
         private void ChkIsSessionBased_CheckedChanged(object sender, EventArgs e)

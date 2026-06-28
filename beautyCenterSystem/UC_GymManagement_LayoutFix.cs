@@ -22,12 +22,16 @@ namespace beautyCenterSystem
             
             this.btnCheckIn.Dock = DockStyle.Right;
             this.btnCheckIn.Width = 150;
+
+            this.btnCancelSubscription.Dock = DockStyle.Right;
+            this.btnCancelSubscription.Width = 150;
             
             this.btnPrintReceipt.Dock = DockStyle.Left;
             this.btnPrintReceipt.Width = 150;
 
             pnlActiveBottom.Controls.Add(this.btnNewSubscription);
             pnlActiveBottom.Controls.Add(this.btnCheckIn);
+            pnlActiveBottom.Controls.Add(this.btnCancelSubscription);
             pnlActiveBottom.Controls.Add(this.btnPrintReceipt);
             
             // Ensure DataGridView fills the rest

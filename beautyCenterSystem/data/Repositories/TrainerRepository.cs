@@ -109,7 +109,7 @@ namespace beautyCenterSystem.data.Repositories
                     (CASE WHEN GT.BaseAmount > 0 THEN GT.BaseAmount ELSE GS.PaidAmount END) * (GT.CommissionRate / 100.0)
                 ), 0)
                 FROM GymSubscriptionTrainers GT
-                JOIN CustomerGymSubscriptions GS ON GT.SubscriptionID = GS.SubscriptionID
+                JOIN CustomerGymSubscriptions GS ON GT.SubscriptionID = GS.SubscriptionID AND GS.IsActive = 1
                 WHERE GT.TrainerID = @ID";
             return await db.ExecuteScalarAsync<decimal>(sql, new { ID = trainerId });
         }
