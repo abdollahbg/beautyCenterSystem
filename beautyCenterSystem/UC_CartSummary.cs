@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -18,6 +18,18 @@ namespace beautyCenterSystem
         private decimal _currentTotal = 0;
         private bool _isRefreshing = false;
 
+        public string SaveButtonText
+        {
+            get => btnSave.Text;
+            set => btnSave.Text = value;
+        }
+
+        public string ItemColumnHeaderText
+        {
+            get => NameCol.HeaderText;
+            set => NameCol.HeaderText = value;
+        }
+
         public UC_CartSummary()
         {
             InitializeComponent();
@@ -27,6 +39,9 @@ namespace beautyCenterSystem
         private void SetupCustomEvents()
         {
             btnAddCustomer.Click += (s, e) => OnAddCustomerClicked?.Invoke(this, e);
+
+            btnSave.MouseEnter += (s, e) => btnSave.BackColor = Color.FromArgb(200, 20, 60);
+            btnSave.MouseLeave += (s, e) => btnSave.BackColor = Color.FromArgb(230, 25, 70);
 
             btnSave.Click += (s, e) =>
             {

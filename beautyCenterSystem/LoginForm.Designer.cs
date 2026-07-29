@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem
+namespace beautyCenterSystem
 {
     partial class LoginForm
     {
@@ -212,7 +212,6 @@
             Controls.Add(materialCard1);
             Controls.Add(label1);
             FormBorderStyle = FormBorderStyle.FixedDialog;
-            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "LoginForm";
             StartPosition = FormStartPosition.CenterScreen;

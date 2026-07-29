@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Data;
@@ -17,11 +17,21 @@ namespace beautyCenterSystem.Data.Repositories
             _dbFactory = dbFactory;
         }
 
-        public async Task<IEnumerable<Room>> GetAllAsync()
+        public async Task<IEnumerable<Room>> GetAllAsync(bool includeCafeteria = true, bool onlyCafeteria = false)
         {
             using var db = _dbFactory.CreateConnection();
-            // الـ * ستجلب IsCaffeteria تلقائياً الآن من الجدول
-            string sql = "SELECT * FROM Rooms WHERE IsActive = 1 ORDER BY RoomName";
+            string sql = "SELECT * FROM Rooms WHERE IsActive = 1";
+            
+            if (!includeCafeteria)
+            {
+                sql += " AND IsCaffeteria = 0";
+            }
+            else if (onlyCafeteria)
+            {
+                sql += " AND IsCaffeteria = 1";
+            }
+            
+            sql += " ORDER BY RoomName";
             return await db.QueryAsync<Room>(sql);
         }
 

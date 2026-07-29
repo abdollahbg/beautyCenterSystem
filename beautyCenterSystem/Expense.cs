@@ -20,5 +20,8 @@ namespace beautyCenterSystem
         // خصائص إضافية للعرض في الجداول (اختياري ولكن مفيد جداً)
         public string SafeName { get; set; } = string.Empty;
         public string IssuedByName { get; set; } = string.Empty;
+        
+        public int? RoomID { get; set; }
+        public string RoomName { get; set; } = string.Empty;
     }
 }

@@ -30,7 +30,35 @@ namespace beautyCenterSystem
             // ربط أحداث جدول التفاصيل برمجياً
             dgvDetails.CellFormatting += dgvDetails_CellFormatting;
             dgvDetails.CellContentClick += dgvDetails_CellContentClick;
+            dgvAppointments.CellFormatting += dgvAppointments_CellFormatting;
             dgvAppointments.DataBindingComplete += dgvAppointments_DataBindingComplete;
+        }
+
+        private void dgvAppointments_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.Value == null) return;
+            string colName = dgvAppointments.Columns[e.ColumnIndex].Name;
+            string value = e.Value.ToString();
+
+            if (colName == "PaymentMethod")
+            {
+                switch (value)
+                {
+                    case "Cash": e.Value = "نقدي"; break;
+                    case "Card": e.Value = "بطاقة"; break;
+                    case "BankTransfer": e.Value = "تحويل بنكي"; break;
+                }
+            }
+            else if (colName == "Status")
+            {
+                switch (value)
+                {
+                    case "Pending": e.Value = "قيد الانتظار"; break;
+                    case "InProgress": e.Value = "قيد التنفيذ"; break;
+                    case "Completed": e.Value = "مكتمل"; break;
+                    case "Canceled": e.Value = "ملغي"; break;
+                }
+            }
         }
 
         private async Task LoadAppointments()
@@ -39,14 +67,18 @@ namespace beautyCenterSystem
             try
             {
                 int? selectedAppId = null;
-                // حفظ الـ ID المحدد حالياً قبل تحديث البيانات
                 if (dgvAppointments.Columns.Contains("AppointmentID") && dgvAppointments.CurrentRow != null)
                 {
                     var cellValue = dgvAppointments.CurrentRow.Cells["AppointmentID"].Value;
                     if (cellValue != null) selectedAppId = Convert.ToInt32(cellValue);
                 }
 
-                DateTime selectedDate = dtpFilterDate.Value.Date;
+                DateTime? selectedDate = null;
+                if (chkEnableDateFilter.Checked)
+                {
+                    selectedDate = dtpFilterDate.Value.Date;
+                }
+
                 int selectedRoomId = 0;
                 if (cmbFilterRoom.SelectedValue != null && int.TryParse(cmbFilterRoom.SelectedValue.ToString(), out int rid))
                 {
@@ -56,8 +88,6 @@ namespace beautyCenterSystem
                 var appointments = await _appointmentRepo.GetByDateAsync(selectedDate, selectedRoomId > 0 ? selectedRoomId : (int?)null);
                 _allDayAppointments = appointments.ToList();
 
-                // مسح الأعمدة أولاً قبل إعادة تعيين DataSource
-                // هذا يمنع تراكم الأعمدة المضافة يدوياً (RowIndex) مع الأعمدة المولَّدة تلقائياً
                 dgvAppointments.DataSource = null;
                 dgvAppointments.Columns.Clear();
                 dgvAppointments.DataSource = _allDayAppointments;
@@ -65,7 +95,6 @@ namespace beautyCenterSystem
 
                 if (_allDayAppointments.Count > 0)
                 {
-                    // البحث عن الصف السابق بأمان
                     DataGridViewRow rowToSelect = null;
                     if (selectedAppId.HasValue)
                     {
@@ -80,19 +109,16 @@ namespace beautyCenterSystem
                     dgvAppointments.ClearSelection();
                     rowToSelect.Selected = true;
 
-                    // تأكد من وجود خلية ظاهرة قبل التحديد
                     if (dgvAppointments.FirstDisplayedCell != null)
                     {
                         dgvAppointments.CurrentCell = rowToSelect.Cells[dgvAppointments.FirstDisplayedCell.ColumnIndex];
                     }
 
-                    // تحميل التفاصيل باستخدام الدالة المساعدة
                     int currentAppId = Convert.ToInt32(rowToSelect.Cells["AppointmentID"].Value);
                     await RefreshDetails(currentAppId);
                 }
                 else
                 {
-                    // مسح شامل لشبكة التفاصيل عند عدم وجود نتائج
                     dgvDetails.DataSource = null;
                     dgvDetails.Columns.Clear();
                 }
@@ -104,6 +130,15 @@ namespace beautyCenterSystem
             finally
             {
                 _isLoadingAppointments = false;
+            }
+        }
+
+        private async void chkEnableDateFilter_CheckedChanged(object sender, EventArgs e)
+        {
+            dtpFilterDate.Enabled = chkEnableDateFilter.Checked;
+            if (!_isLoadingAppointments)
+            {
+                await LoadAppointments();
             }
         }
 
@@ -129,7 +164,7 @@ namespace beautyCenterSystem
                     {
                         Name = "RowIndex",
                         HeaderText = "#",
-                        Width = 36,
+                        Width = 30,
                         ReadOnly = true,
                         SortMode = DataGridViewColumnSortMode.NotSortable
                     };
@@ -148,7 +183,7 @@ namespace beautyCenterSystem
                     {
                         Name = "AppointmentTime",
                         HeaderText = "الوقت",
-                        Width = 80,
+                        Width = 65,
                         ReadOnly = true,
                         SortMode = DataGridViewColumnSortMode.NotSortable
                     };
@@ -185,29 +220,37 @@ namespace beautyCenterSystem
                 {
                     dgvAppointments.Columns["AppointmentDate"].HeaderText = "التاريخ";
                     dgvAppointments.Columns["AppointmentDate"].DefaultCellStyle.Format = "yyyy/MM/dd";
-                    dgvAppointments.Columns["AppointmentDate"].Width = 95;
+                    dgvAppointments.Columns["AppointmentDate"].Width = 80;
                 }
 
                 if (dgvAppointments.Columns.Contains("CustomerName"))
                 {
                     dgvAppointments.Columns["CustomerName"].HeaderText = "اسم العميلة";
                     dgvAppointments.Columns["CustomerName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                    dgvAppointments.Columns["CustomerName"].MinimumWidth = 120;
+                    dgvAppointments.Columns["CustomerName"].MinimumWidth = 90;
                 }
 
                 if (dgvAppointments.Columns.Contains("TotalPrice"))
                 {
                     dgvAppointments.Columns["TotalPrice"].HeaderText = "الإجمالي";
-                    dgvAppointments.Columns["TotalPrice"].Width = 80;
+                    dgvAppointments.Columns["TotalPrice"].Width = 60;
                     dgvAppointments.Columns["TotalPrice"].DefaultCellStyle.Format = "N2";
                 }
 
                 if (dgvAppointments.Columns.Contains("Status"))
                 {
                     dgvAppointments.Columns["Status"].HeaderText = "الحالة";
-                    dgvAppointments.Columns["Status"].Width = 90;
+                    dgvAppointments.Columns["Status"].Width = 65;
                 }
 
+                if (dgvAppointments.Columns.Contains("PaymentMethod"))
+                {
+                    dgvAppointments.Columns["PaymentMethod"].HeaderText = "طريقة الدفع";
+                    dgvAppointments.Columns["PaymentMethod"].Width = 70;
+                }
+
+                dgvAppointments.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+                dgvAppointments.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
                 dgvAppointments.ReadOnly = true;
             }
             catch (Exception ex)
@@ -227,14 +270,12 @@ namespace beautyCenterSystem
                 btnCol.Name = "ActionBtn";
                 btnCol.HeaderText = "إجراء";
                 btnCol.FlatStyle = FlatStyle.Flat;
-                btnCol.Width = 80;
                 dgvDetails.Columns.Add(btnCol); // إضافة في النهاية
             }
-            else
-            {
-                // التأكد من بقائه في الأخير حتى بعد تحديث الـ DataSource
-                dgvDetails.Columns["ActionBtn"].DisplayIndex = dgvDetails.Columns.Count - 1;
-            }
+            
+            // التأكد من بقائه في الأخير حتى بعد تحديث الـ DataSource
+            dgvDetails.Columns["ActionBtn"].DisplayIndex = dgvDetails.Columns.Count - 1;
+            dgvDetails.Columns["ActionBtn"].Width = 25;
 
             // 2. إخفاء الأعمدة التي تسبب زحاماً
             string[] hiddenCols = { "ServiceID", "MaterialID", "AppointmentID", "DetailID", "EmployeeID", "CommissionAmount", "IsMaterial" };
@@ -246,19 +287,20 @@ namespace beautyCenterSystem
             if (dgvDetails.Columns.Contains("RoomName"))
             {
                 dgvDetails.Columns["RoomName"].HeaderText = "الغرفة";
+                dgvDetails.Columns["RoomName"].Width = 70;
             }
 
             if (dgvDetails.Columns.Contains("Quantity"))
             {
                 dgvDetails.Columns["Quantity"].HeaderText = "الكمية";
-                dgvDetails.Columns["Quantity"].Width = 50;
+                dgvDetails.Columns["Quantity"].Width = 45;
             }
 
             if (dgvDetails.Columns.Contains("Price"))
             {
                 dgvDetails.Columns["Price"].HeaderText = "السعر";
                 dgvDetails.Columns["Price"].DefaultCellStyle.Format = "N2";
-                dgvDetails.Columns["Price"].Width = 70;
+                dgvDetails.Columns["Price"].Width = 50;
             }
 
             // 3. تعريب وتعديل عرض الأعمدة
@@ -266,43 +308,62 @@ namespace beautyCenterSystem
             {
                 dgvDetails.Columns["Name"].HeaderText = "الخدمة/المنتج";
                 dgvDetails.Columns["Name"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                dgvDetails.Columns["Name"].MinimumWidth = 80;
             }
 
             if (dgvDetails.Columns.Contains("EmployeeName"))
             {
                 dgvDetails.Columns["EmployeeName"].HeaderText = "الموظفة";
-                dgvDetails.Columns["EmployeeName"].Width = 100;
+                dgvDetails.Columns["EmployeeName"].Width = 80;
             }
 
             if (dgvDetails.Columns.Contains("ActualStartTime"))
             {
                 dgvDetails.Columns["ActualStartTime"].HeaderText = "بدء";
                 dgvDetails.Columns["ActualStartTime"].DefaultCellStyle.Format = "hh:mm tt";
-                dgvDetails.Columns["ActualStartTime"].Width = 70;
+                dgvDetails.Columns["ActualStartTime"].Width = 50;
             }
 
             if (dgvDetails.Columns.Contains("ActualEndTime"))
             {
                 dgvDetails.Columns["ActualEndTime"].HeaderText = "نهاية";
                 dgvDetails.Columns["ActualEndTime"].DefaultCellStyle.Format = "hh:mm tt";
-                dgvDetails.Columns["ActualEndTime"].Width = 70;
+                dgvDetails.Columns["ActualEndTime"].Width = 50;
             }
 
             if (dgvDetails.Columns.Contains("Status"))
             {
                 dgvDetails.Columns["Status"].HeaderText = "الحالة";
-                dgvDetails.Columns["Status"].Width = 85;
+                dgvDetails.Columns["Status"].Width = 60;
             }
 
+
+            dgvDetails.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+            dgvDetails.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             dgvDetails.ReadOnly = true;
             if (dgvDetails.Columns.Contains("ActionBtn"))
                 dgvDetails.Columns["ActionBtn"].ReadOnly = false;
         }
 
+
+
         private void dgvDetails_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
+            if (e.Value != null && dgvDetails.Columns[e.ColumnIndex].Name == "Status")
+            {
+                string val = e.Value.ToString();
+                switch (val)
+                {
+                    case "Pending": e.Value = "قيد الانتظار"; break;
+                    case "InProgress": e.Value = "قيد التنفيذ"; break;
+                    case "Completed": e.Value = "مكتمل"; break;
+                    case "Canceled": e.Value = "ملغي"; break;
+                }
+            }
+
             if (dgvDetails.Columns[e.ColumnIndex].Name == "ActionBtn" && e.RowIndex >= 0)
             {
+                if (!dgvDetails.Columns.Contains("Status")) return;
                 var row = dgvDetails.Rows[e.RowIndex];
                 string status = row.Cells["Status"].Value?.ToString() ?? "Pending";
 
@@ -340,6 +401,7 @@ namespace beautyCenterSystem
 
             if (e.RowIndex >= 0 && dgvDetails.Columns[e.ColumnIndex].Name == "ActionBtn")
             {
+                if (!dgvDetails.Columns.Contains("Status")) return;
                 var row = dgvDetails.Rows[e.RowIndex];
                 string status = row.Cells["Status"].Value?.ToString() ?? "Pending";
 
@@ -532,14 +594,36 @@ namespace beautyCenterSystem
                 string customerName = selectedRow.Cells["CustomerName"].Value?.ToString() ?? "";
                 string currentStatus = selectedRow.Cells["Status"].Value?.ToString() ?? "";
 
-                if (currentStatus == "Cancelled" || currentStatus == "Completed") return;
+                if (currentStatus == "Cancelled") return;
 
-                var confirmResult = MessageBox.Show($"هل أنت متأكد من إلغاء حجز العميلة ({customerName})؟", "تأكيد الإلغاء", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                if (confirmResult == DialogResult.Yes)
+                if (currentStatus == "Completed")
                 {
-                    bool success = await _appointmentRepo.UpdateStatusAsync(appId, "Cancelled");
-                    if (success) await LoadAppointments();
+                    if (!PermissionManager.Can("CancelCompletedAppointments"))
+                    {
+                        MessageBox.Show("ليس لديك صلاحية لإلغاء الحجوزات المكتملة واسترداد قيمتها.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    var confirmRefund = MessageBox.Show($"هذا الحجز مكتمل وتم دفع مبلغه. هل أنت متأكد من إلغاء حجز العميلة ({customerName})؟\n\n(سيتم سحب المبلغ من الخزنة لردّه للزبون، وإرجاع المواد للمخزن، وإلغاء عمولات الموظفات)", "تأكيد الإلغاء والاسترداد", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (confirmRefund == DialogResult.Yes)
+                    {
+                        bool success = await _appointmentRepo.ReverseCompletedAppointmentAsync(appId, "Cancelled");
+                        if (success) 
+                        {
+                            MessageBox.Show("تم إلغاء الحجز واسترداد المبلغ وإرجاع المواد بنجاح.", "نجاح", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            await LoadAppointments();
+                        }
+                    }
+                }
+                else
+                {
+                    var confirmResult = MessageBox.Show($"هل أنت متأكد من إلغاء حجز العميلة ({customerName})؟", "تأكيد الإلغاء", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                    if (confirmResult == DialogResult.Yes)
+                    {
+                        bool success = await _appointmentRepo.UpdateStatusAsync(appId, "Cancelled");
+                        if (success) await LoadAppointments();
+                    }
                 }
             }
             catch (Exception ex) { MessageBox.Show(ex.Message); }
@@ -565,10 +649,37 @@ namespace beautyCenterSystem
                     return;
                 }
 
+                if (status == "Completed")
+                {
+                    var confirmEdit = MessageBox.Show(
+                        "هذا الحجز مكتمل وتم دفعه مسبقاً. تعديله الآن سيقوم بإلغاء الدفع واسترداد مبلغه للخزينة، وعكس المواد والعمولات، وإرجاع الحجز لحالة (قيد الانتظار) لتتمكن من إضافة أو إزالة خدمات ثم الدفع من جديد.\n\nهل ترغب بالاستمرار والتعديل؟", 
+                        "تأكيد التعديل الجذري", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                    if (confirmEdit == DialogResult.Yes)
+                    {
+                        bool success = await _appointmentRepo.ReverseCompletedAppointmentAsync(appId, "Pending");
+                        if (!success)
+                        {
+                            MessageBox.Show("فشلت عملية تهيئة الحجز للتعديل.", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        return; // المستخدم ألغى التعديل
+                    }
+                }
+
                 using (var editForm = new AddAppointmentForm(appId))
                 {
                     if (editForm.ShowDialog() == DialogResult.OK)
                     {
+                        await LoadAppointments();
+                    }
+                    else if (status == "Completed")
+                    {
+                        // في حالة قام المستخدم بفتح التعديل ثم أغلق الشاشة بدون حفظ، 
+                        // الموعد أصبح Pending. نحدث الجدول لنعكس الحالة الجديدة.
                         await LoadAppointments();
                     }
                 }

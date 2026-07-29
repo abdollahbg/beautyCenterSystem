@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem
+namespace beautyCenterSystem
 {
     partial class MainDashBoard
     {

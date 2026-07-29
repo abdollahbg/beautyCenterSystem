@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,5 +15,6 @@ namespace beautyCenterSystem.viewsmodels
         public DateTime ExpenseDate { get; set; }
         public string PaidFromSafe { get; set; }
         public string IssuedBy { get; set; }
+        public string RoomName { get; set; }
     }
 }

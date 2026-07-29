@@ -112,6 +112,12 @@ namespace beautyCenterSystem
         // تحديث الدالة لتقبل التواريخ كمعاملات
         private async Task LoadAllDataAsync(DateTime? fromDate = null, DateTime? toDate = null)
         {
+            if (!chkEnableDateFilter.Checked)
+            {
+                fromDate = null;
+                toDate = null;
+            }
+
             try
             {
                 // 1. جلب الاشتراكات من قاعدة البيانات مع تطبيق الفلترة بالتاريخ
@@ -247,6 +253,13 @@ namespace beautyCenterSystem
         private void DgvPackages_SelectionChanged(object? sender, EventArgs e)
         {
             btnEditPackage.Enabled = dgvPackages.CurrentRow != null && dgvPackages.CurrentRow.Selected;
+        }
+
+        private async void chkEnableDateFilter_CheckedChanged(object sender, EventArgs e)
+        {
+            dtpFrom.Enabled = chkEnableDateFilter.Checked;
+            dtpTo.Enabled = chkEnableDateFilter.Checked;
+            await LoadAllDataAsync(dtpFrom.Value, dtpTo.Value);
         }
 
         private async void BtnAddNewPackage_Click(object? sender, EventArgs e)

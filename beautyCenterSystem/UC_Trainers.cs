@@ -74,6 +74,17 @@ namespace beautyCenterSystem
                 DataPropertyName = "Phone",
                 Width = 150
             });
+
+            // عمود المستحقات الحالية
+            dgvTrainers.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "CurrentDues",
+                HeaderText = "المستحقات الحالية",
+                DataPropertyName = "CurrentDues",
+                DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" },
+                Width = 120,
+                ReadOnly = true
+            });
         }
 
         private async Task LoadTrainersData()
@@ -86,7 +97,8 @@ namespace beautyCenterSystem
                 {
                     TrainerID = d.TrainerID,
                     TrainerName = d.TrainerName,
-                    Phone = d.Phone
+                    Phone = d.Phone,
+                    CurrentDues = d.CurrentDues
                 }).ToList();
 
                 dgvTrainers.DataSource = _allTrainers;
@@ -219,5 +231,6 @@ namespace beautyCenterSystem
         public int TrainerID { get; set; }
         public string TrainerName { get; set; }
         public string Phone { get; set; }
+        public decimal CurrentDues { get; set; }
     }
 }

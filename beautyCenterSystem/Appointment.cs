@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using beautyCenterSystem.viewsmodels;
 
@@ -11,6 +11,7 @@ public class Appointment
     public decimal TotalPrice { get; set; }
     public string Status { get; set; } = "Pending";
     public int CreatedBy { get; set; }
+    public string PaymentMethod { get; set; } // Cash, Card or null if not completed
 
     // --- التعديلات الجديدة لتوقيت العميل داخل المركز ---
     public DateTime? ArrivalTime { get; set; }  // وقت وصول العميلة للمركز

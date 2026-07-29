@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem.data.Repositories
+namespace beautyCenterSystem.data.Repositories
 {
     partial class FrmDailyClosure
     {
@@ -238,7 +238,7 @@
             txtActualCash.Depth = 0;
             txtActualCash.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
             txtActualCash.HideSelection = true;
-            txtActualCash.Hint = "أدخل المبلغ الفعلي الموجود في الدرج (كاش)";
+            txtActualCash.Hint = "ادخل المبلغ الموجود فالدرج والمبلغ الموجود في حساب البطاقة";
             txtActualCash.LeadingIcon = null;
             txtActualCash.Location = new Point(20, 29);
             txtActualCash.Margin = new Padding(4, 3, 4, 3);

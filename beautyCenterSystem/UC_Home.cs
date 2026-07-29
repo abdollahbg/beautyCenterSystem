@@ -236,5 +236,19 @@ namespace beautyCenterSystem
                 await RefreshDashboard();
             }
         }
+        private void btnDailyClosing_Click(object sender, EventArgs e)
+        {
+            if (PermissionManager.Can("AccessFinancials") || PermissionManager.Can("AccessFinancialReports"))
+            {
+                using (var frm = new FrmDailyClosure())
+                {
+                    frm.ShowDialog();
+                }
+            }
+            else
+            {
+                MessageBox.Show("عذراً، لا تملك صلاحية الوصول للقسم المالي.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+            }
+        }
     }
 }

@@ -20,7 +20,26 @@ namespace beautyCenterSystem.data.Repositories
         {
             using (var db = _connectionFactory.CreateConnection())
             {
-                var sql = "SELECT * FROM Trainers WHERE IsActive = 1 ORDER BY TrainerName";
+                var sql = @"
+                    SELECT 
+                        T.*,
+                        ISNULL(Earned.TotalEarned, 0) - ISNULL(Paid.TotalPaid, 0) AS CurrentDues
+                    FROM Trainers T
+                    LEFT JOIN (
+                        SELECT 
+                            GT.TrainerID, 
+                            SUM((CASE WHEN GT.BaseAmount > 0 THEN GT.BaseAmount ELSE GS.PaidAmount END) * (GT.CommissionRate / 100.0)) AS TotalEarned
+                        FROM GymSubscriptionTrainers GT
+                        JOIN CustomerGymSubscriptions GS ON GT.SubscriptionID = GS.SubscriptionID AND GS.IsActive = 1
+                        GROUP BY GT.TrainerID
+                    ) Earned ON T.TrainerID = Earned.TrainerID
+                    LEFT JOIN (
+                        SELECT TrainerID, SUM(AmountPaid) AS TotalPaid
+                        FROM TrainerPayments
+                        GROUP BY TrainerID
+                    ) Paid ON T.TrainerID = Paid.TrainerID
+                    WHERE T.IsActive = 1 
+                    ORDER BY T.TrainerName";
                 return await db.QueryAsync<Trainer>(sql);
             }
         }
@@ -82,21 +101,6 @@ namespace beautyCenterSystem.data.Repositories
                     INSERT INTO TrainerPayments (TrainerID, SafeID, AmountPaid, PaymentDate, IssuedBy, Notes)
                     VALUES (@TrainerID, @SafeID, @AmountPaid, @PaymentDate, @IssuedBy, @Notes);";
                 await db.ExecuteAsync(sql, payment);
-
-                // Add to expenses
-                var expenseSql = @"
-                    INSERT INTO Expenses (ExpenseName, Category, Amount, ExpenseDate, PaidFromSafeID, IssuedBy, Notes)
-                    VALUES (@ExpenseName, @Category, @Amount, @PaymentDate, @SafeID, @IssuedBy, @Notes)";
-                
-                await db.ExecuteAsync(expenseSql, new {
-                    ExpenseName = "صرف مستحقات مدربة",
-                    Category = "رواتب وعمولات",
-                    Amount = payment.AmountPaid,
-                    PaymentDate = payment.PaymentDate,
-                    SafeID = payment.SafeID,
-                    IssuedBy = payment.IssuedBy,
-                    Notes = payment.Notes
-                });
             }
         }
 
@@ -143,13 +147,7 @@ namespace beautyCenterSystem.data.Repositories
                     new { Amount = amount, SafeID = safeId },
                     trans);
 
-                // 3. تسجيل كمصروف
-                string expenseSql = @"
-                    INSERT INTO Expenses (ExpenseName, Category, Amount, ExpenseDate, PaidFromSafeID, IssuedBy, Notes)
-                    VALUES (N'صرف مستحقات مدربة', N'رواتب وعمولات', @Amount, GETDATE(), @SafeID, @UserID, @Notes)";
-                await db.ExecuteAsync(expenseSql,
-                    new { Amount = amount, SafeID = safeId, UserID = userId, Notes = notes },
-                    trans);
+                // (تمت الإزالة لتجنب الازدواجية في الحسابات: لا نسجل مدفوعات المدربات كمصروفات)
 
                 trans.Commit();
                 return true;

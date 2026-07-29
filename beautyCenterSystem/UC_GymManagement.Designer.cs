@@ -25,6 +25,7 @@ namespace beautyCenterSystem
             dtpTo = new DateTimePicker();
             lblTo = new Label();
             dtpFrom = new DateTimePicker();
+            chkEnableDateFilter = new CheckBox();
             lblFrom = new Label();
             txtBoxsearch = new MaterialTextBox2();
             lblTitle = new Label();
@@ -66,6 +67,7 @@ namespace beautyCenterSystem
             pnlHeader.Controls.Add(dtpTo);
             pnlHeader.Controls.Add(lblTo);
             pnlHeader.Controls.Add(dtpFrom);
+            pnlHeader.Controls.Add(chkEnableDateFilter);
             pnlHeader.Controls.Add(lblFrom);
             pnlHeader.Controls.Add(flpSearch);
             pnlHeader.Controls.Add(lblTitle);
@@ -123,6 +125,19 @@ namespace beautyCenterSystem
             lblFrom.Size = new Size(52, 15);
             lblFrom.TabIndex = 3;
             lblFrom.Text = "من تاريخ:";
+            // 
+            // chkEnableDateFilter
+            // 
+            chkEnableDateFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkEnableDateFilter.AutoSize = true;
+            chkEnableDateFilter.Location = new Point(620, 73);
+            chkEnableDateFilter.Name = "chkEnableDateFilter";
+            chkEnableDateFilter.Size = new Size(81, 19);
+            chkEnableDateFilter.TabIndex = 99;
+            chkEnableDateFilter.Text = "تفعيل الفلتر";
+            chkEnableDateFilter.Checked = true;
+            chkEnableDateFilter.UseVisualStyleBackColor = true;
+            chkEnableDateFilter.CheckedChanged += new EventHandler(chkEnableDateFilter_CheckedChanged);
             // 
             // txtBoxsearch
             // 
@@ -383,9 +398,10 @@ namespace beautyCenterSystem
         private Panel pnlHeader;
         private Label lblTitle;
 
-        private Label lblFrom;
-        private DateTimePicker dtpFrom;
         private Label lblTo;
+        private DateTimePicker dtpFrom;
+        private CheckBox chkEnableDateFilter;
+        private Label lblFrom;
         private DateTimePicker dtpTo;
         private Button btnFilter;
 

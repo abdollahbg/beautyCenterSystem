@@ -30,6 +30,7 @@ namespace beautyCenterSystem
         {
             flowLayoutPanel1 = new FlowLayoutPanel();
             label1 = new Label();
+            chkEnableDateFilter = new CheckBox();
             dtpFilterDate = new DateTimePicker();
             cmbFilterRoom = new System.Windows.Forms.ComboBox();
             iconPictureBox1 = new System.Windows.Forms.Label();
@@ -59,6 +60,7 @@ namespace beautyCenterSystem
             // flowLayoutPanel1
             // 
             flowLayoutPanel1.BackColor = Color.WhiteSmoke;
+            flowLayoutPanel1.Controls.Add(chkEnableDateFilter);
             flowLayoutPanel1.Controls.Add(label1);
             flowLayoutPanel1.Controls.Add(dtpFilterDate);
             flowLayoutPanel1.Controls.Add(cmbFilterRoom);
@@ -75,24 +77,33 @@ namespace beautyCenterSystem
             flowLayoutPanel1.WrapContents = false;
             // 
             // label1
-            // 
             label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
-            label1.ForeColor = Color.FromArgb(64, 64, 64);
-            label1.Location = new Point(789, 20);
-            label1.Margin = new Padding(3, 0, 15, 0);
+            label1.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label1.Location = new Point(789, 27);
+            label1.Margin = new Padding(3, 15, 3, 0);
             label1.Name = "label1";
-            label1.RightToLeft = RightToLeft.Yes;
-            label1.Size = new Size(151, 32);
+            label1.Size = new Size(100, 21);
             label1.TabIndex = 0;
-            label1.Text = "مواعيد اليوم";
-            label1.TextAlign = ContentAlignment.MiddleCenter;
+            label1.Text = "تاريخ الحجز:";
+            // 
+            // chkEnableDateFilter
+            // 
+            chkEnableDateFilter.AutoSize = true;
+            chkEnableDateFilter.Font = new Font("Segoe UI", 12F);
+            chkEnableDateFilter.Location = new Point(660, 27);
+            chkEnableDateFilter.Margin = new Padding(10, 13, 3, 0);
+            chkEnableDateFilter.Name = "chkEnableDateFilter";
+            chkEnableDateFilter.Size = new Size(120, 25);
+            chkEnableDateFilter.TabIndex = 99;
+            chkEnableDateFilter.Text = "تفعيل الفلتر";
+            chkEnableDateFilter.Checked = true;
+            chkEnableDateFilter.CheckedChanged += chkEnableDateFilter_CheckedChanged;
             // 
             // dtpFilterDate
             // 
             dtpFilterDate.Font = new Font("Segoe UI", 12F);
             dtpFilterDate.Location = new Point(561, 23);
-            dtpFilterDate.Margin = new Padding(15, 3, 15, 3);
+            dtpFilterDate.Margin = new Padding(15, 11, 10, 3);
             dtpFilterDate.Name = "dtpFilterDate";
             dtpFilterDate.Size = new Size(210, 29);
             dtpFilterDate.TabIndex = 1;
@@ -105,9 +116,9 @@ namespace beautyCenterSystem
             cmbFilterRoom.Font = new Font("Segoe UI", 12F);
             cmbFilterRoom.FormattingEnabled = true;
             cmbFilterRoom.Location = new Point(316, 23);
-            cmbFilterRoom.Margin = new Padding(15, 3, 15, 3);
+            cmbFilterRoom.Margin = new Padding(15, 11, 10, 3);
             cmbFilterRoom.Name = "cmbFilterRoom";
-            cmbFilterRoom.Size = new Size(215, 29);
+            cmbFilterRoom.Size = new Size(180, 29);
             cmbFilterRoom.TabIndex = 8;
             cmbFilterRoom.SelectedIndexChanged += cmbFilterRoom_SelectedIndexChanged;
             // 
@@ -118,7 +129,7 @@ namespace beautyCenterSystem
             iconPictureBox1.Font = new Font("Segoe UI Emoji", 16F);
             iconPictureBox1.Text = "🔍";
             iconPictureBox1.Location = new Point(506, 23);
-            iconPictureBox1.Margin = new Padding(5, 3, 15, 3);
+            iconPictureBox1.Margin = new Padding(5, 8, 15, 3);
             iconPictureBox1.Name = "iconPictureBox1";
             iconPictureBox1.Size = new Size(35, 35);
             iconPictureBox1.TabIndex = 7;
@@ -166,7 +177,7 @@ namespace beautyCenterSystem
             btnRefresh.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             btnRefresh.ForeColor = Color.FromArgb(64, 64, 64);
             btnRefresh.Location = new Point(40, 23);
-            btnRefresh.Margin = new Padding(15, 3, 3, 3);
+            btnRefresh.Margin = new Padding(15, 3, 15, 3);
             btnRefresh.Name = "btnRefresh";
             btnRefresh.Size = new Size(89, 48);
             btnRefresh.TabIndex = 8;
@@ -297,7 +308,7 @@ namespace beautyCenterSystem
             // 
             splitContainer1.Panel2.Controls.Add(dgvAppointments);
             splitContainer1.Size = new Size(970, 474);
-            splitContainer1.SplitterDistance = 580;
+            splitContainer1.SplitterDistance = 490;
             splitContainer1.SplitterWidth = 10;
             splitContainer1.TabIndex = 0;
             // 
@@ -355,6 +366,7 @@ namespace beautyCenterSystem
 
         private FlowLayoutPanel flowLayoutPanel1;
         private Label label1;
+        private CheckBox chkEnableDateFilter;
         private DateTimePicker dtpFilterDate;
         private System.Windows.Forms.ComboBox cmbFilterRoom;
         private MaterialSkin.Controls.MaterialTextBox2 txtSearchCustomer;

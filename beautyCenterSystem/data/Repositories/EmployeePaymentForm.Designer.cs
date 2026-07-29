@@ -20,10 +20,7 @@ namespace beautyCenterSystem.data.Repositories
             PnlHeader = new Panel();
             label1 = new Label();
             lblEmployee = new Label();
-            lblTotalEarned = new Label();
-            txtTotalEarned = new MaterialSkin.Controls.MaterialTextBox2();
-            lblTotalPaid = new Label();
-            txtTotalPaid = new MaterialSkin.Controls.MaterialTextBox2();
+
             lblRemaining = new Label();
             txtRemainingBalance = new MaterialSkin.Controls.MaterialTextBox2();
             lblTreasury = new Label();
@@ -67,98 +64,18 @@ namespace beautyCenterSystem.data.Repositories
             lblEmployee.TabIndex = 1;
             lblEmployee.Text = "اسم الموظفة";
             // 
-            // lblTotalEarned
             // 
-            lblTotalEarned.AutoSize = true;
-            lblTotalEarned.Font = new Font("Segoe UI", 10F);
-            lblTotalEarned.Location = new Point(400, 175);
-            lblTotalEarned.Name = "lblTotalEarned";
-            lblTotalEarned.Size = new Size(120, 19);
-            lblTotalEarned.TabIndex = 3;
-            lblTotalEarned.Text = "إجمالي المستحقات";
-            // 
-            // txtTotalEarned
-            // 
-            txtTotalEarned.AnimateReadOnly = false;
-            txtTotalEarned.AutoCompleteMode = AutoCompleteMode.None;
-            txtTotalEarned.AutoCompleteSource = AutoCompleteSource.None;
-            txtTotalEarned.BackgroundImageLayout = ImageLayout.None;
-            txtTotalEarned.CharacterCasing = CharacterCasing.Normal;
-            txtTotalEarned.Depth = 0;
-            txtTotalEarned.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            txtTotalEarned.HideSelection = true;
-            txtTotalEarned.LeadingIcon = null;
-            txtTotalEarned.Location = new Point(50, 160);
-            txtTotalEarned.MaxLength = 50;
-            txtTotalEarned.MouseState = MaterialSkin.MouseState.OUT;
-            txtTotalEarned.Name = "txtTotalEarned";
-            txtTotalEarned.PasswordChar = '\0';
-            txtTotalEarned.PrefixSuffixText = null;
-            txtTotalEarned.ReadOnly = true;
-            txtTotalEarned.RightToLeft = RightToLeft.Yes;
-            txtTotalEarned.SelectedText = "";
-            txtTotalEarned.SelectionLength = 0;
-            txtTotalEarned.SelectionStart = 0;
-            txtTotalEarned.ShortcutsEnabled = true;
-            txtTotalEarned.Size = new Size(320, 48);
-            txtTotalEarned.TabIndex = 4;
-            txtTotalEarned.TabStop = false;
-            txtTotalEarned.Text = "0.00";
-            txtTotalEarned.TextAlign = HorizontalAlignment.Center;
-            txtTotalEarned.TrailingIcon = null;
-            txtTotalEarned.UseSystemPasswordChar = false;
-            // 
-            // lblTotalPaid
-            // 
-            lblTotalPaid.AutoSize = true;
-            lblTotalPaid.Font = new Font("Segoe UI", 10F);
-            lblTotalPaid.Location = new Point(400, 245);
-            lblTotalPaid.Name = "lblTotalPaid";
-            lblTotalPaid.Size = new Size(110, 19);
-            lblTotalPaid.TabIndex = 5;
-            lblTotalPaid.Text = "إجمالي المصروف";
-            // 
-            // txtTotalPaid
-            // 
-            txtTotalPaid.AnimateReadOnly = false;
-            txtTotalPaid.AutoCompleteMode = AutoCompleteMode.None;
-            txtTotalPaid.AutoCompleteSource = AutoCompleteSource.None;
-            txtTotalPaid.BackgroundImageLayout = ImageLayout.None;
-            txtTotalPaid.CharacterCasing = CharacterCasing.Normal;
-            txtTotalPaid.Depth = 0;
-            txtTotalPaid.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            txtTotalPaid.HideSelection = true;
-            txtTotalPaid.LeadingIcon = null;
-            txtTotalPaid.Location = new Point(50, 230);
-            txtTotalPaid.MaxLength = 50;
-            txtTotalPaid.MouseState = MaterialSkin.MouseState.OUT;
-            txtTotalPaid.Name = "txtTotalPaid";
-            txtTotalPaid.PasswordChar = '\0';
-            txtTotalPaid.PrefixSuffixText = null;
-            txtTotalPaid.ReadOnly = true;
-            txtTotalPaid.RightToLeft = RightToLeft.Yes;
-            txtTotalPaid.SelectedText = "";
-            txtTotalPaid.SelectionLength = 0;
-            txtTotalPaid.SelectionStart = 0;
-            txtTotalPaid.ShortcutsEnabled = true;
-            txtTotalPaid.Size = new Size(320, 48);
-            txtTotalPaid.TabIndex = 6;
-            txtTotalPaid.TabStop = false;
-            txtTotalPaid.Text = "0.00";
-            txtTotalPaid.TextAlign = HorizontalAlignment.Center;
-            txtTotalPaid.TrailingIcon = null;
-            txtTotalPaid.UseSystemPasswordChar = false;
             // 
             // lblRemaining
             // 
             lblRemaining.AutoSize = true;
             lblRemaining.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblRemaining.ForeColor = Color.DarkGreen;
-            lblRemaining.Location = new Point(400, 315);
+            lblRemaining.Location = new Point(400, 175);
             lblRemaining.Name = "lblRemaining";
-            lblRemaining.Size = new Size(104, 20);
+            lblRemaining.Size = new Size(130, 20);
             lblRemaining.TabIndex = 7;
-            lblRemaining.Text = "الرصيد المتبقي";
+            lblRemaining.Text = "مستحقات الموظفة";
             // 
             // txtRemainingBalance
             // 
@@ -171,7 +88,7 @@ namespace beautyCenterSystem.data.Repositories
             txtRemainingBalance.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Bold, GraphicsUnit.Pixel);
             txtRemainingBalance.HideSelection = true;
             txtRemainingBalance.LeadingIcon = null;
-            txtRemainingBalance.Location = new Point(50, 300);
+            txtRemainingBalance.Location = new Point(50, 160);
             txtRemainingBalance.MaxLength = 50;
             txtRemainingBalance.MouseState = MaterialSkin.MouseState.OUT;
             txtRemainingBalance.Name = "txtRemainingBalance";
@@ -195,7 +112,7 @@ namespace beautyCenterSystem.data.Repositories
             // 
             lblTreasury.AutoSize = true;
             lblTreasury.Font = new Font("Segoe UI", 11F);
-            lblTreasury.Location = new Point(400, 385);
+            lblTreasury.Location = new Point(400, 245);
             lblTreasury.Name = "lblTreasury";
             lblTreasury.Size = new Size(52, 20);
             lblTreasury.TabIndex = 9;
@@ -207,7 +124,7 @@ namespace beautyCenterSystem.data.Repositories
             cmbSafe.FlatStyle = FlatStyle.Flat;
             cmbSafe.Font = new Font("Segoe UI", 11F);
             cmbSafe.FormattingEnabled = true;
-            cmbSafe.Location = new Point(50, 370);
+            cmbSafe.Location = new Point(50, 230);
             cmbSafe.MaxDropDownItems = 4;
             cmbSafe.Name = "cmbSafe";
             cmbSafe.RightToLeft = RightToLeft.Yes;
@@ -218,7 +135,7 @@ namespace beautyCenterSystem.data.Repositories
             // 
             lblAmount.AutoSize = true;
             lblAmount.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            lblAmount.Location = new Point(400, 455);
+            lblAmount.Location = new Point(400, 315);
             lblAmount.Name = "lblAmount";
             lblAmount.Size = new Size(124, 20);
             lblAmount.TabIndex = 11;
@@ -235,7 +152,7 @@ namespace beautyCenterSystem.data.Repositories
             txtAmountToPay.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
             txtAmountToPay.HideSelection = true;
             txtAmountToPay.LeadingIcon = null;
-            txtAmountToPay.Location = new Point(50, 440);
+            txtAmountToPay.Location = new Point(50, 300);
             txtAmountToPay.MaxLength = 10;
             txtAmountToPay.MouseState = MaterialSkin.MouseState.OUT;
             txtAmountToPay.Name = "txtAmountToPay";
@@ -258,7 +175,7 @@ namespace beautyCenterSystem.data.Repositories
             // 
             lblNotes.AutoSize = true;
             lblNotes.Font = new Font("Segoe UI", 10F);
-            lblNotes.Location = new Point(400, 525);
+            lblNotes.Location = new Point(400, 385);
             lblNotes.Name = "lblNotes";
             lblNotes.Size = new Size(63, 19);
             lblNotes.TabIndex = 13;
@@ -275,7 +192,7 @@ namespace beautyCenterSystem.data.Repositories
             txtNotes.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
             txtNotes.HideSelection = true;
             txtNotes.LeadingIcon = null;
-            txtNotes.Location = new Point(50, 510);
+            txtNotes.Location = new Point(50, 370);
             txtNotes.MaxLength = 200;
             txtNotes.MouseState = MaterialSkin.MouseState.OUT;
             txtNotes.Name = "txtNotes";
@@ -298,7 +215,7 @@ namespace beautyCenterSystem.data.Repositories
             // btnSave
             // 
             btnSave.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnSave.Location = new Point(320, 590);
+            btnSave.Location = new Point(320, 450);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(140, 50);
             btnSave.TabIndex = 15;
@@ -308,7 +225,7 @@ namespace beautyCenterSystem.data.Repositories
             // BtnCancel
             // 
             BtnCancel.Font = new Font("Segoe UI", 11F);
-            BtnCancel.Location = new Point(80, 590);
+            BtnCancel.Location = new Point(80, 450);
             BtnCancel.Name = "BtnCancel";
             BtnCancel.Size = new Size(140, 50);
             BtnCancel.TabIndex = 16;
@@ -328,7 +245,7 @@ namespace beautyCenterSystem.data.Repositories
             // EmployeePaymentForm
             // 
             AutoScaleMode = AutoScaleMode.None;
-            ClientSize = new Size(534, 680);
+            ClientSize = new Size(534, 540);
             Controls.Add(cmbEmployee);
             Controls.Add(BtnCancel);
             Controls.Add(btnSave);
@@ -340,10 +257,6 @@ namespace beautyCenterSystem.data.Repositories
             Controls.Add(lblTreasury);
             Controls.Add(txtRemainingBalance);
             Controls.Add(lblRemaining);
-            Controls.Add(txtTotalPaid);
-            Controls.Add(lblTotalPaid);
-            Controls.Add(txtTotalEarned);
-            Controls.Add(lblTotalEarned);
             Controls.Add(lblEmployee);
             Controls.Add(PnlHeader);
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -363,10 +276,6 @@ namespace beautyCenterSystem.data.Repositories
         private System.Windows.Forms.Panel PnlHeader;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lblEmployee;
-        private System.Windows.Forms.Label lblTotalEarned;
-        private MaterialSkin.Controls.MaterialTextBox2 txtTotalEarned;
-        private System.Windows.Forms.Label lblTotalPaid;
-        private MaterialSkin.Controls.MaterialTextBox2 txtTotalPaid;
         private System.Windows.Forms.Label lblRemaining;
         private MaterialSkin.Controls.MaterialTextBox2 txtRemainingBalance;
         private System.Windows.Forms.Label lblTreasury;

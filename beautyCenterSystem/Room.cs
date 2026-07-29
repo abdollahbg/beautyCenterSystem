@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace beautyCenterSystem
 {
@@ -10,5 +10,9 @@ namespace beautyCenterSystem
         public bool IsActive { get; set; }
         // الحقل الجديد للتمييز بين غرف الخدمات والكافيتيريا
         public bool IsCaffeteria { get; set; }
+        public override string ToString()
+        {
+            return RoomName;
+        }
     }
 }

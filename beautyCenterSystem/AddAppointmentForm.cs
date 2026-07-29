@@ -64,6 +64,7 @@ namespace beautyCenterSystem
         private void SetupNewUI()
         {
             _cartSummary = new UC_CartSummary { Dock = DockStyle.Fill };
+            _cartSummary.ItemColumnHeaderText = "الخدمة";
             while (pnlSidebar.Controls.Count > 0) { var c = pnlSidebar.Controls[0]; pnlSidebar.Controls.Remove(c); c.Dispose(); }
             pnlSidebar.Controls.Add(_cartSummary);
 
@@ -115,7 +116,7 @@ namespace beautyCenterSystem
         private async Task InitializeData()
         {
             await LoadCustomersToCartCombo();
-            var rooms = await _roomRepo.GetAllAsync();
+            var rooms = await _roomRepo.GetAllAsync(includeCafeteria: false);
             _roomNav.LoadRooms(rooms.ToList());
             ShowUC(_roomNav);
 

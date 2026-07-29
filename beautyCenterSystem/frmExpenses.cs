@@ -1,4 +1,4 @@
-﻿using BeautyCenterSystem.Data;
+using BeautyCenterSystem.Data;
 using BeautyCenterSystem.Data.Repositories;
 using MaterialSkin;
 using System;
@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using beautyCenterSystem.Data.Repositories;
 
 namespace beautyCenterSystem
 {
@@ -25,14 +26,41 @@ namespace beautyCenterSystem
 
         private async void frmExpenses_Load(object sender, EventArgs e)
         {
-
-            await LoadSafes();
-
-            await LoadExpenses();
             AppTheme.Apply(this);
 
+            await LoadSafes();
+            await LoadRooms();
+
+            await LoadExpenses();
 
 
+
+        }
+
+        private async Task LoadRooms()
+        {
+            try
+            {
+                // Actually I will change FinancialRepository to have GetActiveRoomsAsync. Let's do it in FinancialRepo.
+                var roomList = (await _financialRepo.GetActiveRoomsAsync()).ToList();
+
+                //إضافة خيارات إضافية
+               roomList.Insert(0, new Room { RoomID = -1, RoomName = "مصروف عام" });
+               roomList.Add(new Room { RoomID = -2, RoomName = "مصروفات الجيم" });
+
+                cmbRooms.DisplayMember = "RoomName";
+               cmbRooms.ValueMember = "RoomID";
+              cmbRooms.DataSource = roomList;
+
+                if (roomList.Count > 0)
+                {
+                    cmbRooms.SelectedIndex = 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"خطأ في تحميل الغرف: {ex.Message}");
+            }
         }
         private async Task LoadSafes()
         {
@@ -97,6 +125,16 @@ namespace beautyCenterSystem
 
             try
             {
+                int? selectedRoomId = null;
+                if (cmbRooms.SelectedValue != null)
+                {
+                    int val = (int)cmbRooms.SelectedValue;
+                    if (val != -1) // إذا لم يكن "مصروف عام"
+                    {
+                        selectedRoomId = val; // سيحفظ ID الغرفة الفعلي أو -2 للجيم أو -3 للكافيتيريا
+                    }
+                }
+
                 // 2. تجهيز كائن المصروف
                 var expense = new Expense
                 {
@@ -105,6 +143,7 @@ namespace beautyCenterSystem
                     Amount = decimal.Parse(txtAmount.Text),
                     ExpenseDate = dtpExpenseDate.Value,
                     PaidFromSafeID = (int)cmbSafes.SelectedValue,
+                    RoomID = selectedRoomId,
 
                     // استخدام الكلاس الخاص بك هنا
                     IssuedBy = CurrentSession.UserID
@@ -134,13 +173,49 @@ namespace beautyCenterSystem
         private async Task LoadExpenses()
         {
             var search = txtboxSearch.Text;
-            var fromDate = dtp_From.Value;
-            var toDate = dtp_To.Value;
 
-            var result = await _financialRepo.GetExpensesAsync(fromDate, toDate, search);
-            dgvExpenses.DataSource = result.ToList();
+            DateTime? fromDate = null;
+            DateTime? toDate = null;
+
+            if (chkEnableDateFilter.Checked)
+            {
+                fromDate = dtp_From.Value;
+                toDate = dtp_To.Value;
+            }
+            else
+            {
+                // إذا كان الفلتر غير مفعل، نمرر تواريخ واسعة جداً أو نعدل الريبوزيتوري.
+                // لتفادي تعديل الريبوزيتوري، سنمرر تواريخ تشمل كل شيء:
+                fromDate = new DateTime(2000, 1, 1);
+                toDate = new DateTime(2100, 1, 1);
+            }
+
+            var result = await _financialRepo.GetExpensesAsync(fromDate.Value, toDate.Value, search);
+            var formatted = result.Select(x => new Expense
+            {
+                ExpenseID = x.ExpenseID,
+                ExpenseName = x.ExpenseName,
+                Category = x.Category,
+                Amount = x.Amount,
+                ExpenseDate = x.ExpenseDate,
+                PaidFromSafeID = x.PaidFromSafeID,
+                SafeName = x.SafeName,
+                IssuedBy = x.IssuedBy,
+                IssuedByName = x.IssuedByName,
+                RoomID = x.RoomID,
+                RoomName = x.RoomID == -2 ? "مصروفات الجيم" : (string.IsNullOrEmpty(x.RoomName) ? "مصروف عام" : x.RoomName)
+            }).ToList();
+
+            dgvExpenses.DataSource = formatted;
 
             FormatGrid();
+        }
+
+        private async void chkEnableDateFilter_CheckedChanged(object sender, EventArgs e)
+        {
+            dtp_From.Enabled = chkEnableDateFilter.Checked;
+            dtp_To.Enabled = chkEnableDateFilter.Checked;
+            await LoadExpenses();
         }
 
         // عند الكتابة في مربع البحث
@@ -171,6 +246,7 @@ namespace beautyCenterSystem
                 if (dgvExpenses.Columns.Contains("PaidFromSafeID")) dgvExpenses.Columns["PaidFromSafeID"].Visible = false;
                 if (dgvExpenses.Columns.Contains("IssuedBy")) dgvExpenses.Columns["IssuedBy"].Visible = false;
                 if (dgvExpenses.Columns.Contains("Notes")) dgvExpenses.Columns["Notes"].Visible = false;
+                if (dgvExpenses.Columns.Contains("RoomID")) dgvExpenses.Columns["RoomID"].Visible = false;
 
                 // 2. تحسين أسماء الأعمدة الظاهرة (Header Text)
                 if (dgvExpenses.Columns.Contains("Category")) dgvExpenses.Columns["Category"].HeaderText = "التصنيف";
@@ -179,6 +255,7 @@ namespace beautyCenterSystem
                 if (dgvExpenses.Columns.Contains("ExpenseDate")) dgvExpenses.Columns["ExpenseDate"].HeaderText = "التاريخ";
                 if (dgvExpenses.Columns.Contains("SafeName")) dgvExpenses.Columns["SafeName"].HeaderText = "الخزنة";
                 if (dgvExpenses.Columns.Contains("IssuedByName")) dgvExpenses.Columns["IssuedByName"].HeaderText = "الموظف";
+                if (dgvExpenses.Columns.Contains("RoomName")) dgvExpenses.Columns["RoomName"].HeaderText = "اسم الغرفة";
 
                 // 3. تنسيق القيم (مثل العملة والتاريخ)
                 if (dgvExpenses.Columns.Contains("Amount"))
@@ -247,14 +324,19 @@ namespace beautyCenterSystem
 
                 // جلب البيانات المحدثة والمعرف
                 int id = (int)row.Cells["ExpenseID"].Value;
-                string category = row.Cells["Category"].Value?.ToString() ?? "";
-                string name = row.Cells["ExpenseName"].Value?.ToString() ?? "";
-                string notes = row.Cells["Notes"].Value?.ToString() ?? ""; // إذا كنت تسمح بتعديل الملاحظات أيضاً
+                string category = row.Cells["Category"].Value?.ToString();
+                string expenseName = row.Cells["ExpenseName"].Value?.ToString();
+                string notes = row.Cells["Notes"].Value?.ToString();
+                int? roomId = null;
+                if (row.Cells["RoomID"].Value != DBNull.Value && row.Cells["RoomID"].Value != null)
+                {
+                    roomId = Convert.ToInt32(row.Cells["RoomID"].Value);
+                }
 
                 try
                 {
-                    // استدعاء الميثود التي كتبناها في الـ Repository سابقاً
-                    bool success = await _financialRepo.UpdateExpenseDetailsAsync(id, category, name, notes);
+                    // حفظ التعديلات في قاعدة البيانات
+                    bool success = await _financialRepo.UpdateExpenseDetailsAsync(id, category, expenseName, notes, roomId);
 
                     if (!success)
                     {
@@ -267,6 +349,11 @@ namespace beautyCenterSystem
                     MessageBox.Show($"خطأ أثناء التحديث: {ex.Message}");
                 }
             }
+        }
+
+        private void cmbRooms_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem.data.Repositories
+namespace beautyCenterSystem.data.Repositories
 {
     partial class UC_FinancialMain
     {

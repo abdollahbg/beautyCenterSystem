@@ -29,9 +29,20 @@ namespace BeautyCenterSystem.Data.Repositories
             E.IsActive,
             E.EmployeeType,
             E.BaseSalary,
-            R.RoomName 
+            R.RoomName,
+            ISNULL(Earned.TotalEarned, 0) - ISNULL(Paid.TotalPaid, 0) AS CurrentDues
         FROM Employees E
         LEFT JOIN Rooms R ON E.RoomID = R.RoomID
+        LEFT JOIN (
+            SELECT EmployeeID, SUM(CommissionAmount) AS TotalEarned
+            FROM AppointmentDetails
+            GROUP BY EmployeeID
+        ) Earned ON E.EmployeeID = Earned.EmployeeID
+        LEFT JOIN (
+            SELECT EmployeeID, SUM(AmountPaid) AS TotalPaid
+            FROM EmployeePayments
+            GROUP BY EmployeeID
+        ) Paid ON E.EmployeeID = Paid.EmployeeID
         WHERE E.IsActive = 1
         ORDER BY E.EmployeeID DESC";
 

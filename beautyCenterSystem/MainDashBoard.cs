@@ -53,6 +53,36 @@ namespace beautyCenterSystem
             // ترتيبه ليظهر بشكل صحيح (Controls[0] هو الأسفل في الـ Dock=Top)
             pnlSidebar.Controls.SetChildIndex(btnTrainers, pnlSidebar.Controls.IndexOf(btnEmployees));
 
+            // إنشاء زر الكافيتيريا ديناميكياً
+            var btnCafeteria = new FontAwesome.Sharp.IconButton();
+            btnCafeteria.Dock = DockStyle.Top;
+            btnCafeteria.IconChar = FontAwesome.Sharp.IconChar.Coffee;
+            btnCafeteria.IconColor = Color.Black;
+            btnCafeteria.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnCafeteria.IconSize = 35;
+            btnCafeteria.ImageAlign = ContentAlignment.MiddleRight;
+            btnCafeteria.Name = "btnCafeteria";
+            btnCafeteria.Padding = new Padding(0, 0, 15, 0);
+            btnCafeteria.Size = new Size(200, 45);
+            btnCafeteria.TabIndex = 13;
+            btnCafeteria.Text = "الكافيتيريا";
+            btnCafeteria.TextAlign = ContentAlignment.MiddleRight;
+            btnCafeteria.TextImageRelation = TextImageRelation.TextBeforeImage;
+            btnCafeteria.FlatStyle = FlatStyle.Flat;
+            btnCafeteria.FlatAppearance.BorderSize = 0;
+            btnCafeteria.Click += async (s, ev) => 
+            {
+                var uc = new UC_Cafeteria(CurrentSession.UserID);
+                if (await ShowScreen(uc))
+                {
+                    HighlightButton(s);
+                    await uc.LoadCafeteria();
+                }
+            };
+
+            pnlSidebar.Controls.Add(btnCafeteria);
+            pnlSidebar.Controls.SetChildIndex(btnCafeteria, pnlSidebar.Controls.IndexOf(btnTrainers));
+
             // القفل والمفتاح: تطبيق الصلاحيات فور تحميل الواجهة
             ApplyPermissions();
 

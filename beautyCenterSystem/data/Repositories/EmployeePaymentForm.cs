@@ -98,10 +98,8 @@ namespace beautyCenterSystem.data.Repositories
                 {
                     // Salary logic
                     decimal baseSalary = selectedEmp.BaseSalary;
-                    decimal totalPaid = await _employeeRepo.GetTotalPaidAsync(empId); // this gets total paid forever, maybe we just show it
+                    decimal totalPaid = await _employeeRepo.GetTotalPaidAsync(empId);
                     
-                    txtTotalEarned.Text = baseSalary.ToString("N2");
-                    txtTotalPaid.Text = totalPaid.ToString("N2");
                     txtRemainingBalance.Text = "N/A (راتب)";
                 }
                 else
@@ -111,9 +109,7 @@ namespace beautyCenterSystem.data.Repositories
                     decimal totalPaid = await _employeeRepo.GetTotalPaidAsync(empId);
                     decimal remaining = totalEarned - totalPaid;
 
-                    // تحديث حقول العرض في الواجهة
-                    txtTotalEarned.Text = totalEarned.ToString("N2");
-                    txtTotalPaid.Text = totalPaid.ToString("N2");
+                    // تحديث حقل العرض في الواجهة
                     txtRemainingBalance.Text = remaining.ToString("N2");
                 }
             }

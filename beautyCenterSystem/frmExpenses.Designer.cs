@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem
+namespace beautyCenterSystem
 {
     partial class frmExpenses
     {
@@ -31,6 +31,7 @@
             dgvExpenses = new DataGridView();
             dtp_To = new DateTimePicker();
             dtp_From = new DateTimePicker();
+            chkEnableDateFilter = new CheckBox();
             panel1 = new Panel();
             txtboxSearch = new MaterialSkin.Controls.MaterialTextBox2();
             label8 = new Label();
@@ -40,6 +41,7 @@
             splitContainer1 = new SplitContainer();
             btnSave = new Button();
             tableLayoutPanel1 = new TableLayoutPanel();
+            cmbRooms = new MaterialSearchableCombo();
             txtDescription = new MaterialSkin.Controls.MaterialMultiLineTextBox2();
             txtAmount = new MaterialSkin.Controls.MaterialTextBox2();
             txtCategory = new MaterialSkin.Controls.MaterialTextBox2();
@@ -50,6 +52,7 @@
             label2 = new Label();
             cmbSafes = new MaterialSearchableCombo();
             label1 = new Label();
+            label9 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvExpenses).BeginInit();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox1).BeginInit();
@@ -86,6 +89,19 @@
             dtp_From.TabIndex = 28;
             dtp_From.ValueChanged += OnDateFilterChanged;
             // 
+            // chkEnableDateFilter
+            // 
+            chkEnableDateFilter.AutoSize = true;
+            chkEnableDateFilter.Checked = true;
+            chkEnableDateFilter.CheckState = CheckState.Checked;
+            chkEnableDateFilter.Location = new Point(265, 30);
+            chkEnableDateFilter.Name = "chkEnableDateFilter";
+            chkEnableDateFilter.Size = new Size(84, 19);
+            chkEnableDateFilter.TabIndex = 40;
+            chkEnableDateFilter.Text = "تفعيل الفلتر";
+            chkEnableDateFilter.UseVisualStyleBackColor = true;
+            chkEnableDateFilter.CheckedChanged += chkEnableDateFilter_CheckedChanged;
+            // 
             // panel1
             // 
             panel1.Controls.Add(txtboxSearch);
@@ -93,6 +109,7 @@
             panel1.Controls.Add(label7);
             panel1.Controls.Add(label6);
             panel1.Controls.Add(iconPictureBox1);
+            panel1.Controls.Add(chkEnableDateFilter);
             panel1.Controls.Add(dtp_From);
             panel1.Controls.Add(dtp_To);
             panel1.Dock = DockStyle.Top;
@@ -211,6 +228,7 @@
             tableLayoutPanel1.ColumnCount = 2;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel1.Controls.Add(cmbRooms, 0, 5);
             tableLayoutPanel1.Controls.Add(txtDescription, 0, 2);
             tableLayoutPanel1.Controls.Add(txtAmount, 0, 1);
             tableLayoutPanel1.Controls.Add(txtCategory, 0, 0);
@@ -221,17 +239,32 @@
             tableLayoutPanel1.Controls.Add(label2, 1, 1);
             tableLayoutPanel1.Controls.Add(cmbSafes, 0, 3);
             tableLayoutPanel1.Controls.Add(label1, 1, 0);
+            tableLayoutPanel1.Controls.Add(label9, 1, 5);
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 6;
+            tableLayoutPanel1.RowCount = 7;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 70F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 25F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 70F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tableLayoutPanel1.Size = new Size(318, 585);
             tableLayoutPanel1.TabIndex = 0;
+            // 
+            // cmbRooms
+            // 
+            cmbRooms.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            cmbRooms.AutoCompleteSource = AutoCompleteSource.ListItems;
+            cmbRooms.BackColor = Color.White;
+            cmbRooms.FlatStyle = FlatStyle.Flat;
+            cmbRooms.Font = new Font("Segoe UI", 15F);
+            cmbRooms.FormattingEnabled = true;
+            cmbRooms.Location = new Point(3, 273);
+            cmbRooms.Name = "cmbRooms";
+            cmbRooms.Size = new Size(250, 36);
+            cmbRooms.TabIndex = 15;
             // 
             // txtDescription
             // 
@@ -322,7 +355,7 @@
             // 
             label5.Anchor = AnchorStyles.Left;
             label5.AutoSize = true;
-            label5.Location = new Point(267, 225);
+            label5.Location = new Point(267, 237);
             label5.Name = "label5";
             label5.Size = new Size(38, 15);
             label5.TabIndex = 9;
@@ -386,9 +419,18 @@
             label1.Location = new Point(267, 18);
             label1.Name = "label1";
             label1.Size = new Size(48, 13);
-            label1.TabIndex = 5;
+            label1.TabIndex = 2;
             label1.Text = "التصنيف";
-            label1.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // label9
+            // 
+            label9.Anchor = AnchorStyles.Left;
+            label9.AutoSize = true;
+            label9.Location = new Point(267, 287);
+            label9.Name = "label9";
+            label9.Size = new Size(37, 15);
+            label9.TabIndex = 14;
+            label9.Text = "الغرفة";
             // 
             // frmExpenses
             // 
@@ -422,20 +464,23 @@
         private SplitContainer splitContainer1;
         private TableLayoutPanel tableLayoutPanel1;
         private Button btnSave;
-        private DateTimePicker dtpExpenseDate;
         private FontAwesome.Sharp.IconPictureBox iconPictureBox1;
         private Label label5;
         private Label label4;
         private Label label3;
+        private DateTimePicker dtpExpenseDate;
         private Label label2;
+        private MaterialSearchableCombo cmbSafes;
+        private Label label9;
         private Label label1;
+        private CheckBox chkEnableDateFilter;
         private Label label6;
         private Label label7;
         private Label label8;
-        private MaterialSearchableCombo cmbSafes;
         private MaterialSkin.Controls.MaterialTextBox2 txtAmount;
         private MaterialSkin.Controls.MaterialTextBox2 txtCategory;
         private MaterialSkin.Controls.MaterialMultiLineTextBox2 txtDescription;
         private MaterialSkin.Controls.MaterialTextBox2 txtboxSearch;
+        private MaterialSearchableCombo cmbRooms;
     }
 }

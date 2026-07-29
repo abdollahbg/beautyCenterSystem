@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +12,8 @@ namespace beautyCenterSystem.viewsmodels
         public decimal TotalCardIn { get; set; }
         public decimal TotalExpenses { get; set; }
         public decimal TotalPurchases { get; set; }
-        // الرصيد الدفتري المتوقع (كاش فقط) = الكاش الداخل - المصروفات - المشتريات
-        public decimal ExpectedCash => TotalCashIn - (TotalExpenses + TotalPurchases);
+        public decimal TotalCafeteriaIn { get; set; }
+        // الرصيد الدفتري المتوقع = الكاش والشبكة الداخلة - المصروفات والمشتريات
+        public decimal ExpectedCash => (TotalCashIn + TotalCardIn) - (TotalExpenses + TotalPurchases);
     }
 }

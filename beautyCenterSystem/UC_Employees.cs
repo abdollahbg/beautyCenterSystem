@@ -128,6 +128,17 @@ namespace beautyCenterSystem
                 Width = 100
             });
 
+            // عمود المستحقات الحالية
+            dgvEmployees.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "CurrentDues",
+                HeaderText = "المستحقات الحالية",
+                DataPropertyName = "CurrentDues",
+                DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" },
+                Width = 120,
+                ReadOnly = true
+            });
+
             // 5. عمود الغرفة
             // جلب البيانات من الريبو (الذي تم تهيئته في المشيد)
             var roomsData = await _employeeRepo.GetRoomsForComboAsync();
@@ -166,9 +177,10 @@ namespace beautyCenterSystem
                     EmployeeName = d.EmployeeName != null ? d.EmployeeName.ToString() : "",
                     Phone = d.Phone != null ? d.Phone.ToString() : "",
                     CommissionRate = d.CommissionRate,
-                    EmployeeType = d.EmployeeType,
+                    EmployeeType = d.EmployeeType != null ? d.EmployeeType.ToString() : "Commission",
                     BaseSalary = d.BaseSalary,
-                    RoomID = d.RoomID != null ? (int)d.RoomID : (int?)null
+                    RoomID = d.RoomID,
+                    CurrentDues = d.CurrentDues
                 }).ToList();
 
                 _allCommissionEmployees = allViewModels.Where(e => e.EmployeeType == "Commission").ToList();
@@ -407,5 +419,6 @@ namespace beautyCenterSystem
         public string EmployeeType { get; set; }
         public decimal BaseSalary { get; set; }
         public int? RoomID { get; set; }
+        public decimal CurrentDues { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace beautyCenterSystem
+namespace beautyCenterSystem
 {
     partial class UC_Home
     {
@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             pnlTopHeader = new Panel();
+            btnDailyClosing = new FontAwesome.Sharp.IconButton();
             lblDashboardTitle = new Label();
             tlpKPIs = new TableLayoutPanel();
             cardCompleted = new MaterialSkin.Controls.MaterialCard();
@@ -72,12 +73,32 @@
             // 
             // pnlTopHeader
             // 
+            pnlTopHeader.Controls.Add(btnDailyClosing);
             pnlTopHeader.Controls.Add(lblDashboardTitle);
             pnlTopHeader.Dock = DockStyle.Top;
             pnlTopHeader.Location = new Point(0, 0);
             pnlTopHeader.Name = "pnlTopHeader";
             pnlTopHeader.Size = new Size(1184, 60);
             pnlTopHeader.TabIndex = 0;
+            // 
+            // btnDailyClosing
+            // 
+            btnDailyClosing.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            btnDailyClosing.BackColor = Color.MediumSeaGreen;
+            btnDailyClosing.ForeColor = Color.White;
+            btnDailyClosing.IconChar = FontAwesome.Sharp.IconChar.CalendarDay;
+            btnDailyClosing.IconColor = Color.White;
+            btnDailyClosing.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnDailyClosing.IconSize = 25;
+            btnDailyClosing.ImageAlign = ContentAlignment.MiddleLeft;
+            btnDailyClosing.Location = new Point(20, 10);
+            btnDailyClosing.Name = "btnDailyClosing";
+            btnDailyClosing.Size = new Size(200, 40);
+            btnDailyClosing.TabIndex = 1;
+            btnDailyClosing.Text = "إغلاق الحسابات اليومية";
+            btnDailyClosing.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnDailyClosing.UseVisualStyleBackColor = false;
+            btnDailyClosing.Click += btnDailyClosing_Click;
             // 
             // lblDashboardTitle
             // 
@@ -444,6 +465,7 @@
         #endregion
 
         private System.Windows.Forms.Panel pnlTopHeader;
+        private FontAwesome.Sharp.IconButton btnDailyClosing;
         private System.Windows.Forms.Label lblDashboardTitle;
 
         private System.Windows.Forms.TableLayoutPanel tlpKPIs;

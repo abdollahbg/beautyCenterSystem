@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -28,9 +28,9 @@ namespace BeautyCenterSystem.Data.Repositories
             using var transaction = db.BeginTransaction();
             try
             {
-                // 1. إضافة سجل المصروف (تم إضافة ExpenseDate)
-                string sql = @"INSERT INTO Expenses (ExpenseName, Category, Amount, ExpenseDate, PaidFromSafeID, IssuedBy, Notes) 
-                       VALUES (@ExpenseName, @Category, @Amount, @ExpenseDate, @PaidFromSafeID, @IssuedBy, @Notes)";
+                // 1. إضافة سجل المصروف (تم إضافة ExpenseDate و RoomID)
+                string sql = @"INSERT INTO Expenses (ExpenseName, Category, Amount, ExpenseDate, PaidFromSafeID, IssuedBy, Notes, RoomID) 
+                       VALUES (@ExpenseName, @Category, @Amount, @ExpenseDate, @PaidFromSafeID, @IssuedBy, @Notes, @RoomID)";
 
                 await db.ExecuteAsync(sql, expense, transaction);
 
@@ -96,12 +96,15 @@ namespace BeautyCenterSystem.Data.Repositories
         public async Task<IEnumerable<Expense>> GetExpensesAsync(DateTime from, DateTime to, string search = "")
         {
             using var db = _dbFactory.CreateConnection();
-            string sql = @"SELECT E.*, S.SafeName, U.Username as IssuedByName 
+            string sql = @"SELECT E.ExpenseID, E.ExpenseName, E.Category, E.Amount, E.ExpenseDate, E.Notes,
+                                  S.SafeName, U.Username AS IssuedByName,
+                                  E.RoomID, R.RoomName
                    FROM Expenses E
-                   JOIN Safes S ON E.PaidFromSafeID = S.SafeID
-                   JOIN Users U ON E.IssuedBy = U.UserID
+                   LEFT JOIN Safes S ON E.PaidFromSafeID = S.SafeID
+                   LEFT JOIN Users U ON E.IssuedBy = U.UserID
+                   LEFT JOIN Rooms R ON E.RoomID = R.RoomID
                    WHERE E.ExpenseDate BETWEEN @From AND @To
-                   AND (E.ExpenseName LIKE @Search OR E.Category LIKE @Search)
+                   AND (E.ExpenseName LIKE @Search OR E.Category LIKE @Search OR R.RoomName LIKE @Search)
                    ORDER BY E.ExpenseDate DESC";
 
             return await db.QueryAsync<Expense>(sql, new
@@ -111,18 +114,17 @@ namespace BeautyCenterSystem.Data.Repositories
                 Search = $"%{search}%"
             });
         }
-        public async Task<bool> UpdateExpenseDetailsAsync(int expenseId, string category, string expenseName, string notes)
+        public async Task<bool> UpdateExpenseDetailsAsync(int expenseId, string category, string expenseName, string notes, int? roomId)
         {
             try
             {
-                using var db = _dbFactory.CreateConnection();
-
-                // ملاحظة: Dapper يتعامل مع النصوص كـ Unicode تلقائياً عند استخدام البارامترات
-                // وهذا يحل مشكلة علامات الاستفهام إذا كان نوع العمود NVARCHAR
+                using (var db = _dbFactory.CreateConnection())
+                {
                 string sql = @"UPDATE Expenses 
                        SET Category = @Category, 
                            ExpenseName = @ExpenseName, 
-                           Notes = @Notes 
+                           Notes = @Notes,
+                           RoomID = @RoomID
                        WHERE ExpenseID = @Id";
 
                 int rowsAffected = await db.ExecuteAsync(sql, new
@@ -130,10 +132,12 @@ namespace BeautyCenterSystem.Data.Repositories
                     Category = category,
                     ExpenseName = expenseName,
                     Notes = notes,
+                    RoomID = roomId,
                     Id = expenseId
                 });
 
                 return rowsAffected > 0;
+            }
             }
             catch (Exception ex)
             {
@@ -141,6 +145,46 @@ namespace BeautyCenterSystem.Data.Repositories
                 throw new Exception($"حدث خطأ أثناء تحديث بيانات المصروف: {ex.Message}");
             }
         }
+
+        public async Task<IEnumerable<RoomProfit>> GetRoomProfitsAsync(DateTime from, DateTime to)
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = @"
+                SELECT 
+                    r.RoomID, 
+                    r.RoomName,
+                    ISNULL(rev.TotalRevenue, 0) AS TotalRevenue,
+                    ISNULL(exp.TotalExpenses, 0) AS TotalExpenses
+                FROM Rooms r
+                LEFT JOIN (
+                    SELECT RoomID, SUM(ServicePrice) AS TotalRevenue
+                    FROM vw_Financial_RoomServicePerformance
+                    WHERE PaymentDate BETWEEN @From AND @To
+                    GROUP BY RoomID
+                ) rev ON r.RoomID = rev.RoomID
+                LEFT JOIN (
+                    SELECT RoomID, SUM(Amount) AS TotalExpenses
+                    FROM Expenses
+                    WHERE RoomID IS NOT NULL AND ExpenseDate BETWEEN @From AND @To
+                    GROUP BY RoomID
+                ) exp ON r.RoomID = exp.RoomID
+                WHERE r.IsActive = 1
+                ORDER BY r.RoomID";
+
+            return await db.QueryAsync<RoomProfit>(sql, new 
+            { 
+                From = from.Date, 
+                To = to.Date.AddDays(1).AddSeconds(-1) 
+            });
+        }
+
+        public async Task<IEnumerable<Room>> GetActiveRoomsAsync()
+        {
+            using var db = _dbFactory.CreateConnection();
+            string sql = "SELECT RoomID, RoomName FROM Rooms WHERE IsActive = 1";
+            return await db.QueryAsync<Room>(sql);
+        }
+
         // --- إضافة خزنة جديدة ---
         public async Task<bool> AddNewSafeAsync(string safeName, decimal initialBalance)
         {
@@ -481,15 +525,24 @@ namespace BeautyCenterSystem.Data.Repositories
             using (var conn = _dbFactory.CreateConnection())
             {
                 string sql = @"
-        -- 0. تحديد خزنة الكاش ديناميكياً من جدول الربط
+        -- 0. تحديد الخزائن ديناميكياً من جدول الربط
         DECLARE @CashSafeId INT = (SELECT TOP 1 SafeID FROM PaymentMapping WHERE MethodName = 'Cash');
+        DECLARE @CardSafeId INT = (SELECT TOP 1 SafeID FROM PaymentMapping WHERE MethodName = 'Card');
 
-        -- 1. المبيعات (نأخذ الكاش الذي دخل الخزنة المحددة، والشبكة بشكل عام)
+        -- 1. المبيعات (نأخذ الكاش والشبكة من الحجوزات والاشتراكات)
         SELECT 
-            ISNULL(SUM(CASE WHEN SafeID = @CashSafeId THEN AmountPaid ELSE 0 END), 0) as TotalCashIn,
-            ISNULL(SUM(CASE WHEN PaymentMethod = 'Card' THEN AmountPaid ELSE 0 END), 0) as TotalCardIn
-        FROM Payments 
-        WHERE CAST(PaymentDate AS DATE) = CAST(GETDATE() AS DATE);
+            -- حساب الكاش: حجوزات + اشتراكات الجيم كاش
+            ISNULL((SELECT SUM(AmountPaid) FROM Payments WHERE SafeID = @CashSafeId AND CAST(PaymentDate AS DATE) = CAST(GETDATE() AS DATE)), 0) +
+            ISNULL((SELECT SUM(PaidAmount) FROM CustomerGymSubscriptions WHERE SafeID = @CashSafeId AND CAST(CreatedAt AS DATE) = CAST(GETDATE() AS DATE)), 0)
+            AS TotalCashIn,
+
+            -- حساب الشبكة: حجوزات + اشتراكات الجيم شبكة
+            ISNULL((SELECT SUM(AmountPaid) FROM Payments WHERE SafeID = @CardSafeId AND CAST(PaymentDate AS DATE) = CAST(GETDATE() AS DATE)), 0) +
+            ISNULL((SELECT SUM(PaidAmount) FROM CustomerGymSubscriptions WHERE SafeID = @CardSafeId AND CAST(CreatedAt AS DATE) = CAST(GETDATE() AS DATE)), 0)
+            AS TotalCardIn,
+
+            -- إيرادات الكافيتريا (للعرض فقط إن لزم)
+            ISNULL((SELECT SUM(AmountPaid) FROM Payments P WHERE CAST(PaymentDate AS DATE) = CAST(GETDATE() AS DATE) AND EXISTS(SELECT 1 FROM AppointmentDetails AD WHERE AD.AppointmentID = P.AppointmentID AND AD.MaterialID IS NOT NULL AND AD.ServiceID IS NULL)), 0) as TotalCafeteriaIn;
 
         -- 2. المصروفات (التي خرجت من خزنة الكاش حصراً)
         SELECT ISNULL(SUM(Amount), 0) FROM Expenses 
@@ -511,6 +564,7 @@ namespace BeautyCenterSystem.Data.Repositories
                     {
                         TotalCashIn = (decimal)sales.TotalCashIn,
                         TotalCardIn = (decimal)sales.TotalCardIn,
+                        TotalCafeteriaIn = (decimal)sales.TotalCafeteriaIn,
                         TotalExpenses = expenses,
                         TotalPurchases = purchases
                         // ملاحظة: ExpectedCash سيتم حسابها تلقائياً داخل الـ DTO
@@ -528,7 +582,7 @@ namespace BeautyCenterSystem.Data.Repositories
                      (TotalCashSystem, TotalCardSystem, TotalExpenses, TotalPurchases, ActualCashHand, Difference, ClosedBy, Notes, ClosureDate)
                      VALUES 
                      (@cashSystem, @cardSystem, @expenses, @purchases, @actualCash, 
-                      (@actualCash - (@cashSystem - (@expenses + @purchases))), 
+                      (@actualCash - ((@cashSystem + @cardSystem) - (@expenses + @purchases))), 
                       @userId, @notes, GETDATE())";
 
                 var result = await conn.ExecuteAsync(sql, new

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using beautyCenterSystem.data.Repositories;
@@ -15,6 +15,18 @@ namespace beautyCenterSystem
             InitializeComponent();
             var dbFactory = new DbConnectionFactory();
             _userRepository = new UserRepository(dbFactory);
+            
+            // التأكد من وجود صلاحية إلغاء الحجز المكتمل في قاعدة البيانات
+            try
+            {
+                using var db = dbFactory.CreateConnection();
+                db.Open();
+                var cmd = db.CreateCommand();
+                cmd.CommandText = "IF NOT EXISTS (SELECT 1 FROM Permissions WHERE PermissionKey = 'CancelCompletedAppointments') INSERT INTO Permissions (PermissionKey, PermissionName) VALUES ('CancelCompletedAppointments', N'إلغاء حجز مكتمل (استرداد)')";
+                cmd.ExecuteNonQuery();
+            }
+            catch { }
+
             AppTheme.Apply(this);
         }
 
@@ -44,7 +56,8 @@ namespace beautyCenterSystem
                         {
                             "AccessSettings", "AccessCenterIdentity", "AccessUsersPermissions",
                             "AccessBackup", "AccessFinancials", "AccessExpenses", "AccessPurchases",
-                            "AccessSafeManagement", "AccessFinancialReports", "AccessEmployees", "AccessGym"
+                            "AccessSafeManagement", "AccessFinancialReports", "AccessEmployees", "AccessGym",
+                            "CancelCompletedAppointments"
                         }
                     };
 

@@ -20,10 +20,7 @@ namespace beautyCenterSystem
             PnlHeader = new Panel();
             label1 = new Label();
             lblTrainer = new Label();
-            lblTotalEarned = new Label();
-            txtTotalEarned = new TextBox();
-            lblTotalPaid = new Label();
-            txtTotalPaid = new TextBox();
+
             lblRemaining = new Label();
             txtRemainingBalance = new TextBox();
             lblTreasury = new Label();
@@ -80,69 +77,25 @@ namespace beautyCenterSystem
             cmbTrainer.Size = new Size(320, 28);
             cmbTrainer.TabIndex = 17;
             // 
-            // lblTotalEarned
             // 
-            lblTotalEarned.AutoSize = true;
-            lblTotalEarned.Font = new Font("Segoe UI", 10F);
-            lblTotalEarned.Location = new Point(400, 145);
-            lblTotalEarned.Name = "lblTotalEarned";
-            lblTotalEarned.Size = new Size(120, 19);
-            lblTotalEarned.TabIndex = 3;
-            lblTotalEarned.Text = "إجمالي المستحقات";
-            // 
-            // txtTotalEarned
-            // 
-            txtTotalEarned.BackColor = Color.FromArgb(245, 245, 245);
-            txtTotalEarned.Font = new Font("Segoe UI", 12F);
-            txtTotalEarned.Location = new Point(50, 140);
-            txtTotalEarned.Name = "txtTotalEarned";
-            txtTotalEarned.ReadOnly = true;
-            txtTotalEarned.RightToLeft = RightToLeft.Yes;
-            txtTotalEarned.Size = new Size(320, 29);
-            txtTotalEarned.TabIndex = 4;
-            txtTotalEarned.Text = "0.00";
-            txtTotalEarned.TextAlign = HorizontalAlignment.Center;
-            // 
-            // lblTotalPaid
-            // 
-            lblTotalPaid.AutoSize = true;
-            lblTotalPaid.Font = new Font("Segoe UI", 10F);
-            lblTotalPaid.Location = new Point(400, 195);
-            lblTotalPaid.Name = "lblTotalPaid";
-            lblTotalPaid.Size = new Size(110, 19);
-            lblTotalPaid.TabIndex = 5;
-            lblTotalPaid.Text = "إجمالي المصروف";
-            // 
-            // txtTotalPaid
-            // 
-            txtTotalPaid.BackColor = Color.FromArgb(245, 245, 245);
-            txtTotalPaid.Font = new Font("Segoe UI", 12F);
-            txtTotalPaid.Location = new Point(50, 190);
-            txtTotalPaid.Name = "txtTotalPaid";
-            txtTotalPaid.ReadOnly = true;
-            txtTotalPaid.RightToLeft = RightToLeft.Yes;
-            txtTotalPaid.Size = new Size(320, 29);
-            txtTotalPaid.TabIndex = 6;
-            txtTotalPaid.Text = "0.00";
-            txtTotalPaid.TextAlign = HorizontalAlignment.Center;
             // 
             // lblRemaining
             // 
             lblRemaining.AutoSize = true;
             lblRemaining.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblRemaining.ForeColor = Color.DarkGreen;
-            lblRemaining.Location = new Point(400, 245);
+            lblRemaining.Location = new Point(400, 145);
             lblRemaining.Name = "lblRemaining";
-            lblRemaining.Size = new Size(104, 20);
+            lblRemaining.Size = new Size(130, 20);
             lblRemaining.TabIndex = 7;
-            lblRemaining.Text = "الرصيد المتبقي";
+            lblRemaining.Text = "مستحقات المدربة";
             // 
             // txtRemainingBalance
             // 
             txtRemainingBalance.BackColor = Color.FromArgb(232, 245, 233);
             txtRemainingBalance.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             txtRemainingBalance.ForeColor = Color.DarkGreen;
-            txtRemainingBalance.Location = new Point(50, 240);
+            txtRemainingBalance.Location = new Point(50, 140);
             txtRemainingBalance.Name = "txtRemainingBalance";
             txtRemainingBalance.ReadOnly = true;
             txtRemainingBalance.RightToLeft = RightToLeft.Yes;
@@ -155,7 +108,7 @@ namespace beautyCenterSystem
             // 
             lblTreasury.AutoSize = true;
             lblTreasury.Font = new Font("Segoe UI", 11F);
-            lblTreasury.Location = new Point(400, 300);
+            lblTreasury.Location = new Point(400, 200);
             lblTreasury.Name = "lblTreasury";
             lblTreasury.Size = new Size(52, 20);
             lblTreasury.TabIndex = 9;
@@ -167,7 +120,7 @@ namespace beautyCenterSystem
             cmbSafe.FlatStyle = FlatStyle.Flat;
             cmbSafe.Font = new Font("Segoe UI", 11F);
             cmbSafe.FormattingEnabled = true;
-            cmbSafe.Location = new Point(50, 297);
+            cmbSafe.Location = new Point(50, 197);
             cmbSafe.Name = "cmbSafe";
             cmbSafe.RightToLeft = RightToLeft.Yes;
             cmbSafe.Size = new Size(320, 28);
@@ -177,7 +130,7 @@ namespace beautyCenterSystem
             // 
             lblAmount.AutoSize = true;
             lblAmount.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            lblAmount.Location = new Point(400, 350);
+            lblAmount.Location = new Point(400, 250);
             lblAmount.Name = "lblAmount";
             lblAmount.Size = new Size(124, 20);
             lblAmount.TabIndex = 11;
@@ -186,7 +139,7 @@ namespace beautyCenterSystem
             // txtAmountToPay
             // 
             txtAmountToPay.Font = new Font("Segoe UI", 12F);
-            txtAmountToPay.Location = new Point(50, 345);
+            txtAmountToPay.Location = new Point(50, 245);
             txtAmountToPay.Name = "txtAmountToPay";
             txtAmountToPay.RightToLeft = RightToLeft.Yes;
             txtAmountToPay.Size = new Size(320, 29);
@@ -197,7 +150,7 @@ namespace beautyCenterSystem
             // 
             lblNotes.AutoSize = true;
             lblNotes.Font = new Font("Segoe UI", 10F);
-            lblNotes.Location = new Point(400, 400);
+            lblNotes.Location = new Point(400, 300);
             lblNotes.Name = "lblNotes";
             lblNotes.Size = new Size(63, 19);
             lblNotes.TabIndex = 13;
@@ -206,7 +159,7 @@ namespace beautyCenterSystem
             // txtNotes
             // 
             txtNotes.Font = new Font("Segoe UI", 11F);
-            txtNotes.Location = new Point(50, 395);
+            txtNotes.Location = new Point(50, 295);
             txtNotes.Name = "txtNotes";
             txtNotes.RightToLeft = RightToLeft.Yes;
             txtNotes.Size = new Size(320, 27);
@@ -220,7 +173,7 @@ namespace beautyCenterSystem
             btnSave.FlatStyle = FlatStyle.Flat;
             btnSave.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             btnSave.ForeColor = Color.White;
-            btnSave.Location = new Point(270, 450);
+            btnSave.Location = new Point(270, 350);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(140, 45);
             btnSave.TabIndex = 15;
@@ -233,7 +186,7 @@ namespace beautyCenterSystem
             BtnCancel.FlatAppearance.BorderSize = 0;
             BtnCancel.FlatStyle = FlatStyle.Flat;
             BtnCancel.Font = new Font("Segoe UI", 11F);
-            BtnCancel.Location = new Point(100, 450);
+            BtnCancel.Location = new Point(100, 350);
             BtnCancel.Name = "BtnCancel";
             BtnCancel.Size = new Size(140, 45);
             BtnCancel.TabIndex = 16;
@@ -243,7 +196,7 @@ namespace beautyCenterSystem
             // TrainerPaymentForm
             // 
             AutoScaleMode = AutoScaleMode.None;
-            ClientSize = new Size(534, 520);
+            ClientSize = new Size(534, 420);
             Controls.Add(cmbTrainer);
             Controls.Add(BtnCancel);
             Controls.Add(btnSave);
@@ -255,10 +208,6 @@ namespace beautyCenterSystem
             Controls.Add(lblTreasury);
             Controls.Add(txtRemainingBalance);
             Controls.Add(lblRemaining);
-            Controls.Add(txtTotalPaid);
-            Controls.Add(lblTotalPaid);
-            Controls.Add(txtTotalEarned);
-            Controls.Add(lblTotalEarned);
             Controls.Add(lblTrainer);
             Controls.Add(PnlHeader);
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -280,10 +229,6 @@ namespace beautyCenterSystem
         private Panel PnlHeader;
         private Label label1;
         private Label lblTrainer;
-        private Label lblTotalEarned;
-        private TextBox txtTotalEarned;
-        private Label lblTotalPaid;
-        private TextBox txtTotalPaid;
         private Label lblRemaining;
         private TextBox txtRemainingBalance;
         private Label lblTreasury;

@@ -17,5 +17,6 @@ namespace beautyCenterSystem
         public string EmployeeType { get; set; } = "Commission"; // 'Commission' or 'Salary'
         public decimal BaseSalary { get; set; }
         public bool IsActive { get; set; }
+        public decimal CurrentDues { get; set; } // المستحقات الحالية
     }
 }

@@ -126,7 +126,7 @@ namespace beautyCenterSystem.Data.Repositories
         {
             using var db = _dbFactory.CreateConnection();
 
-            // بناء الاستعلام الأساسي
+            // بناء الاستعلام الأساسي - استبعاد الاشتراكات الملغاة
             string sql = @"
                 SELECT v.*, 
                     (SELECT STRING_AGG(t.TrainerName, ' , ') 
@@ -134,20 +134,21 @@ namespace beautyCenterSystem.Data.Repositories
                      JOIN Trainers t ON st.TrainerID = t.TrainerID 
                      WHERE st.SubscriptionID = v.SubscriptionID) AS TrainersNames
                 FROM vw_GymSubscriptionsStatus v 
-                WHERE 1=1";
+                JOIN CustomerGymSubscriptions cgs ON v.SubscriptionID = cgs.SubscriptionID
+                WHERE cgs.IsActive = 1";
 
             // إضافة شرط التاريخ فقط في حال تمريره (الفلترة بناءً على تاريخ بداية الاشتراك StartDate)
             if (fromDate.HasValue)
             {
-                sql += " AND StartDate >= @FromDate";
+                sql += " AND v.StartDate >= @FromDate";
             }
             if (toDate.HasValue)
             {
-                sql += " AND StartDate <= @ToDate";
+                sql += " AND v.StartDate <= @ToDate";
             }
 
             // ترتيب النتائج من الأحدث إلى الأقدم
-            sql += " ORDER BY StartDate DESC";
+            sql += " ORDER BY v.StartDate DESC";
 
             return await db.QueryAsync<GymSubscriptionStatus>(sql, new { FromDate = fromDate, ToDate = toDate });
         }

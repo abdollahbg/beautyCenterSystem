@@ -100,7 +100,7 @@ namespace beautyCenterSystem.Data.Repositories
         }
 
         // 2. جلب مواعيد يوم معين
-        public async Task<IEnumerable<Appointment>> GetByDateAsync(DateTime date, int? roomId = null)
+        public async Task<IEnumerable<Appointment>> GetByDateAsync(DateTime? date = null, int? roomId = null)
         {
             using var db = _dbFactory.CreateConnection();
 
@@ -117,13 +117,16 @@ namespace beautyCenterSystem.Data.Repositories
                     A.CreatedBy,
                     A.ArrivalTime,
                     A.FinishTime,
-                    C.CustomerName
+                    C.CustomerName,
+                    P.PaymentMethod
                 FROM Appointments A
                 LEFT JOIN Customers C ON A.CustomerID = C.CustomerID
                 LEFT JOIN AppointmentDetails AD ON A.AppointmentID = AD.AppointmentID
                 LEFT JOIN Services S ON AD.ServiceID = S.ServiceID
+                LEFT JOIN Payments P ON A.AppointmentID = P.AppointmentID
                 WHERE
-                    CAST(A.AppointmentDate AS DATE) = CAST(@TargetDate AS DATE)
+                    A.Status != 'Cancelled'
+                    AND (@TargetDate IS NULL OR CAST(A.AppointmentDate AS DATE) = CAST(@TargetDate AS DATE))
                     AND (@RoomId IS NULL OR S.RoomID = @RoomId)
                 ORDER BY A.AppointmentDate ASC, A.ArrivalTime ASC";
 
@@ -138,6 +141,60 @@ namespace beautyCenterSystem.Data.Repositories
             string sql = "UPDATE Appointments SET Status = @Status WHERE AppointmentID = @Id";
             int rows = await db.ExecuteAsync(sql, new { Status = newStatus, Id = appointmentId });
             return rows > 0;
+        }
+
+        // إلغاء أو تعديل حجز مكتمل مدفوع واسترداد قيمته ومواده من الخزينة والمخزون
+        public async Task<bool> ReverseCompletedAppointmentAsync(int appointmentId, string targetStatus = "Cancelled")
+        {
+            using var db = _dbFactory.CreateConnection();
+            await ((SqlConnection)db).OpenAsync();
+            using var transaction = db.BeginTransaction();
+
+            try
+            {
+                // جلب مبلغ الدفع والخزينة
+                string sqlPayment = "SELECT TOP 1 AmountPaid, SafeID FROM Payments WHERE AppointmentID = @AppId ORDER BY PaymentID DESC";
+                var paymentInfo = await db.QueryFirstOrDefaultAsync<dynamic>(sqlPayment, new { AppId = appointmentId }, transaction);
+
+                if (paymentInfo != null && paymentInfo.SafeID != null)
+                {
+                    decimal amountPaid = paymentInfo.AmountPaid;
+                    int safeId = paymentInfo.SafeID;
+
+                    // إرجاع المبلغ للخزينة (استرداد/خصم)
+                    string updateSafeSql = "UPDATE Safes SET Balance = Balance - @Amount WHERE SafeID = @SafeId";
+                    await db.ExecuteAsync(updateSafeSql, new { Amount = amountPaid, SafeId = safeId }, transaction);
+                    
+                    // حذف الدفعة حتى لا تحسب في الإيرادات
+                    string deletePaymentSql = "DELETE FROM Payments WHERE AppointmentID = @AppId";
+                    await db.ExecuteAsync(deletePaymentSql, new { AppId = appointmentId }, transaction);
+                }
+
+                // إرجاع المواد المستهلكة للمخزون
+                string stockUpdateSql = @"
+                    UPDATE Materials 
+                    SET StockQuantity = StockQuantity + AD.Quantity 
+                    FROM Materials M 
+                    INNER JOIN AppointmentDetails AD ON M.MaterialID = AD.MaterialID 
+                    WHERE AD.AppointmentID = @AppId AND AD.MaterialID IS NOT NULL";
+                await db.ExecuteAsync(stockUpdateSql, new { AppId = appointmentId }, transaction);
+
+                // تغيير الحالة
+                string updateAppSql = "UPDATE Appointments SET Status = @TargetStatus WHERE AppointmentID = @AppId";
+                await db.ExecuteAsync(updateAppSql, new { AppId = appointmentId, TargetStatus = targetStatus }, transaction);
+
+                // تصفير عمولات الموظفات لهذا الموعد 
+                string zeroCommissionsSql = "UPDATE AppointmentDetails SET CommissionAmount = 0 WHERE AppointmentID = @AppId";
+                await db.ExecuteAsync(zeroCommissionsSql, new { AppId = appointmentId }, transaction);
+
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                throw new Exception($"فشل عملية استرداد الحجز المكتمل: {ex.Message}");
+            }
         }
 
         // 4. جلب تفاصيل حجز معين - تم إضافة DetailID والحالات والأوقات

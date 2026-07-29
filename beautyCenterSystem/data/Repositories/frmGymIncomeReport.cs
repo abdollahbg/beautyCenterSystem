@@ -11,6 +11,7 @@ namespace beautyCenterSystem.data.Repositories
     public partial class frmGymIncomeReport : Form
     {
         private readonly GymRepository _gymRepo;
+        private CheckBox chkEnableDateFilter;
 
         public frmGymIncomeReport()
         {
@@ -18,6 +19,23 @@ namespace beautyCenterSystem.data.Repositories
 
             var dbFactory = new DbConnectionFactory();
             _gymRepo = new GymRepository(dbFactory);
+
+            // Add checkbox dynamically
+            chkEnableDateFilter = new CheckBox
+            {
+                Text = "تفعيل الفلتر",
+                Checked = true,
+                AutoSize = true,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Location = new Point(dtpTo.Location.X - 100, dtpTo.Location.Y + 2)
+            };
+            chkEnableDateFilter.CheckedChanged += (s, e) =>
+            {
+                dtpFrom.Enabled = chkEnableDateFilter.Checked;
+                dtpTo.Enabled = chkEnableDateFilter.Checked;
+                LoadReportAsync();
+            };
+            pnlDateFilter.Controls.Add(chkEnableDateFilter);
 
             // Apply theme
             AppTheme.Apply(this);
@@ -49,15 +67,26 @@ namespace beautyCenterSystem.data.Repositories
                 this.Cursor = Cursors.WaitCursor;
                 btnFilter.Enabled = false;
 
-                DateTime fromDate = dtpFrom.Value.Date;
-                DateTime toDate = dtpTo.Value.Date.AddDays(1).AddSeconds(-1);
+                DateTime from;
+                DateTime to;
+
+                if (chkEnableDateFilter.Checked)
+                {
+                    from = dtpFrom.Value.Date;
+                    to = dtpTo.Value.Date.AddDays(1).AddSeconds(-1);
+                }
+                else
+                {
+                    from = new DateTime(2000, 1, 1);
+                    to = new DateTime(2100, 1, 1);
+                }
 
                 // 1. Get total income and update the label
-                decimal totalIncome = await _gymRepo.GetTotalGymIncomeAsync(fromDate, toDate);
+                decimal totalIncome = await _gymRepo.GetTotalGymIncomeAsync(from, to);
                 lblTotalIncomeValue.Text = totalIncome.ToString("N0");
 
                 // 2. Get detailed records in background if needed (without grid binding)
-                var details = (await _gymRepo.GetGymIncomeDetailsAsync(fromDate, toDate)).ToList();
+                var details = (await _gymRepo.GetGymIncomeDetailsAsync(from, to)).ToList();
             }
             catch (Exception ex)
             {

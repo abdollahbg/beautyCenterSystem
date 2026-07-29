@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,5 +12,9 @@ namespace beautyCenterSystem
         public string SafeName { get; set; }
         public decimal Balance { get; set; }
         public bool IsActive { get; set; }
+        public override string ToString()
+        {
+            return SafeName;
+        }
     }
 }

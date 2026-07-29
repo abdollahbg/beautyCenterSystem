@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,21 +29,44 @@ namespace BeautyCenterSystem.Data.Repositories
 
                 SELECT ISNULL(SUM(Amount), 0) FROM vw_Financial_Expenses WHERE ExpenseDate BETWEEN @From AND @To;
                 
-                SELECT ISNULL(SUM(TotalAmount), 0) FROM vw_Financial_Purchases WHERE PurchaseDate BETWEEN @From AND @To;";
+                SELECT ISNULL(SUM(TotalAmount), 0) FROM vw_Financial_Purchases WHERE PurchaseDate BETWEEN @From AND @To;
+                
+                SELECT ISNULL(SUM(AD.CommissionAmount), 0) 
+                FROM AppointmentDetails AD
+                INNER JOIN Appointments A ON AD.AppointmentID = A.AppointmentID 
+                WHERE A.Status = 'Completed' AND A.AppointmentDate BETWEEN @From AND @To;
+                
+                SELECT ISNULL(SUM( 
+                    (CASE WHEN GT.BaseAmount > 0 THEN GT.BaseAmount ELSE GS.PaidAmount END) * (GT.CommissionRate / 100.0)
+                ), 0)
+                FROM GymSubscriptionTrainers GT
+                JOIN CustomerGymSubscriptions GS ON GT.SubscriptionID = GS.SubscriptionID AND GS.IsActive = 1
+                WHERE GS.CreatedAt BETWEEN @From AND @To;
+                
+                SELECT ISNULL(SUM(P.AmountPaid), 0) 
+                FROM Payments P
+                WHERE P.PaymentDate BETWEEN @From AND @To
+                AND EXISTS (SELECT 1 FROM AppointmentDetails AD WHERE AD.AppointmentID = P.AppointmentID AND AD.MaterialID IS NOT NULL AND AD.ServiceID IS NULL);";
 
             using var multi = await db.QueryMultipleAsync(sql, new { From = from, To = to });
 
             var revenueInfo = await multi.ReadFirstAsync();
             decimal totalExpenses = await multi.ReadFirstAsync<decimal>();
             decimal totalPurchases = await multi.ReadFirstAsync<decimal>();
+            decimal totalEmployeeDues = await multi.ReadFirstAsync<decimal>();
+            decimal totalTrainerDues = await multi.ReadFirstAsync<decimal>();
+            decimal totalCafeteriaRevenue = await multi.ReadFirstAsync<decimal>();
 
             return new FinancialDashboardDTO
             {
                 TotalRevenue = revenueInfo.TotalRevenue,
                 CashRevenue = revenueInfo.CashRevenue,
                 CardRevenue = revenueInfo.CardRevenue,
+                TotalCafeteriaRevenue = totalCafeteriaRevenue,
                 TotalExpenses = totalExpenses,
-                TotalPurchases = totalPurchases
+                TotalPurchases = totalPurchases,
+                TotalEmployeeDues = totalEmployeeDues,
+                TotalTrainerDues = totalTrainerDues
             };
         }
 
@@ -76,11 +99,27 @@ namespace BeautyCenterSystem.Data.Repositories
         {
             using var db = _dbFactory.CreateConnection();
             string sql = @"
-                SELECT RoomName, SUM(ServicePrice) AS TotalRevenue 
-                FROM vw_Financial_RoomServicePerformance 
-                WHERE PaymentDate BETWEEN @From AND @To 
-                GROUP BY RoomName 
-                ORDER BY TotalRevenue DESC";
+                SELECT 
+                    r.RoomName,
+                    ISNULL(rev.TotalRevenue, 0) AS TotalRevenue,
+                    ISNULL(exp.TotalExpenses, 0) AS TotalExpenses,
+                    ISNULL(rev.TotalRevenue, 0) - ISNULL(exp.TotalExpenses, 0) AS NetProfit
+                FROM Rooms r
+                LEFT JOIN (
+                    SELECT RoomName, SUM(ServicePrice) AS TotalRevenue 
+                    FROM vw_Financial_RoomServicePerformance 
+                    WHERE PaymentDate BETWEEN @From AND @To 
+                    GROUP BY RoomName
+                ) rev ON r.RoomName = rev.RoomName
+                LEFT JOIN (
+                    SELECT R.RoomName, SUM(E.Amount) AS TotalExpenses
+                    FROM Expenses E
+                    INNER JOIN Rooms R ON E.RoomID = R.RoomID
+                    WHERE E.ExpenseDate BETWEEN @From AND @To
+                    GROUP BY R.RoomName
+                ) exp ON r.RoomName = exp.RoomName
+                WHERE (ISNULL(rev.TotalRevenue, 0) > 0 OR ISNULL(exp.TotalExpenses, 0) > 0) AND ISNULL(r.IsCaffeteria, 0) = 0
+                ORDER BY NetProfit DESC";
             return await db.QueryAsync(sql, new { From = from, To = to });
         }
 
@@ -134,6 +173,58 @@ namespace BeautyCenterSystem.Data.Repositories
             ORDER BY ep.PaymentDate DESC";
 
                 return await conn.QueryAsync<dynamic>(sql, new { from, to });
+            }
+        }
+
+        // جلب مدفوعات المدربات الفعلية (التي تم صرفها من الخزنة)
+        public async Task<IEnumerable<dynamic>> GetTrainerExpensesAsync(DateTime from, DateTime to)
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                string sql = @"
+            SELECT 
+                t.TrainerName AS TrainerName,
+                tp.AmountPaid AS ExpenseAmount,
+                tp.PaymentDate AS ExpenseDate,
+                s.SafeName AS SafeName,
+                tp.Notes AS Notes
+            FROM TrainerPayments tp
+            INNER JOIN Trainers t ON tp.TrainerID = t.TrainerID
+            INNER JOIN Safes s ON tp.SafeID = s.SafeID
+            WHERE tp.PaymentDate BETWEEN @from AND @to
+            ORDER BY tp.PaymentDate DESC";
+
+                return await conn.QueryAsync<dynamic>(sql, new { from, to });
+            }
+        }
+
+        // جلب مصروفات الكافتيريا باستخدام عمود IsCaffeteria فقط
+        public async Task<decimal> GetCafeteriaExpensesAsync(DateTime from, DateTime to)
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                string sql = @"
+                SELECT ISNULL(SUM(E.Amount), 0)
+                FROM Expenses E
+                INNER JOIN Rooms R ON E.RoomID = R.RoomID
+                WHERE E.ExpenseDate BETWEEN @From AND @To
+                AND R.IsCaffeteria = 1";
+                return await conn.ExecuteScalarAsync<decimal>(sql, new { From = from, To = to });
+            }
+        }
+
+        // جلب مصروفات الجيم (بناءً على RoomID = -2 أو التصنيف/الاسم)
+        public async Task<decimal> GetGymExpensesAsync(DateTime from, DateTime to)
+        {
+            using (var conn = _dbFactory.CreateConnection())
+            {
+                string sql = @"
+                SELECT ISNULL(SUM(E.Amount), 0)
+                FROM Expenses E
+                LEFT JOIN Rooms R ON E.RoomID = R.RoomID
+                WHERE E.ExpenseDate BETWEEN @From AND @To
+                AND (E.RoomID = -2 OR E.Category LIKE N'%جيم%' OR R.RoomName LIKE N'%جيم%')";
+                return await conn.ExecuteScalarAsync<decimal>(sql, new { From = from, To = to });
             }
         }
 

@@ -90,8 +90,6 @@ namespace beautyCenterSystem
                 decimal totalPaid = await _trainerRepo.GetTrainerTotalPaidAsync(trainerId);
                 decimal remaining = totalEarned - totalPaid;
 
-                txtTotalEarned.Text = totalEarned.ToString("N2");
-                txtTotalPaid.Text = totalPaid.ToString("N2");
                 txtRemainingBalance.Text = remaining.ToString("N2");
             }
             catch (Exception ex)
